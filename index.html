@@ -1430,7 +1430,7 @@ function fcMeta(sub){return SUBJ_META[sub]||{CH:{}}}
 async function fcInit(){
   if(!FC.idx){const cached=load('klil_cidx',null);if(cached)FC.idx=cached.map(r=>({id:r[0],sub:r[1],ch:r[2],deck:r[3],sec:r[4]}))}
   fcLoadLocal();
-  if(sb){try{const r=await sb.rpc('card_index');if(!r.error&&Array.isArray(r.data)){save('klil_cidx',r.data);FC.idx=r.data.map(r=>({id:r[0],sub:r[1],ch:r[2],deck:r[3],sec:r[4]}))}}catch(e){}}
+  if(sb){try{const r=await sb.rpc('card_index');FC.err=r.error?(r.error.message||String(r.error)):null;if(!r.error&&Array.isArray(r.data)){save('klil_cidx',r.data);FC.idx=r.data.map(r=>({id:r[0],sub:r[1],ch:r[2],deck:r[3],sec:r[4]}))}}catch(e){}}
   if(!FC.idx)FC.idx=[];
   if(ST.user&&sb){try{const r=await allRows(()=>sb.from('card_progress').select('cid,box,due').eq('user_id',ST.user.id));
     if(!r.error){(r.data||[]).forEach(x=>{const L=FC.prog[x.cid];if(!L||!L.t||(L.box<=x.box))FC.prog[x.cid]={box:x.box,due:x.due,t:L&&L.t||0}});fcSaveLocal()}}catch(e){}}
@@ -1458,7 +1458,7 @@ function viewCards(){
   const sub=fcCur();
   let h=header('فلاشکارد',sub?subName(sub)+' · زاراوە و پێناسەکانی کتێب':'زاراوە و پێناسەکانی کتێب',false,accBtn())+'<div class="wrap">';
   if(!FC.idx)return h+'<div class="card empty" style="margin-top:16px">چاوەڕێ بکە…</div></div>';
-  if(!sub)return h+'<div class="card empty" style="margin-top:16px">بەم زووانە فلاشکارد زیاد دەکرێت.</div></div>';
+  if(!sub)return h+'<div class="card empty" style="margin-top:16px">بەم زووانە فلاشکارد زیاد دەکرێت.'+(FC.err?'<br><small class="ltr" style="color:var(--bad)">'+esc(FC.err)+'</small>':'')+'</div></div>';
   const all=fcCards(sub),S=fcStats(all.filter(fcOpen)),today=fcTodayIds(sub);
   h+=fcSubBar();
   h+='<div class="card fchero"><div class="fch1">'+ring(S.n?S.master/S.n*100:0,'لەبەرکراو')+'<div class="stack" style="gap:4px;flex:1"><b style="font-size:18px">کارتەکانی ئەمڕۆ</b>'+
