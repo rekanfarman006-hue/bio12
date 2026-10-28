@@ -478,7 +478,7 @@ const SB_URL='https://wzvbwfyntsfvtuhffngp.supabase.co';
 const SB_KEY='sb_publishable_qGRQaP2YaPsmO-oZVGSpEA_rj2jyhDy';          // publishable key (safe to be public)
 // Supabase needs a real e-mail domain: every username becomes a +tag of the owner's Gmail (no e-mails are sent while Confirm email is off)
 const emailOf=u=>'rekanfarman006+'+u+'@gmail.com';
-const CONTACT='rekanf1';        // Telegram username for activation
+const CONTACT='laxawnawa';        // Telegram username for activation
 const FREE_CH=[1,2];                 // must match free_chapters() in the database
 // ============================================
 let CH={},SEC={},UNIT=[],SECK=[],LAST=202,CUR=load('bio_sub','bio');
@@ -794,7 +794,7 @@ function viewExams(){
    '<p class="muted" style="font-size:13px">لە ڕاهێناندا دوای هەر پرسیارێک وەڵامەکە و ڕوونکردنەوەکە دەبینیت. لە تاقیکردنەوەدا وەک ڕۆژی وەزاری: کات دیاریکراوە و ئەنجام و ڕاپۆرتی خاڵە لاوازەکان لە کۆتاییدا.</p></div>';
 }
 function viewMist(){
-  const H=header('پێداچوونەوە',subName()+' · هەڵەکانت لە کاتی خۆیدا دەگەڕێنەوە',false,accBtn())+'<div class="wrap">'+subBar()+'</div>';
+  const H=header('پێداچوونەوە',subName()+' · هەڵەکانت لە کاتی خۆیدا دەگەڕێنەوە',false,accBtn())+'<div class="wrap" style="padding-bottom:0">'+subBar()+'</div>';
   if(!ST.user)return H+'<div class="wrap"><div class="card stack" style="margin-top:16px"><div>بۆ ئەوەی هەڵەکانت پاشەکەوت بن و لە کاتی خۆیدا بگەڕێنەوە، هەژمارێکی بەخۆڕایی دروست بکە.</div><button class="btn" data-act="joinlb">هەژمار دروست بکە</button></div></div>';
   const ids=reviewIds(),t=todayStr(),due=dueIds();
   if(!ids.length)return H+'<div class="wrap"><div class="empty card" style="margin-top:16px">هیچ هەڵەیەکت نییە. هەر پرسیارێک هەڵە بکەیت لێرە دەردەکەوێت و دوای ١، ٣ و ٧ ڕۆژ دەگەڕێتەوە هەتا فێری دەبیت.</div></div>';
@@ -1243,7 +1243,7 @@ function viewMain(){
   h+='<div class="tiles">'+
    '<button class="tile t1" data-sec="bank"><span class="ti">'+icon('ex')+'</span><b>ئەسیلەکان</b><span>بانکی پرسیاری وەزاری '+(SUBS.filter(subCount).length>1?'هەموو دەرسەکان':subName())+'</span><small><span class="num">'+all.seen+'</span> / <span class="num">'+ALLQS.length+'</span> حەلکراو'+(dueIds().length?' · <span class="num">'+dueIds().length+'</span> پێداچوونەوە ئەمڕۆ':'')+'</small></button>'+
    '<button class="tile t2" data-sec="daily"><span class="ti">'+icon('daily')+'</span><b>سەعی ڕۆژانە</b><span>خشتەی خوێندنی ئەمڕۆ بۆ هەموو دەرسەکان</span><small>'+(ps?'ئەمڕۆ: <span class="num">'+ps.d+'</span> لە <span class="num">'+ps.n+'</span> کرا':'خشتەی ئەمڕۆت دروست بکە')+'</small></button>'+
-   '<button class="tile t3" data-sec="week"><span class="ti">'+icon('week')+'</span><b>پێداچوونەوەی هەفتانە</b><span>هەموو هەینییەک، بە سیستەمی دووبارەکردنەوە</span><small>'+(isFri(t)?(due.length?'ئەمڕۆ هەینییە: <span class="num">'+due.length+'</span> بابەت چاوەڕێتن':'ئەمڕۆ هەینییە'):'هەینی داهاتوو: '+fmtD(nf)+(due.length?' · <span class="num">'+due.length+'</span> بابەت':''))+'</small></button>'+
+   '<button class="tile t3" data-sec="week"><span class="ti">'+icon('week')+'</span><b>پێداچوونەوەی هەفتانە</b><span>هەموو هەینییەک، بە سیستەمی دووبارەکردنەوە</span><small>'+(ST.user&&!wrOpen()?'🔒 تەنها بۆ هەژماری چالاککراو':isFri(t)?(due.length?'ئەمڕۆ هەینییە: <span class="num">'+due.length+'</span> بابەت چاوەڕێتن':'ئەمڕۆ هەینییە'):'هەینی داهاتوو: '+fmtD(nf)+(due.length?' · <span class="num">'+due.length+'</span> بابەت':''))+'</small></button>'+
    '<button class="tile t4" data-sec="cards"><span class="ti">'+icon('cards')+'</span><b>فلاشکارد</b><span>پرسیار و وەڵامی ناو کتێب بە کارت، بە سیستەمی دووبارەکردنەوە</span><small>'+fcTile()+'</small></button>'+
    '</div>'+statsCard()+voicesCard()+reportCard()+themeBtn()+'</div>';
   return h}
@@ -1340,8 +1340,15 @@ function wrCard(x,canDo){const t=todayStr(),over=x.next<winFri(t)&&isWin(t);
    (canDo?'<button class="btn" data-act="wdone" data-id="'+x.id+'">✓ پێداچوونەوەم کرد</button><span class="muted" style="font-size:12px">دەبێتە پێداچوونەوەی <span class="num">'+(x.n+1)+'</span> و دوای <span class="num">'+gapWeeks(x.n+1)+'</span> هەفتە دەگەڕێتەوە.</span>':'')+'</div>'}
 function bySubject(list){const g={};list.forEach(x=>{(g[x.subject]=g[x.subject]||[]).push(x)});return SUBJ.filter(s=>g[s]).map(s=>[s,g[s]])}
 function deckGrid(act,countOf,subOf){return '<div class="decks">'+SUBJ.map((s,j)=>{const c=countOf(s),sub=subOf(s);return '<button class="deck'+(c?' has':'')+'" data-act="'+act+'" data-s="'+j+'"><b>'+s+'</b><span class="dc num">'+c+'</span><small>'+sub+'</small></button>'}).join('')+'</div>'}
+// weekly review: free trial (14 days from the account's start, and at least until 14 days after the trial began for everyone), then activated accounts only
+const WR_TRIAL=14,WR_FROM='2026-10-28';
+function wrTrialEnd(){const c=ST.user&&ST.user.created_at?String(ST.user.created_at).slice(0,10):WR_FROM;const a=addDays(c,WR_TRIAL),b=addDays(WR_FROM,WR_TRIAL);return a>b?a:b}
+function wrOpen(){return paid()||todayStr()<wrTrialEnd()}
+function wrTrialNote(){if(paid())return '';const e=wrTrialEnd(),n=dayDiff(todayStr(),e);return '<div class="card" style="margin-top:12px;font-size:14px;background:var(--goldsoft)"><b>تاقیکردنەوەی بەخۆڕایی</b><br>پێداچوونەوەی هەفتانە بۆ ماوەی <span class="num">'+WR_TRIAL+'</span> ڕۆژ بەخۆڕاییە. <span class="num">'+n+'</span> ڕۆژی ماوە (هەتا '+fmtD(e)+').</div>'}
+function wrLocked(){return header('پێداچوونەوەی هەفتانە','',false,accBtn())+'<div class="wrap"><div class="card stack" style="margin-top:16px"><b>ماوەی تاقیکردنەوەی بەخۆڕایی تەواو بوو</b><span class="muted">پێداچوونەوەی هەفتانە <span class="num">'+WR_TRIAL+'</span> ڕۆژ بەخۆڕایی بوو. بابەتەکانت هەموویان پاشەکەوت کراون؛ هەژمارەکەت چالاک بکە بۆ ئەوەی بەردەوام بیت.</span><button class="btn dark" data-act="unlock">🔑 چالاککردنی هەژمار</button></div></div>'}
 function viewWeek(){
   if(!ST.user)return needAcc('پێداچوونەوەی هەفتانە');
+  if(!wrOpen())return wrLocked();
   if(ST.wrOk===false)return header('پێداچوونەوەی هەفتانە','',false,accBtn())+'<div class="wrap"><div class="card" style="margin-top:16px">ئەم بەشە هێشتا لە داتابەیس ئامادە نەکراوە (update-3.sql).</div></div>';
   if(V.wtab==='all')return viewWeekAll();
   if(V.wtab==='stats')return viewWeekStats();
@@ -1350,6 +1357,7 @@ function viewWeek(){
   if(deck==null){
     h+=win?'<div class="fri on"><b>ئەمڕۆ '+dayName(t)+'یە، کاتی پێداچوونەوەیە</b><span>دەرسێک هەڵبژێرە: بابەتەکانی ئەمڕۆی تێدایە و دەتوانیت بابەتی نوێی تێدا زیاد بکەیت.</span></div>':
       '<div class="fri"><b>پێداچوونەوە و زیادکردن تەنها ڕۆژانی هەینی و شەممە</b><span>هەینی داهاتوو: <b>'+fmtD(nf)+'</b> (<span class="num">'+left+'</span> ڕۆژی ماوە). لێرە دەبینیت چی چاوەڕێتە.</span></div>';
+    h+=wrTrialNote();
     h+='<h2>'+(win?'بابەتەکانی ئەم هەفتەیە':'بابەتەکانی هەینی داهاتوو')+' <span class="muted num" style="font-size:15px">('+due.length+')</span></h2>';
     h+=deckGrid('wdeck',s=>due.filter(x=>x.subject===s).length,s=>{const n=ST.wr.filter(x=>x.subject===s).length;return n?'<span class="num">'+n+'</span> بابەت':'هیچ'});
     h+='<div class="card" style="margin-top:12px;font-size:14px"><b>سیستەمەکە چۆنە؟</b><br>ژمارەی پێداچوونەوە چەند بێت، دوای ئەوەندە هەفتە دەگەڕێتەوە: پێداچوونەوەی ١ ← دوای ١ هەفتە · ٢ ← دوای ٢ هەفتە · ٣ ← دوای ٣ هەفتە · ٤ ← دوای ٤ هەفتە، و بەم شێوەیە. یەکەم هەینی بابەتەکە دەنووسیت و دەبێتە پێداچوونەوەی ١. ئەگەر هەینی نەتکرد، شەممە دەتوانیت.</div>';
