@@ -382,7 +382,7 @@ html[data-theme=dark] .sg .sgi{filter:saturate(.8) brightness(.85)}
 .fface.front{background:linear-gradient(140deg,#EE3D63,#8E1E52);color:#fff}
 .fface.back{background:var(--surface);color:var(--fg);border:2px solid var(--line);transform:rotateY(180deg)}
 .fcs{position:absolute;top:14px;inset-inline:16px;font-size:12px;font-weight:700;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.fct{font-size:clamp(22px,6vw,30px);font-weight:900;line-height:1.5}
+.fct{font-size:clamp(19px,5.2vw,25px);font-weight:900;line-height:1.5}
 .fcb{font-size:17px;line-height:1.95;font-weight:600}
 .fhint{position:absolute;bottom:14px;font-size:12px;opacity:.75}
 .fimg{max-width:100%;max-height:150px;border-radius:12px;background:#fff}
@@ -390,6 +390,10 @@ html[data-theme=dark] .sg .sgi{filter:saturate(.8) brightness(.85)}
 .fno{background:var(--bad)!important;color:#fff!important}.fyes{background:var(--good)!important;color:#fff!important}
 .fen{display:block;font-size:16px;font-weight:700;opacity:.85;margin-top:10px;font-family:system-ui,sans-serif}
 .fpg{display:block;font-size:12px;color:var(--muted);margin-top:12px;font-weight:700}
+
+/* Phone night mode must not darken the app: only the in-app switch (html[data-theme=dark]) does. Declaring a dark-scheme rule tells browsers with their own forced dark mode (e.g. Samsung Internet) that the page handles dark itself, so they leave it alone; the rule changes nothing. */
+:root{color-scheme:only light}
+@media (prefers-color-scheme:dark){:root:not([data-theme=dark]){color-scheme:only light;background:#FFFFFF}}
 </style>
 
 <div id="app" dir="rtl" lang="ckb"></div>
@@ -552,7 +556,7 @@ function errKey(e){const m=String((e&&(e.message||e.error_description||e))||'');
 // ---- running inside the Android/iPhone app (Capacitor) ----
 const IN_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 if(IN_APP){try{const P=window.Capacitor.Plugins;
-  if(P.StatusBar){P.StatusBar.setStyle({style:'LIGHT'}).catch(()=>{});P.StatusBar.setBackgroundColor({color:'#FFFFFF'}).catch(()=>{})}
+  if(P.StatusBar){const dk=document.documentElement.dataset.theme==='dark';P.StatusBar.setStyle({style:dk?'DARK':'LIGHT'}).catch(()=>{});P.StatusBar.setBackgroundColor({color:dk?'#0E1422':'#FFFFFF'}).catch(()=>{})}
   if(P.App)P.App.addListener('backButton',()=>{
     if(V.lock||V.acc||V.aiq||V.me){V.lock=0;V.acc=0;V.aiq=null;V.me=0;render();return}
     const bk=document.querySelector('header .back');if(bk){bk.click();return}
@@ -625,8 +629,9 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 async function refreshMe(msg){try{await loadMe();render();if(msg)toast(msg)}catch(e){toast(ERR.net)}}
 let BT=null;
 function boardSoon(){clearTimeout(BT);BT=setTimeout(loadBoard,20000)}
-function setTheme(t){document.documentElement.dataset.theme=t;try{localStorage.setItem('bio_theme',t)}catch(e){}const m=document.querySelector('meta[name=theme-color]');if(m)m.content=t==='dark'?'#0E1422':'#FFFFFF'}
-try{if(localStorage.getItem('bio_theme')==='dark')document.documentElement.dataset.theme='dark'}catch(e){}
+function barTheme(t){try{const P=window.Capacitor&&window.Capacitor.Plugins;if(P&&P.StatusBar){P.StatusBar.setStyle({style:t==='dark'?'DARK':'LIGHT'}).catch(()=>{});P.StatusBar.setBackgroundColor({color:t==='dark'?'#0E1422':'#FFFFFF'}).catch(()=>{})}}catch(e){}}
+function setTheme(t){document.documentElement.dataset.theme=t;try{localStorage.setItem('bio_theme',t)}catch(e){}const m=document.querySelector('meta[name=theme-color]');if(m)m.content=t==='dark'?'#0E1422':'#FFFFFF';barTheme(t)}
+try{if(localStorage.getItem('bio_theme')==='dark'){document.documentElement.dataset.theme='dark';const m=document.querySelector('meta[name=theme-color]');if(m)m.content='#0E1422';setTimeout(()=>barTheme('dark'),400)}}catch(e){}
 function themeBtn(){return '<button class="thm" data-act="theme">'+(document.documentElement.dataset.theme==='dark'?'☀️ دۆخی ڕووناک':'🌙 دۆخی تاریک')+'</button>'}
 async function loadStats(){if(!sb)return;try{const r=await sb.rpc('app_stats');if(!r.error&&r.data){ST.stats=r.data;if(!RUN)render()}}catch(e){}}
 async function loadBoard(){if(!sb)return;try{const [a,w]=await Promise.all([sb.rpc('get_board',{p_mode:'all'}),sb.rpc('get_board',{p_mode:'week'})]);if(!a.error&&!w.error){ST.board={all:a.data,week:w.data};if(!RUN&&!V.lock&&!V.acc&&!V.aiq&&!V.me)render()}}catch(e){}}
@@ -1239,7 +1244,7 @@ function viewMain(){
    '<button class="tile t1" data-sec="bank"><span class="ti">'+icon('ex')+'</span><b>ئەسیلەکان</b><span>بانکی پرسیاری وەزاری '+(SUBS.filter(subCount).length>1?'هەموو دەرسەکان':subName())+'</span><small><span class="num">'+all.seen+'</span> / <span class="num">'+ALLQS.length+'</span> حەلکراو'+(dueIds().length?' · <span class="num">'+dueIds().length+'</span> پێداچوونەوە ئەمڕۆ':'')+'</small></button>'+
    '<button class="tile t2" data-sec="daily"><span class="ti">'+icon('daily')+'</span><b>سەعی ڕۆژانە</b><span>خشتەی خوێندنی ئەمڕۆ بۆ هەموو دەرسەکان</span><small>'+(ps?'ئەمڕۆ: <span class="num">'+ps.d+'</span> لە <span class="num">'+ps.n+'</span> کرا':'خشتەی ئەمڕۆت دروست بکە')+'</small></button>'+
    '<button class="tile t3" data-sec="week"><span class="ti">'+icon('week')+'</span><b>پێداچوونەوەی هەفتانە</b><span>هەموو هەینییەک، بە سیستەمی دووبارەکردنەوە</span><small>'+(isFri(t)?(due.length?'ئەمڕۆ هەینییە: <span class="num">'+due.length+'</span> بابەت چاوەڕێتن':'ئەمڕۆ هەینییە'):'هەینی داهاتوو: '+fmtD(nf)+(due.length?' · <span class="num">'+due.length+'</span> بابەت':''))+'</small></button>'+
-   '<button class="tile t4" data-sec="cards"><span class="ti">'+icon('cards')+'</span><b>فلاشکارد</b><span>زاراوە و پێناسەکانی کتێب بە کارت، بە سیستەمی دووبارەکردنەوە</span><small>'+fcTile()+'</small></button>'+
+   '<button class="tile t4" data-sec="cards"><span class="ti">'+icon('cards')+'</span><b>فلاشکارد</b><span>پرسیار و وەڵامی ناو کتێب بە کارت، بە سیستەمی دووبارەکردنەوە</span><small>'+fcTile()+'</small></button>'+
    '</div>'+statsCard()+voicesCard()+reportCard()+themeBtn()+'</div>';
   return h}
 const SUBIC={bio:['🫀','#FDE8E7'],chem:['🧪','#E6F1FB'],phys:['🧲','#FFF1DC'],math:['📐','#FCE7F3'],kurd:['☀️','#FFF7D6'],eng:['<svg viewBox="0 0 48 48" width="34" height="34" aria-hidden="true"><path d="M2 42 Q8 30 14 29 L34 29 Q40 30 46 42 Z" fill="#C9A26B"/><path d="M10 30 V18 h3 v-3 h3 v3 h3 v-3 h3 v3 h4 v-3 h3 v3 h3 v-3 h3 v3 h3 V30 Z" fill="#E7C48D" stroke="#8A6A3B" stroke-width="1.2"/><path d="M21 30 v-6 a3 3 0 0 1 6 0 v6 Z" fill="#6B4E26"/><rect x="14" y="21" width="2.4" height="3.2" rx="1" fill="#8A6A3B"/><rect x="31.6" y="21" width="2.4" height="3.2" rx="1" fill="#8A6A3B"/><path d="M24 6 v8" stroke="#8A6A3B" stroke-width="1.4"/><path d="M24 6 l7 2.2 -7 2.2 Z" fill="#E0463A"/><circle cx="24" cy="10" r=".1"/></svg>','#E6F1FB'],arab:['📜','#E8F6EC'],isl:['📖','#F3ECE0']};
@@ -1456,7 +1461,7 @@ function fcSubBar(){const L=fcSubs();if(L.length<2)return '';
 function viewCards(){
   if(V.fcrun)return viewCardRun();
   const sub=fcCur();
-  let h=header('فلاشکارد',sub?subName(sub)+' · زاراوە و پێناسەکانی کتێب':'زاراوە و پێناسەکانی کتێب',false,accBtn())+'<div class="wrap">';
+  let h=header('فلاشکارد',sub?subName(sub)+' · پرسیار و وەڵام لە ناو کتێب':'پرسیار و وەڵام لە ناو کتێب',false,accBtn())+'<div class="wrap">';
   if(!FC.idx)return h+'<div class="card empty" style="margin-top:16px">چاوەڕێ بکە…</div></div>';
   if(!sub)return h+'<div class="card empty" style="margin-top:16px">بەم زووانە فلاشکارد زیاد دەکرێت.'+(FC.err?'<br><small class="ltr" style="color:var(--bad)">'+esc(FC.err)+'</small>':'')+'</div></div>';
   const all=fcCards(sub),S=fcStats(all.filter(fcOpen)),today=fcTodayIds(sub);
