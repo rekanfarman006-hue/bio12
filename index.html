@@ -497,21 +497,30 @@ function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 function sx(h){return h.replace(/_\{([^}]*)\}/g,'<sub>$1</sub>').replace(/\^\{([^}]*)\}/g,'<sup>$1</sup>')}
 // formulas, numbers with units and English inside Kurdish/Arabic text: keep them left-to-right so they are not scrambled
 function fx(t){t=String(t==null?'':t);if(!/[؀-ۿ]/.test(t))return sx(esc(t));
-  return t.replace(/[^؀-ۿݐ-ݿﭐ-﷿ﹰ-﻿]+|[؀-ۿݐ-ݿﭐ-﷿ﹰ-﻿]+/g,run=>{
+  // Kurdish words glued to a formula in brackets, e.g. Ea(پاشینە) or C(گرافیت), stay inside the formula
+  const P=[];t=t.replace(/([A-Za-z0-9°′″⁰-⁹₀-₉⁺⁻)\]}])\(([؀-ۿ][^()]{0,40}?)\)/g,(m,a,k)=>{P.push(k);return a+'('+(P.length-1)+')'});
+  const back=h=>h.replace(/(\d+)/g,(m,i)=>'<bdi>'+esc(P[+i])+'</bdi>');
+  const lr=c=>'<span class="lr'+(c.length>34?' lw':'')+'" dir="ltr">'+sx(esc(c))+'</span>';
+  return back(t.replace(/[^؀-ۿݐ-ݿﭐ-﷿ﹰ-﻿]+|[؀-ۿݐ-ݿﭐ-﷿ﹰ-﻿]+/g,run=>{
     if(/[؀-ۿݐ-ݿﭐ-﷿ﹰ-﻿]/.test(run))return esc(run);
     let m=run.match(/^([\s.,:;!?،؛؟]*)([\s\S]*?)([\s.,:;!?،؛؟]*)$/),L=m[1],c=m[2],R=m[3];
-    if((c.match(/[A-Za-z0-9]/g)||[]).length<2||/^\(?[A-E]\)?$/.test(c))return sx(esc(run));
-    const n=ch=>(c.split(ch).length-1);
-    if(c[0]==='('&&n('(')>n(')')){L+='(';c=c.slice(1)}
-    if(c.slice(-1)===')'&&n(')')>n('(')){R=')'+R;c=c.slice(0,-1)}
-    return esc(L)+'<span class="lr'+(c.length>34?' lw':'')+'" dir="ltr">'+sx(esc(c))+'</span>'+esc(R)})}
+    if((c.replace(/\d+/g,'').match(/[A-Za-z0-9]/g)||[]).length<2||/^\(?[A-E]\)?$/.test(c))return sx(esc(run));
+    // a bracket that opens or closes a Kurdish part stays outside the left-to-right piece
+    const st=[],cut=new Set();for(let i=0;i<c.length;i++){if(c[i]==='(')st.push(i);else if(c[i]===')'){if(st.length)st.pop();else cut.add(i)}}
+    st.forEach(i=>cut.add(i));
+    let out='',buf='';const flush=()=>{const mm=buf.match(/^(\s*)([\s\S]*?)(\s*)$/);if(mm[2])out+=esc(mm[1])+((mm[2].replace(/\d+/g,'').match(/[A-Za-z0-9]/g)||[]).length<1?sx(esc(mm[2])):lr(mm[2]))+esc(mm[3]);else out+=esc(buf);buf=''};
+    for(let i=0;i<c.length;i++){if(cut.has(i)){flush();out+=c[i]}else buf+=c[i]}flush();
+    return esc(L)+out+esc(R)}))}
+// a maths/chemistry step that starts with a formula and is mostly formula is shown left-to-right, Kurdish words kept whole
+function ltrLine(x,step){if(!step||!/^[\s(]*[A-Za-z0-9ΔΣπ√∫−-]/.test(x))return false;const ar=(x.match(/[؀-ۿ]/g)||[]).length,la=(x.match(/[A-Za-z0-9ΔπΣ°]/g)||[]).length;return ar<la}
+function lx(t){return sx(esc(t)).replace(/[؀-ۿ][؀-ۿ\s\u200c]*[؀-ۿ]|[؀-ۿ]/g,m=>'<bdi>'+m+'</bdi>')}
 // explanations: one step per line so Kurdish text and maths never get mixed
 function exFx(t,sub){t=String(t||'');const AR=/[؀-ۿ]/;
   if(!AR.test(t))return '<div class="et" dir="ltr">'+fx(t)+'</div>';
   const step=/^(math|phys|chem)$/.test(sub||CUR);
   let parts=step?t.split(/(?<=[.؟!:،])\s+(?=\S)/):[t];
   const out=[];parts.forEach(p=>{p.split(/\s*←\s*/).forEach((x,i)=>{x=x.trim();if(x)out.push({x,arr:i>0})})});
-  return '<div class="et'+(step?' st':'')+'" dir="rtl">'+out.map(o=>{const ar=AR.test(o.x);return '<div class="el'+(o.arr?' ea':'')+'">'+(o.arr?'<span class="arr">←</span> ':'')+(ar?fx(o.x):'<span class="lr lw" dir="ltr">'+sx(esc(o.x.replace(/[.،]$/,'')))+'</span>')+'</div>'}).join('')+'</div>'}
+  return '<div class="et'+(step?' st':'')+'" dir="rtl">'+out.map(o=>{const ar=AR.test(o.x);return '<div class="el'+(o.arr?' ea':'')+'">'+(o.arr?'<span class="arr">←</span> ':'')+(ar&&!ltrLine(o.x,step)?fx(o.x):ar?'<span class="lr lw" dir="ltr">'+lx(o.x.replace(/[.،]$/,''))+'</span>':'<span class="lr lw" dir="ltr">'+sx(esc(o.x.replace(/[.،]$/,'')))+'</span>')+'</div>'}).join('')+'</div>'}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 // dates follow Kurdistan time, same as the server
 const DF=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Baghdad',year:'numeric',month:'2-digit',day:'2-digit'});
