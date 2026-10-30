@@ -17,6 +17,9 @@ button{cursor:pointer}
 :focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .num{font-variant-numeric:tabular-nums}
 .ltr{direction:ltr;unicode-bidi:isolate;display:inline-block}
+html,body{overscroll-behavior-y:none}
+body{padding-top:env(safe-area-inset-top,0px)}
+body::before{content:'';position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:7}
 .wrap{max-width:640px;margin:0 auto;padding-inline:16px;padding-block:0 112px}
 header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:rgba(255,255,255,.96);color:var(--fg);border-bottom:1px solid var(--line);backdrop-filter:saturate(1.4) blur(8px)}
 header.top .in{max-width:640px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px}
@@ -394,6 +397,55 @@ html[data-theme=dark] .sg .sgi{filter:saturate(.8) brightness(.85)}
 /* Phone night mode must not darken the app: only the in-app switch (html[data-theme=dark]) does. Declaring a dark-scheme rule tells browsers with their own forced dark mode (e.g. Samsung Internet) that the page handles dark itself, so they leave it alone; the rule changes nothing. */
 :root{color-scheme:only light}
 @media (prefers-color-scheme:dark){:root:not([data-theme=dark]){color-scheme:only light;background:#FFFFFF}}
+/* dictionary */
+.tile.t5{border-inline-start-color:#E0457B}.tile.t5 .ti{background:rgba(224,69,123,.14)}
+.dtabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:5px;margin:14px 0 12px}
+.dtabs button{border:0;background:none;border-radius:10px;padding:9px 4px;font:inherit;font-weight:800;font-size:14px;color:var(--muted)}
+.dtabs button[aria-current]{background:var(--fg);color:var(--bg)}
+.dsearch input{width:100%;font-size:17px;padding:13px 14px;border-radius:14px;border:1px solid var(--line);background:var(--surface);color:var(--fg);box-sizing:border-box}
+.dsearch{margin-bottom:12px}
+.dlist{display:flex;flex-direction:column;gap:8px}
+.drow{display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:6px 8px;box-shadow:var(--shadow)}
+.dmain{flex:1;min-width:0;display:flex;flex-direction:column;align-items:stretch;gap:2px;background:none;border:0;padding:6px;font:inherit;color:var(--fg);text-align:right}
+.dmain b{font-size:17px;font-weight:800;text-align:left;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.dmain span{font-size:14px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dic{flex:none;width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--fg);display:grid;place-items:center;padding:0}
+.dic.on{color:#E0A100;border-color:#E0A100}
+.dic.sm{width:30px;height:30px;border-radius:9px;display:inline-grid;vertical-align:middle}
+.dic.sm svg{width:16px;height:16px}
+.dic.big{width:52px;height:52px;border-radius:16px;background:#E0457B;color:#fff;border:0}
+.dgh{display:flex;flex-direction:column;gap:4px;margin:0 2px 12px}
+.dgh b{font-size:18px;text-align:left}
+.dsheet{max-height:86vh;overflow:auto}
+.dhead{display:flex;align-items:center;justify-content:space-between;gap:12px;direction:ltr}
+.dw{font-size:28px;font-weight:900;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.dipa{font-family:"Lucida Sans Unicode","DejaVu Sans","Segoe UI",system-ui,sans-serif;color:var(--muted);font-size:16px;margin-top:2px}
+.dbr{font-size:11px;font-weight:800;background:rgba(224,69,123,.14);color:#C2316A;border-radius:6px;padding:1px 6px;margin-inline-start:4px}
+.dkp{margin-top:10px;font-size:16px}.dkp b{font-size:18px}
+.dmean{background:var(--bg);border-radius:14px;padding:12px 14px;margin-top:10px}
+.dmean p{margin:2px 0 0;font-size:19px;font-weight:800;line-height:1.7}
+.dh3{font-size:15px;margin:14px 0 6px}
+.dex{border-inline-start:3px solid #E0457B;padding:6px 10px;margin:8px 0;background:var(--bg);border-radius:10px}
+.den{font-size:16px;line-height:1.75;text-align:left;font-family:Georgia,"Times New Roman",serif}
+.dku{font-size:15px;line-height:1.8;color:var(--fg);opacity:.85;margin-top:4px}
+.dl{border-bottom:1px dotted currentColor;cursor:pointer}
+.dread-tools{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:12px 0}
+.dread-tools label{display:flex;gap:6px;align-items:center;font-weight:700;font-size:14px}
+.btn.sm{padding:8px 12px;font-size:13px;width:auto;display:inline-flex;gap:6px;align-items:center}
+.dread{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:6px 14px;box-shadow:var(--shadow)}
+.dsent{padding:10px 0;border-bottom:1px solid var(--line)}
+.dsent:last-child{border-bottom:0}
+.dsent.play{background:rgba(224,69,123,.07);margin:0 -14px;padding:10px 14px}
+.dsp{color:#C2316A;font-family:system-ui,sans-serif}
+.dsh{font-size:18px;margin:16px 0 4px;text-align:left;font-family:Georgia,serif;color:#C2316A}
+.dsh span{display:block;text-align:right;font-family:inherit;font-size:15px;color:var(--muted);direction:rtl}
+.dpg{font-size:11px;color:var(--muted);text-align:left;margin-top:8px;font-family:system-ui,sans-serif}
+.drcard{width:100%;min-height:260px;border:0;border-radius:24px;background:linear-gradient(135deg,#F0476E,#7A1452);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:24px;margin-top:16px;font:inherit;box-shadow:var(--shadow)}
+.drcard b{font-size:32px;font-family:system-ui,sans-serif}
+.drcard .dipa{color:rgba(255,255,255,.8)}
+.drcard p{font-size:22px;font-weight:900;margin:6px 0 0;text-align:center;line-height:1.6}
+.drcard.on{background:var(--surface);color:var(--fg);border:1px solid var(--line)}
+.drcard.on .dipa{color:var(--muted)}
 </style>
 
 <div id="app" dir="rtl" lang="ckb"></div>
@@ -1017,6 +1069,7 @@ function render(){
   if(RUN)h=RUN.summary?viewSummary():viewRun();
   else if(top&&top.v==='report')h=viewReport();
   else if(V.sec==='cards')h=viewCards();
+  else if(V.sec==='dict')h=viewDict();
   else if(V.sec==='main')h=viewMain();
   else if(V.sec==='daily')h=viewDaily();
   else if(V.sec==='week')h=viewWeek();
@@ -1122,6 +1175,8 @@ app.addEventListener('click',e=>{
   if(b.dataset.jump!=null){RUN.i=+b.dataset.jump;RUN.grid=0;render();scrollTo(0,0);return}
   if(b.dataset.review!=null){RUN.rev=+b.dataset.review;render();return}
   const a=b.dataset.act;
+  if(dictClick(a,b))return;
+  if(a==='back'&&dictBack())return;
   if(cardsClick(a,b))return;
   if(a==='back'&&cardsBack())return;
   if(plannerClick(a,b))return;
@@ -1236,7 +1291,7 @@ async function loadPlanner(){if(!ST.user||!sb){ST.plans={};ST.wr=[];return}
 const SECS=[['main','سەرەکی','home'],['bank','ئەسیلەکان','ex'],['cards','فلاشکارد','cards'],['daily','سەعی ڕۆژانە','daily'],['week','هەفتانە','week']];
 function navBar(items,cur,attr){return '<nav class="tabs"><div class="in" style="grid-template-columns:repeat('+items.length+',1fr)">'+items.map(x=>'<button '+(x[3]||attr)+'="'+x[0]+'"'+(cur===x[0]?' aria-current="page"':'')+'>'+icon(x[2])+'<span>'+x[1]+'</span>'+(x[4]?'<b class="nb num">'+x[4]+'</b>':'')+'</button>').join('')+'</div></nav>'}
 function secTabs(){
-  if(V.sec==='main'||V.sec==='cards')return V.fcrun?'':navBar(SECS.map(x=>[x[0],x[1],x[2]]),V.sec,'data-sec');
+  if(V.sec==='main'||V.sec==='cards'||V.sec==='dict')return V.fcrun||(V.sec==='dict'&&(V.dr||V.drev))?'':navBar(SECS.map(x=>[x[0],x[1],x[2]]),V.sec,'data-sec');
   if(V.sec==='daily')return navBar([['main','سەرەکی','home','data-sec'],['plan','خشتەی ڕۆژ','daily'],['hist','ڕۆژانی پێشوو','list'],['stats','ئامار','stats']],V.dtab,'data-dtab');
   if(V.sec==='week'){const d=wrDue().length;return navBar([['main','سەرەکی','home','data-sec'],['fri','هەینی','week','',d||''],['all','هەموو بابەتەکان','list'],['stats','ئامار','stats']],V.wtab,'data-wtab')}
   const nd=dueIds().length;
@@ -1254,6 +1309,7 @@ function viewMain(){
    '<button class="tile t2" data-sec="daily"><span class="ti">'+icon('daily')+'</span><b>سەعی ڕۆژانە</b><span>خشتەی خوێندنی ئەمڕۆ بۆ هەموو دەرسەکان</span><small>'+(ps?'ئەمڕۆ: <span class="num">'+ps.d+'</span> لە <span class="num">'+ps.n+'</span> کرا':'خشتەی ئەمڕۆت دروست بکە')+'</small></button>'+
    '<button class="tile t3" data-sec="week"><span class="ti">'+icon('week')+'</span><b>پێداچوونەوەی هەفتانە</b><span>هەموو هەینییەک، بە سیستەمی دووبارەکردنەوە</span><small>'+(ST.user&&!wrOpen()?'🔒 تەنها بۆ هەژماری چالاککراو':isFri(t)?(due.length?'ئەمڕۆ هەینییە: <span class="num">'+due.length+'</span> بابەت چاوەڕێتن':'ئەمڕۆ هەینییە'):'هەینی داهاتوو: '+fmtD(nf)+(due.length?' · <span class="num">'+due.length+'</span> بابەت':''))+'</small></button>'+
    '<button class="tile t4" data-sec="cards"><span class="ti">'+icon('cards')+'</span><b>فلاشکارد</b><span>پرسیار و وەڵامی ناو کتێب بە کارت، بە سیستەمی دووبارەکردنەوە</span><small>'+fcTile()+'</small></button>'+
+   '<button class="tile t5" data-sec="dict"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2Z"/><path d="M19 17v4H6"/><path d="M8.5 13 11 7l2.5 6M9.3 11h3.4"/><path d="M14.5 9.5h3"/></svg></span><b>فەرهەنگی ئینگلیزی</b><span>'+dTile()+'</span><small>وشەکان · خوێندنەوە · دەنگی بەریتانی</small></button>'+
    '</div>'+statsCard()+voicesCard()+reportCard()+themeBtn()+'</div>';
   return h}
 const SUBIC={bio:['🫀','#FDE8E7'],chem:['🧪','#E6F1FB'],phys:['🧲','#FFF1DC'],math:['📐','#FCE7F3'],kurd:['☀️','#FFF7D6'],eng:['<svg viewBox="0 0 48 48" width="34" height="34" aria-hidden="true"><path d="M2 42 Q8 30 14 29 L34 29 Q40 30 46 42 Z" fill="#C9A26B"/><path d="M10 30 V18 h3 v-3 h3 v3 h3 v-3 h3 v3 h4 v-3 h3 v3 h3 v-3 h3 v3 h3 V30 Z" fill="#E7C48D" stroke="#8A6A3B" stroke-width="1.2"/><path d="M21 30 v-6 a3 3 0 0 1 6 0 v6 Z" fill="#6B4E26"/><rect x="14" y="21" width="2.4" height="3.2" rx="1" fill="#8A6A3B"/><rect x="31.6" y="21" width="2.4" height="3.2" rx="1" fill="#8A6A3B"/><path d="M24 6 v8" stroke="#8A6A3B" stroke-width="1.4"/><path d="M24 6 l7 2.2 -7 2.2 Z" fill="#E0463A"/><circle cx="24" cy="10" r=".1"/></svg>','#E6F1FB'],arab:['📜','#E8F6EC'],isl:['📖','#F3ECE0']};
@@ -1278,11 +1334,12 @@ function saveLabel(){return V.saveSt==='…'?'پاشەکەوت دەکرێت…':
 function needAcc(title){return header(title,'',false,accBtn())+'<div class="wrap"><div class="card stack" style="margin-top:16px"><b>سەرەتا هەژمار دروست بکە</b><span class="muted">ئەم بەشە بەخۆڕاییە. هەژمار پێویستە بۆ ئەوەی زانیارییەکانت پاشەکەوت بن.</span><button class="btn" data-act="joinlb">هەژمار دروست بکە</button><button class="btn alt" data-act="login">چوونەژوورەوە</button></div></div>'}
 function viewDaily(){
   if(!ST.user)return needAcc('سەعی ڕۆژانە');
+  if(!wrOpen())return wrLocked('سەعی ڕۆژانە');
   if(ST.planOk===false)return header('سەعی ڕۆژانە','',false,accBtn())+'<div class="wrap"><div class="card" style="margin-top:16px">ئەم بەشە هێشتا لە داتابەیس ئامادە نەکراوە (update-2.sql).</div></div>';
   if(V.dtab==='hist')return viewDailyHist();
   if(V.dtab==='stats')return viewDailyStats();
   const day=curDay(),t=todayStr(),P=ST.plans[day];
-  let h=header('سەعی ڕۆژانە','خشتەی ڕۆژانەی خوێندن',false,accBtn())+'<div class="wrap">';
+  let h=header('سەعی ڕۆژانە','خشتەی ڕۆژانەی خوێندن',false,accBtn())+'<div class="wrap">'+(day===t?wrTrialNote('سەعی ڕۆژانە'):'');
   h+='<div class="dnav"><button data-act="dprev"'+(day<=addDays(t,-7)?' disabled':'')+' aria-label="ڕۆژی پێشوو">→</button><div><b>'+fmtDay(day)+'</b><small>'+dayName(day)+' · '+fmtD(day)+'</small></div><button data-act="dnext"'+(day>=addDays(t,7)?' disabled':'')+' aria-label="ڕۆژی دواتر">←</button></div>';
   if(!P||!P.items){
     const prev=Object.keys(ST.plans).filter(d=>d<day&&ST.plans[d].items.length).sort().pop();
@@ -1353,8 +1410,8 @@ function deckGrid(act,countOf,subOf){return '<div class="decks">'+SUBJ.map((s,j)
 const WR_TRIAL=14,WR_FROM='2026-10-28';
 function wrTrialEnd(){const c=ST.user&&ST.user.created_at?String(ST.user.created_at).slice(0,10):WR_FROM;const a=addDays(c,WR_TRIAL),b=addDays(WR_FROM,WR_TRIAL);return a>b?a:b}
 function wrOpen(){return paid()||todayStr()<wrTrialEnd()}
-function wrTrialNote(){if(paid())return '';const e=wrTrialEnd(),n=dayDiff(todayStr(),e);return '<div class="card" style="margin-top:12px;font-size:14px;background:var(--goldsoft)"><b>تاقیکردنەوەی بەخۆڕایی</b><br>پێداچوونەوەی هەفتانە بۆ ماوەی <span class="num">'+WR_TRIAL+'</span> ڕۆژ بەخۆڕاییە. <span class="num">'+n+'</span> ڕۆژی ماوە (هەتا '+fmtD(e)+').</div>'}
-function wrLocked(){return header('پێداچوونەوەی هەفتانە','',false,accBtn())+'<div class="wrap"><div class="card stack" style="margin-top:16px"><b>ماوەی تاقیکردنەوەی بەخۆڕایی تەواو بوو</b><span class="muted">پێداچوونەوەی هەفتانە <span class="num">'+WR_TRIAL+'</span> ڕۆژ بەخۆڕایی بوو. بابەتەکانت هەموویان پاشەکەوت کراون؛ هەژمارەکەت چالاک بکە بۆ ئەوەی بەردەوام بیت.</span><button class="btn dark" data-act="unlock">🔑 چالاککردنی هەژمار</button></div></div>'}
+function wrTrialNote(nm){nm=nm||'پێداچوونەوەی هەفتانە';if(paid())return '';const e=wrTrialEnd(),n=dayDiff(todayStr(),e);return '<div class="card" style="margin-top:12px;font-size:14px;background:var(--goldsoft)"><b>تاقیکردنەوەی بەخۆڕایی</b><br>'+nm+' بۆ ماوەی <span class="num">'+WR_TRIAL+'</span> ڕۆژ بەخۆڕاییە. <span class="num">'+n+'</span> ڕۆژی ماوە (هەتا '+fmtD(e)+').</div>'}
+function wrLocked(nm){nm=nm||'پێداچوونەوەی هەفتانە';return header(nm,'',false,accBtn())+'<div class="wrap"><div class="card stack" style="margin-top:16px"><b>ماوەی تاقیکردنەوەی بەخۆڕایی تەواو بوو</b><span class="muted">'+nm+' <span class="num">'+WR_TRIAL+'</span> ڕۆژ بەخۆڕایی بوو. زانیارییەکانت هەموویان پاشەکەوت کراون؛ هەژمارەکەت چالاک بکە بۆ ئەوەی بەردەوام بیت.</span><button class="btn dark" data-act="unlock">🔑 چالاککردنی هەژمار</button></div></div>'}
 function viewWeek(){
   if(!ST.user)return needAcc('پێداچوونەوەی هەفتانە');
   if(!wrOpen())return wrLocked();
@@ -1531,6 +1588,107 @@ function cardsClick(a,b){
   if(a==='fcback'){V.fcrun=null;fcFlush();render();scrollTo(0,0);return true}
   return false}
 function cardsBack(){if(V.fcrun){V.fcrun=null;fcFlush();render();scrollTo(0,0);return true}return false}
+
+// ---------- ENGLISH-KURDISH DICTIONARY (Sunrise 12) ----------
+const DX={d:null,loading:0,err:0,idx:null};
+const DSRC={E1:'Episode 1 · The old sailor',E2:'Episode 2 · Everything changes at the inn',E3:'Episode 3 · The sea-cook',E4:'Episode 4 · The voyage',E5:'Episode 5 · We arrive at the island',E6:'Episode 6 · The stockade',E7:'Episode 7 · My sea adventure',E8:'Episode 8 · Captain Silver',
+ U1:'Unit 1 · To New York',U2:'Unit 2 · Getting Organized',U3:'Unit 3 · Saving the Past for the Future',U4:'Unit 4 · Revision',U5:'Unit 5 · Feeding Nine Billion',U6:'Unit 6 · Into the Information Age',U7:'Unit 7 · Working Together for a Better World',U8:'Unit 8 · Revision',TI:'Treasure Island · About the author'};
+const DPOS={n:'ناو',v:'کار',adj:'ئاوەڵناو',adv:'ئاوەڵکار',prep:'ئامرازی پەیوەندی',conj:'ئامرازی لێکدەر',pron:'جێناو',det:'ئامرازی نیشانە',exp:'دەربڕین',phr:'دەستەواژە',exclam:'سەرسوڕمان'};
+function dSrcKey(u){return /^E\d/.test(u)?u:'U'+String(u).replace('AB ','')}
+function dSaved(){try{return JSON.parse(localStorage.getItem('klil_dsave')||'[]')}catch(e){return []}}
+function dSetSaved(L){try{localStorage.setItem('klil_dsave',JSON.stringify(L))}catch(e){}}
+function dLoad(){if(DX.d||DX.loading)return;DX.loading=1;
+  fetch('dict-eng.json?v=2').then(r=>r.json()).then(d=>{DX.d=d;DX.loading=0;dIndex();if(V.sec==='dict')render()}).catch(()=>{DX.loading=0;DX.err=1;if(V.sec==='dict')render()})}
+function dIndex(){const M={};DX.d.w.forEach((x,i)=>{const h=x.w.replace(/\(.*?\)/g,'').replace(/[…?!.]/g,'').split('/')[0].trim().toLowerCase();if(!h)return;
+  const add=k=>{if(!(k in M))M[k]=i};add(h);if(!/ /.test(h)){add(h+'s');add(h+'es');add(h+'ed');add(h+'d');add(h+'ing');if(/e$/.test(h))add(h.slice(0,-1)+'ing');if(/y$/.test(h)){add(h.slice(0,-1)+'ies');add(h.slice(0,-1)+'ied')}}});DX.idx=M}
+// ---- speech (British only) ----
+let DVOICE=null;
+function dPickVoice(){if(!('speechSynthesis' in window))return null;const vs=speechSynthesis.getVoices().filter(v=>/^en[-_]GB/i.test(v.lang));
+  const pref=[/Google UK English Female/i,/Google UK English Male/i,/Daniel/i,/Serena|Kate|Stephanie|Martha|Arthur/i,/UK|British|United Kingdom/i];
+  for(const p of pref){const v=vs.find(v=>p.test(v.name));if(v)return v}return vs[0]||null}
+if('speechSynthesis' in window){try{speechSynthesis.onvoiceschanged=()=>{DVOICE=dPickVoice()}}catch(e){}}
+function dSay(t,slow){if(!('speechSynthesis' in window)){toast('ئەم مۆبایلە دەنگی تێدا نییە');return}
+  try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t.replace(/[‘’]/g,"'").replace(/\(.*?\)/g,'').replace(/~|…/g,''));u.lang='en-GB';DVOICE=DVOICE||dPickVoice();if(DVOICE)u.voice=DVOICE;u.rate=slow?0.62:0.88;speechSynthesis.speak(u)}catch(e){}}
+const DSPK='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg>';
+const DSTAR=on=>'<svg viewBox="0 0 24 24" width="20" height="20" fill="'+(on?'currentColor':'none')+'" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.2l1.1-6.2L3 9.6l6.2-.9Z"/></svg>';
+function dTile(){const n=dSaved().length;return 'وشە و ڕستەکانی کتێب بە کوردی، بە دەنگی بەریتانی'+(n?' · <span class="num">'+n+'</span> سەیڤکراو':'')}
+// tappable English sentence: words in the dictionary open their card
+function dLink(en){if(!DX.idx)return esc(en);return esc(en).replace(/[A-Za-z][A-Za-z'’-]*/g,m=>{const k=m.toLowerCase().replace(/[’']s$/,'');const i=DX.idx[k];return i==null?m:'<span class="dl" data-act="dword" data-w="'+i+'">'+m+'</span>'})}
+function dWordRow(i){const x=DX.d.w[i],sv=dSaved().includes(x.w);
+  return '<div class="drow"><button class="dmain" data-act="dword" data-w="'+i+'"><b dir="ltr">'+esc(x.w)+'</b><span>'+esc(x.ku)+'</span></button><button class="dic" data-act="dsay" data-t="'+esc(x.w)+'" aria-label="گوێگرتن">'+DSPK+'</button><button class="dic'+(sv?' on':'')+'" data-act="dsave" data-w="'+i+'" aria-label="سەیڤ">'+DSTAR(sv)+'</button></div>'}
+function viewDict(){
+  if(!DX.d){dLoad();return header('فەرهەنگ','ئینگلیزی ← کوردی · Sunrise 12',false,accBtn())+'<div class="wrap"><div class="card" style="text-align:center;margin-top:20px">'+(DX.err?'نەتوانرا فەرهەنگەکە باربکرێت. ئینتەرنێتەکەت بپشکنە.<div style="margin-top:12px"><button class="btn" data-act="dretry">دووبارە هەوڵ بدەرەوە</button></div>':'فەرهەنگ باردەکرێت…')+'</div></div>'}
+  const t=V.dt||'words';
+  if(t==='read'&&V.dr)return viewDictRead();
+  if(V.drev)return viewDictRev();
+  let h=header('فەرهەنگ','ئینگلیزی ← کوردی · Sunrise 12',false,accBtn())+'<div class="wrap">';
+  h+='<div class="dtabs"><button data-act="dtab" data-t="words"'+(t==='words'?' aria-current="page"':'')+'>وشەکان</button><button data-act="dtab" data-t="read"'+(t==='read'?' aria-current="page"':'')+'>خوێندنەوە</button><button data-act="dtab" data-t="saved"'+(t==='saved'?' aria-current="page"':'')+'>سەیڤکراوەکان'+(dSaved().length?' <span class="num">('+dSaved().length+')</span>':'')+'</button></div>';
+  if(t==='words'){
+    h+='<div class="dsearch"><input type="search" id="dq" dir="auto" placeholder="وشەیەک بنووسە… (ئینگلیزی یان کوردی)" value="'+esc(V.dq||'')+'" autocomplete="off" autocapitalize="off" spellcheck="false"></div>';
+    const q=(V.dq||'').trim().toLowerCase();
+    if(q){const W=DX.d.w,hit=[];W.forEach((x,i)=>{const w=x.w.toLowerCase();let s=w===q?0:w.startsWith(q)?1:w.includes(q)?2:x.ku.includes(q)?3:9;if(s<9)hit.push([s,w.length,i])});
+      hit.sort((a,b)=>a[0]-b[0]||a[1]-b[1]);
+      h+=hit.length?'<div class="dlist">'+hit.slice(0,60).map(z=>dWordRow(z[2])).join('')+'</div>':'<div class="card muted" style="text-align:center">ئەم وشەیە لە کتێبەکەدا نییە.</div>'}
+    else if(V.dg){const L=DX.d.w.map((x,i)=>[x,i]).filter(z=>dSrcKey(z[0].u)===V.dg);
+      h+='<div class="dgh"><button class="linkbtn" data-act="dgrp" data-g="">‹ هەموو بەشەکان</button><b dir="ltr">'+esc(DSRC[V.dg]||V.dg)+'</b><span class="muted"><span class="num">'+L.length+'</span> وشە</span></div><div class="dlist">'+L.map(z=>dWordRow(z[1])).join('')+'</div>'}
+    else{const G={};DX.d.w.forEach(x=>{const k=dSrcKey(x.u);G[k]=(G[k]||0)+1});
+      const order=['U1','U2','U3','U4','U5','U6','U7','U8','E1','E2','E3','E4','E5','E6','E7','E8'].filter(k=>G[k]);
+      h+='<p class="muted" style="font-size:14px;margin:4px 2px 10px">'+'<span class="num">'+DX.d.w.length+'</span> وشەی کتێبی Sunrise 12، هەریەکە بە مانای کوردی و گۆکردنی بەریتانی.</p>';
+      h+='<h2>Unit ـەکان</h2><div class="stack">'+order.filter(k=>k[0]==='U').map(k=>'<button class="row deckrow" data-act="dgrp" data-g="'+k+'"><div class="ix num">'+k.slice(1)+'</div><div class="tx"><b dir="ltr" style="text-align:right">'+esc(DSRC[k])+'</b><span><span class="num">'+G[k]+'</span> وشە</span></div></button>').join('')+'</div>';
+      h+='<h2>Treasure Island</h2><div class="stack">'+order.filter(k=>k[0]==='E').map(k=>'<button class="row deckrow" data-act="dgrp" data-g="'+k+'"><div class="ix num">'+k.slice(1)+'</div><div class="tx"><b dir="ltr" style="text-align:right">'+esc(DSRC[k])+'</b><span><span class="num">'+G[k]+'</span> وشە</span></div></button>').join('')+'</div>'}
+  }else if(t==='read'){
+    const C={},T={};DX.d.s.forEach(s=>{if(s.h||s.x)return;C[s.u]=(C[s.u]||0)+1;if(s.ku)T[s.u]=(T[s.u]||0)+1});
+    const ks=['U1','U2','U3','U4','U5','U6','U7','U8','TI','E1','E2','E3','E4','E5','E6','E7','E8'].filter(k=>C[k]);
+    h+='<p class="muted" style="font-size:14px;margin:4px 2px 10px">هەموو دەقەکانی کتێب، ڕستە بە ڕستە بە کوردی. کرتە لە هەر وشەیەکی ئینگلیزی بکە بۆ بینینی ماناکەی.</p><div class="stack">'+
+      ks.map(k=>'<button class="row deckrow" data-act="dread" data-r="'+k+'"><div class="ix num">'+(k==='TI'?'★':k.slice(1))+'</div><div class="tx"><b dir="ltr" style="text-align:right">'+esc(DSRC[k])+'</b><span><span class="num">'+C[k]+'</span> ڕستە'+(T[k]&&T[k]<C[k]?' · <span class="num">'+T[k]+'</span> وەرگێڕدراو':'')+(!T[k]?' · وەرگێڕان بەم زووانە':'')+'</span></div></button>').join('')+'</div>';
+  }else{
+    const L=dSaved().map(w=>DX.d.w.findIndex(x=>x.w===w)).filter(i=>i>=0);
+    h+=L.length?'<button class="btn" data-act="drev" style="margin:4px 0 12px">پێداچوونەوەی وشە سەیڤکراوەکان (<span class="num">'+L.length+'</span>)</button><div class="dlist">'+L.map(dWordRow).join('')+'</div>'
+      :'<div class="card muted" style="text-align:center;line-height:1.9">هێشتا هیچ وشەیەکت سەیڤ نەکردووە.<br>کرتە لە ئەستێرەی تەنیشت هەر وشەیەک بکە بۆ سەیڤکردنی.</div>';
+  }
+  return h+'</div>'+(V.dw!=null?dWordSheet(V.dw):'')}
+function dWordSheet(i){const x=DX.d.w[i],sv=dSaved().includes(x.w),pos=x.pos.split('/').map(p=>DPOS[p]||p).join(' / ');
+  const ex=(x.ex||[]).map(j=>{const s=DX.d.s[j];return '<div class="dex"><div class="den" dir="ltr">'+dLink(s.en)+' <button class="dic sm" data-act="dsay" data-t="'+esc(s.en)+'">'+DSPK+'</button></div>'+(s.ku?'<div class="dku">'+esc(s.ku)+'</div>':'')+'<small class="muted" dir="ltr">'+esc(DSRC[s.u]||s.u)+' · p. '+s.p+'</small></div>'}).join('');
+  return '<div class="sheet" id="dsx"><div class="box dsheet"><div class="dhead"><div><b class="dw" dir="ltr">'+esc(x.w)+'</b><div class="dipa" dir="ltr">/'+esc(x.ipa)+'/ <span class="dbr">BrE</span></div></div><button class="dic big" data-act="dsay" data-t="'+esc(x.w)+'" aria-label="گوێگرتن">'+DSPK+'</button></div>'+
+   '<div class="dkp">گۆکردن: <b>'+esc(x.kp)+'</b> <button class="linkbtn" data-act="dslow" data-t="'+esc(x.w)+'">هێواش</button></div>'+
+   '<div class="dmean"><small class="muted">'+esc(pos)+'</small><p>'+esc(x.ku)+'</p></div>'+
+   (ex?'<h3 class="dh3">لە ناو کتێبدا</h3>'+ex:'')+
+   '<small class="muted" style="display:block;margin-top:8px" dir="ltr">'+esc(DSRC[dSrcKey(x.u)]||x.u)+'</small>'+
+   '<div class="grid2" style="margin-top:14px"><button class="btn'+(sv?' alt':'')+'" data-act="dsave" data-w="'+i+'">'+(sv?'لابردن لە سەیڤکراوەکان':'سەیڤکردن')+'</button><button class="btn alt" data-act="dclose">داخستن</button></div></div></div>'}
+function viewDictRead(){const k=V.dr,L=DX.d.s.map((s,j)=>[s,j]).filter(z=>z[0].u===k&&!z[0].x);let lastp=null,h=header(DSRC[k]||k,'خوێندنەوە · Sunrise 12',true)+'<div class="wrap">';
+  h+='<div class="dread-tools"><label><input type="checkbox" data-act="dkutog"'+(V.dkuoff?'':' checked')+'> وەرگێڕانی کوردی</label><button class="btn alt sm" data-act="dsayall">'+DSPK+' خوێندنەوەی هەمووی</button></div>';
+  h+='<div class="dread">'+L.map(([s,j])=>{let pg='';if(s.p!==lastp){pg='<div class="dpg" dir="ltr">p. '+s.p+'</div>';lastp=s.p}
+    if(s.h)return pg+'<h3 class="dsh" dir="ltr">'+esc(s.en)+(s.ku?'<span>'+esc(s.ku)+'</span>':'')+'</h3>';
+    return pg+'<div class="dsent'+(V.dplay===j?' play':'')+'" id="ds'+j+'"><div class="den" dir="ltr">'+(s.sp?'<b class="dsp">'+esc(s.sp)+':</b> ':'')+dLink(s.en)+' <button class="dic sm" data-act="dsay" data-t="'+esc(s.en)+'" data-j="'+j+'">'+DSPK+'</button></div>'+(s.ku&&!V.dkuoff?'<div class="dku">'+esc(s.ku)+'</div>':'')+'</div>'}).join('')+'</div>';
+  return h+'</div>'+(V.dw!=null?dWordSheet(V.dw):'')}
+function viewDictRev(){const R=V.drev;if(R.i>=R.ids.length){return header('پێداچوونەوە','وشە سەیڤکراوەکان',true)+'<div class="wrap"><div class="card" style="text-align:center;margin-top:16px"><b style="font-size:20px">تەواو بوو!</b><p class="muted">هەموو وشە سەیڤکراوەکانت بینی.</p><button class="btn" data-act="drevend">گەڕانەوە</button></div></div>'}
+  const x=DX.d.w[R.ids[R.i]];
+  return header('پێداچوونەوە','وشەی '+(R.i+1)+' لە '+R.ids.length,true)+'<div class="wrap"><button class="drcard'+(R.flip?' on':'')+'" data-act="drflip"><b dir="ltr">'+esc(x.w)+'</b><span class="dipa" dir="ltr">/'+esc(x.ipa)+'/</span>'+(R.flip?'<p>'+esc(x.ku)+'</p><small>'+esc(x.kp)+'</small>':'<small class="muted">کرتە بکە بۆ مانا</small>')+'</button>'+
+    '<div class="grid2" style="margin-top:12px"><button class="btn alt" data-act="dsay" data-t="'+esc(x.w)+'">'+DSPK+' گوێگرتن</button><button class="btn" data-act="drnext">دواتر</button></div></div>'}
+function dictClick(a,b){
+  if(a==='dtab'){V.dt=b.dataset.t;V.dg=null;V.dr=null;render();scrollTo(0,0);return true}
+  if(a==='dgrp'){V.dg=b.dataset.g||null;render();scrollTo(0,0);return true}
+  if(a==='dword'){V.dw=+b.dataset.w;render();return true}
+  if(a==='dclose'){V.dw=null;render();return true}
+  if(a==='dsay'){dSay(b.dataset.t);if(b.dataset.j){V.dplay=+b.dataset.j;document.querySelectorAll('.dsent.play').forEach(e=>e.classList.remove('play'));const e=document.getElementById('ds'+b.dataset.j);if(e)e.classList.add('play')}return true}
+  if(a==='dslow'){dSay(b.dataset.t,1);return true}
+  if(a==='dsave'){const x=DX.d.w[+b.dataset.w];let L=dSaved();if(L.includes(x.w)){L=L.filter(w=>w!==x.w);toast('لابرا')}else{L.push(x.w);toast('سەیڤ کرا')}dSetSaved(L);render();return true}
+  if(a==='dread'){V.dr=b.dataset.r;V.dw=null;render();scrollTo(0,0);return true}
+  if(a==='dkutog'){V.dkuoff=!V.dkuoff;render();return true}
+  if(a==='dsayall'){const L=DX.d.s.filter(s=>s.u===V.dr&&!s.h).map(s=>s.en);dSay(L.join(' '));return true}
+  if(a==='drev'){const L=dSaved().map(w=>DX.d.w.findIndex(x=>x.w===w)).filter(i=>i>=0);V.drev={ids:shuffle(L),i:0,flip:0};render();scrollTo(0,0);return true}
+  if(a==='drflip'){V.drev.flip=V.drev.flip?0:1;render();return true}
+  if(a==='drnext'){V.drev.i++;V.drev.flip=0;render();return true}
+  if(a==='drevend'){V.drev=null;render();return true}
+  if(a==='dretry'){DX.err=0;dLoad();render();return true}
+  return false}
+function dictBack(){if(V.sec!=='dict')return false;
+  if(V.dw!=null){V.dw=null;render();return true}
+  if(V.drev){V.drev=null;render();return true}
+  if(V.dr){V.dr=null;try{speechSynthesis.cancel()}catch(e){}render();scrollTo(0,0);return true}
+  return false}
+app.addEventListener('input',e=>{if(e.target.id==='dq'){V.dq=e.target.value;V.dg=null;render()}});
+app.addEventListener('click',e=>{if(e.target.id==='dsx'){V.dw=null;render()}});
 
 render();
 boot();
