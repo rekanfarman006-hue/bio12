@@ -446,6 +446,23 @@ html[data-theme=dark] .sg .sgi{filter:saturate(.8) brightness(.85)}
 .drcard p{font-size:22px;font-weight:900;margin:6px 0 0;text-align:center;line-height:1.6}
 .drcard.on{background:var(--surface);color:var(--fg);border:1px solid var(--line)}
 .drcard.on .dipa{color:var(--muted)}
+/* dictionaries: language switch + Arabic */
+.dlang{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 2px}
+.dlang button{border:1.5px solid var(--line);background:var(--surface);border-radius:18px;padding:12px 10px;display:flex;flex-direction:column;align-items:center;gap:2px;font:inherit;color:var(--fg);box-shadow:var(--shadow)}
+.dlang button b{font-size:19px;font-weight:900;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+.dlang button b.ar{font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic","Amiri",serif;font-size:21px}
+.dlang button span{font-size:12px;color:var(--muted);font-weight:700}
+.dlang button[aria-current]{background:var(--brand);border-color:var(--brand);color:var(--brandfg)}
+.dlang button[aria-current] span{color:rgba(255,255,255,.75)}
+.ar{font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic","Amiri",serif}
+.drow .dmain b.ar{font-size:21px;font-weight:700;line-height:1.5}
+.dw.ar{font-size:34px;font-weight:700;line-height:1.5}
+.axb{font-style:normal;font-family:inherit;font-size:11px;font-weight:800;background:#FDECEF;color:#C2185B;border-radius:999px;padding:2px 8px;vertical-align:middle;white-space:nowrap}
+.aex{border-inline-start-color:#2E7D6B}
+.aen{font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic","Amiri",serif;font-size:19px;line-height:1.9}
+.ann{margin-top:8px;font-size:14px;color:var(--muted);font-weight:700}
+.drcard b.ar{font-size:38px;font-weight:700;font-family:"Noto Naskh Arabic","Geeza Pro","Traditional Arabic","Amiri",serif}
+.drcard small.ar{font-size:17px}
 </style>
 
 <div id="app" dir="rtl" lang="ckb"></div>
@@ -1309,7 +1326,7 @@ function viewMain(){
    '<button class="tile t2" data-sec="daily"><span class="ti">'+icon('daily')+'</span><b>سەعی ڕۆژانە</b><span>خشتەی خوێندنی ئەمڕۆ بۆ هەموو دەرسەکان</span><small>'+(ps?'ئەمڕۆ: <span class="num">'+ps.d+'</span> لە <span class="num">'+ps.n+'</span> کرا':'خشتەی ئەمڕۆت دروست بکە')+'</small></button>'+
    '<button class="tile t3" data-sec="week"><span class="ti">'+icon('week')+'</span><b>پێداچوونەوەی هەفتانە</b><span>هەموو هەینییەک، بە سیستەمی دووبارەکردنەوە</span><small>'+(ST.user&&!wrOpen()?'🔒 تەنها بۆ هەژماری چالاککراو':isFri(t)?(due.length?'ئەمڕۆ هەینییە: <span class="num">'+due.length+'</span> بابەت چاوەڕێتن':'ئەمڕۆ هەینییە'):'هەینی داهاتوو: '+fmtD(nf)+(due.length?' · <span class="num">'+due.length+'</span> بابەت':''))+'</small></button>'+
    '<button class="tile t4" data-sec="cards"><span class="ti">'+icon('cards')+'</span><b>فلاشکارد</b><span>پرسیار و وەڵامی ناو کتێب بە کارت، بە سیستەمی دووبارەکردنەوە</span><small>'+fcTile()+'</small></button>'+
-   '<button class="tile t5" data-sec="dict"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2Z"/><path d="M19 17v4H6"/><path d="M8.5 13 11 7l2.5 6M9.3 11h3.4"/><path d="M14.5 9.5h3"/></svg></span><b>فەرهەنگی ئینگلیزی</b><span>'+dTile()+'</span><small>وشەکان · خوێندنەوە · دەنگی بەریتانی</small></button>'+
+   '<button class="tile t5" data-sec="dict"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2Z"/><path d="M19 17v4H6"/><path d="M8.5 13 11 7l2.5 6M9.3 11h3.4"/><path d="M14.5 9.5h3"/></svg></span><b>فەرهەنگەکان</b><span>'+dTile()+'</span><small>ئینگلیزی · عەرەبی · بە دەنگەوە</small></button>'+
    '</div>'+statsCard()+voicesCard()+reportCard()+themeBtn()+'</div>';
   return h}
 const SUBIC={bio:['🫀','#FDE8E7'],chem:['🧪','#E6F1FB'],phys:['🧲','#FFF1DC'],math:['📐','#FCE7F3'],kurd:['☀️','#FFF7D6'],eng:['<svg viewBox="0 0 48 48" width="34" height="34" aria-hidden="true"><path d="M2 42 Q8 30 14 29 L34 29 Q40 30 46 42 Z" fill="#C9A26B"/><path d="M10 30 V18 h3 v-3 h3 v3 h3 v-3 h3 v3 h4 v-3 h3 v3 h3 v-3 h3 v3 h3 V30 Z" fill="#E7C48D" stroke="#8A6A3B" stroke-width="1.2"/><path d="M21 30 v-6 a3 3 0 0 1 6 0 v6 Z" fill="#6B4E26"/><rect x="14" y="21" width="2.4" height="3.2" rx="1" fill="#8A6A3B"/><rect x="31.6" y="21" width="2.4" height="3.2" rx="1" fill="#8A6A3B"/><path d="M24 6 v8" stroke="#8A6A3B" stroke-width="1.4"/><path d="M24 6 l7 2.2 -7 2.2 Z" fill="#E0463A"/><circle cx="24" cy="10" r=".1"/></svg>','#E6F1FB'],arab:['📜','#E8F6EC'],isl:['📖','#F3ECE0']};
@@ -1611,18 +1628,21 @@ function dSay(t,slow){if(!('speechSynthesis' in window)){toast('ئەم مۆبا�
   try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t.replace(/[‘’]/g,"'").replace(/\(.*?\)/g,'').replace(/~|…/g,''));u.lang='en-GB';DVOICE=DVOICE||dPickVoice();if(DVOICE)u.voice=DVOICE;u.rate=slow?0.62:0.88;speechSynthesis.speak(u)}catch(e){}}
 const DSPK='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg>';
 const DSTAR=on=>'<svg viewBox="0 0 24 24" width="20" height="20" fill="'+(on?'currentColor':'none')+'" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.2l1.1-6.2L3 9.6l6.2-.9Z"/></svg>';
-function dTile(){const n=dSaved().length;return 'وشە و ڕستەکانی کتێب بە کوردی، بە دەنگی بەریتانی'+(n?' · <span class="num">'+n+'</span> سەیڤکراو':'')}
+function dTile(){const n=dSaved().length+aSaved().length;return 'ئینگلیزی و عەرەبی، هەموو وشەکانی کتێب بە کوردی'+(n?' · <span class="num">'+n+'</span> سەیڤکراو':'')}
 // tappable English sentence: words in the dictionary open their card
 const DSTOP=new Set(['were','very','found','set','kind','matter','state','type','turn','turned','people','heart','period','will','unit','mate','sir','below','well','aim','shape','sheet','order','focus','function','limit','supply','support','service','source','system','scale','wish','load','loan','law','spot','mean','complete','feed','fresh','living','native','total','treble','inner','outer','coming','senior','medium','private','available','active']);
 function dLink(en){if(!DX.idx)return esc(en);return esc(en).replace(/[A-Za-z][A-Za-z'’-]*/g,m=>{const k=m.toLowerCase().replace(/[’']s$/,'');if(DSTOP.has(k))return m;const i=DX.idx[k];return i==null?m:'<span class="dl" data-act="dword" data-w="'+i+'">'+m+'</span>'})}
 function dWordRow(i){const x=DX.d.w[i],sv=dSaved().includes(x.w);
   return '<div class="drow"><button class="dmain" data-act="dword" data-w="'+i+'"><b dir="ltr">'+esc(x.w)+'</b><span>'+esc(x.ku)+'</span></button><button class="dic" data-act="dsay" data-t="'+esc(x.w)+'" aria-label="گوێگرتن">'+DSPK+'</button><button class="dic'+(sv?' on':'')+'" data-act="dsave" data-w="'+i+'" aria-label="سەیڤ">'+DSTAR(sv)+'</button></div>'}
+function dLang(){if(V.dlang)return V.dlang;let l='en';try{l=localStorage.getItem('klil_dlang')||'en'}catch(e){}return V.dlang=l}
+function dSwitch(){const l=dLang();return '<div class="dlang" role="tablist"><button data-act="dlang" data-l="en"'+(l==='en'?' aria-current="page"':'')+'><b dir="ltr">English</b><span>ئینگلیزی ← کوردی</span></button><button data-act="dlang" data-l="ar"'+(l==='ar'?' aria-current="page"':'')+'><b class="ar">العربية</b><span>عەرەبی ← کوردی</span></button></div>'}
 function viewDict(){
-  if(!DX.d){dLoad();return header('فەرهەنگ','ئینگلیزی ← کوردی · Sunrise 12',false,accBtn())+'<div class="wrap"><div class="card" style="text-align:center;margin-top:20px">'+(DX.err?'نەتوانرا فەرهەنگەکە باربکرێت. ئینتەرنێتەکەت بپشکنە.<div style="margin-top:12px"><button class="btn" data-act="dretry">دووبارە هەوڵ بدەرەوە</button></div>':'فەرهەنگ باردەکرێت…')+'</div></div>'}
+  if(dLang()==='ar')return viewDictAr();
+  if(!DX.d){dLoad();return header('فەرهەنگەکان','ئینگلیزی و عەرەبی بە کوردی',false,accBtn())+'<div class="wrap">'+dSwitch()+'<div class="card" style="text-align:center;margin-top:20px">'+(DX.err?'نەتوانرا فەرهەنگەکە باربکرێت. ئینتەرنێتەکەت بپشکنە.<div style="margin-top:12px"><button class="btn" data-act="dretry">دووبارە هەوڵ بدەرەوە</button></div>':'فەرهەنگ باردەکرێت…')+'</div></div>'}
   const t=V.dt||'words';
   if(t==='read'&&V.dr)return viewDictRead();
   if(V.drev)return viewDictRev();
-  let h=header('فەرهەنگ','ئینگلیزی ← کوردی · Sunrise 12',false,accBtn())+'<div class="wrap">';
+  let h=header('فەرهەنگەکان','ئینگلیزی و عەرەبی بە کوردی',false,accBtn())+'<div class="wrap">'+dSwitch();
   h+='<div class="dtabs"><button data-act="dtab" data-t="words"'+(t==='words'?' aria-current="page"':'')+'>وشەکان</button><button data-act="dtab" data-t="read"'+(t==='read'?' aria-current="page"':'')+'>خوێندنەوە</button><button data-act="dtab" data-t="saved"'+(t==='saved'?' aria-current="page"':'')+'>سەیڤکراوەکان'+(dSaved().length?' <span class="num">('+dSaved().length+')</span>':'')+'</button></div>';
   if(t==='words'){
     h+='<div class="dsearch"><input type="search" id="dq" dir="auto" placeholder="وشەیەک بنووسە… (ئینگلیزی یان کوردی)" value="'+esc(V.dq||'')+'" autocomplete="off" autocapitalize="off" spellcheck="false"></div>';
@@ -1667,6 +1687,8 @@ function viewDictRev(){const R=V.drev;if(R.i>=R.ids.length){return header('پێ�
   return header('پێداچوونەوە','وشەی '+(R.i+1)+' لە '+R.ids.length,true)+'<div class="wrap"><button class="drcard'+(R.flip?' on':'')+'" data-act="drflip"><b dir="ltr">'+esc(x.w)+'</b><span class="dipa" dir="ltr">/'+esc(x.ipa)+'/</span>'+(R.flip?'<p>'+esc(x.ku)+'</p><small>'+esc(x.kp)+'</small>':'<small class="muted">کرتە بکە بۆ مانا</small>')+'</button>'+
     '<div class="grid2" style="margin-top:12px"><button class="btn alt" data-act="dsay" data-t="'+esc(x.w)+'">'+DSPK+' گوێگرتن</button><button class="btn" data-act="drnext">دواتر</button></div></div>'}
 function dictClick(a,b){
+  if(a==='dlang'){V.dlang=b.dataset.l;try{localStorage.setItem('klil_dlang',V.dlang)}catch(e){}try{speechSynthesis.cancel()}catch(e){}render();scrollTo(0,0);return true}
+  if(a[0]==='a'&&aClick(a,b))return true;
   if(a==='dtab'){V.dt=b.dataset.t;V.dg=null;V.dr=null;render();scrollTo(0,0);return true}
   if(a==='dgrp'){V.dg=b.dataset.g||null;render();scrollTo(0,0);return true}
   if(a==='dword'){V.dw=+b.dataset.w;render();return true}
@@ -1684,12 +1706,87 @@ function dictClick(a,b){
   if(a==='dretry'){DX.err=0;dLoad();render();return true}
   return false}
 function dictBack(){if(V.sec!=='dict')return false;
+  if(dLang()==='ar'){if(V.aw!=null){V.aw=null;render();return true}if(V.arev){V.arev=null;render();return true}if(V.ag){V.ag=null;render();scrollTo(0,0);return true}return false}
+  if(V.dg&&!V.dw){V.dg=null;render();scrollTo(0,0);return true}
   if(V.dw!=null){V.dw=null;render();return true}
   if(V.drev){V.drev=null;render();return true}
   if(V.dr){V.dr=null;try{speechSynthesis.cancel()}catch(e){}render();scrollTo(0,0);return true}
   return false}
-app.addEventListener('input',e=>{if(e.target.id==='dq'){V.dq=e.target.value;V.dg=null;render()}});
-app.addEventListener('click',e=>{if(e.target.id==='dsx'){V.dw=null;render()}});
+app.addEventListener('input',e=>{if(e.target.id==='dq'){V.dq=e.target.value;V.dg=null;render()}else if(e.target.id==='aq'){V.aq=e.target.value;V.ag=null;render();const i=document.getElementById('aq');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}}});
+app.addEventListener('click',e=>{if(e.target.id==='dsx'){V.dw=null;render()}else if(e.target.id==='asx'){V.aw=null;render()}});
+
+// ---------- ARABIC-KURDISH DICTIONARY (grade 12 Arabic book) ----------
+const AX={d:null,loading:0,err:0};
+function aSaved(){try{return JSON.parse(localStorage.getItem('klil_dsave_ar')||'[]')}catch(e){return []}}
+function aSetSaved(L){try{localStorage.setItem('klil_dsave_ar',JSON.stringify(L))}catch(e){}}
+function aLoad(){if(AX.d||AX.loading)return;AX.loading=1;
+  fetch('dict-ar.json?v=1').then(r=>r.json()).then(d=>{AX.d=d;AX.loading=0;if(V.sec==='dict')render()}).catch(()=>{AX.loading=0;AX.err=1;if(V.sec==='dict')render()})}
+function aBare(t){return String(t||'').replace(/[ً-ْٰـ]/g,'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').trim()}
+let AVOICE=null;
+function aPickVoice(){if(!('speechSynthesis' in window))return null;const vs=speechSynthesis.getVoices().filter(v=>/^ar/i.test(v.lang));
+  const pref=[/Google.*ar|العربية/i,/Maged|Tarik|Laila|Mariam|Hamed|Zariyah/i,/SA|Saudi/i];for(const p of pref){const v=vs.find(v=>p.test(v.name)||p.test(v.lang));if(v)return v}return vs[0]||null}
+function aSay(t,slow){if(!('speechSynthesis' in window)){toast('ئەم مۆبایلە دەنگی تێدا نییە');return}
+  try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='ar-SA';AVOICE=AVOICE||aPickVoice();if(AVOICE)u.voice=AVOICE;else toast('ئەگەر دەنگ نەهات، زمانی عەرەبی لە ڕێکخستنی دەنگی مۆبایلەکەت دابەزێنە');u.rate=slow?0.6:0.85;speechSynthesis.speak(u)}catch(e){}}
+if('speechSynthesis' in window){try{const f=speechSynthesis.onvoiceschanged;speechSynthesis.onvoiceschanged=()=>{if(f)f();AVOICE=aPickVoice()}}catch(e){}}
+function aSrc(k){const s=AX.d.src[k];return s?s:{t:k,a:'',g:''}}
+function aKey(i){const x=AX.d.w[i];return x.u+'|'+x.w}
+function aSavedIdx(){if(!AX.d)return [];const L=aSaved();return L.map(k=>AX.d.w.findIndex((x,i)=>aKey(i)===k)).filter(i=>i>=0)}
+function aRow(i){const x=AX.d.w[i],sv=aSaved().includes(aKey(i));
+  return '<div class="drow"><button class="dmain" data-act="aword" data-w="'+i+'"><b class="ar">'+esc(x.w)+(x.x?' <i class="axb">وزاری</i>':'')+'</b><span>'+esc(x.ku)+'</span></button><button class="dic" data-act="asay" data-w="'+i+'" aria-label="گوێگرتن">'+DSPK+'</button><button class="dic'+(sv?' on':'')+'" data-act="asave" data-w="'+i+'" aria-label="سەیڤ">'+DSTAR(sv)+'</button></div>'}
+function viewDictAr(){
+  const hd=header('فەرهەنگەکان','ئینگلیزی و عەرەبی بە کوردی',false,accBtn())+'<div class="wrap">'+dSwitch();
+  if(!AX.d){aLoad();return hd+'<div class="card" style="text-align:center;margin-top:8px">'+(AX.err?'نەتوانرا فەرهەنگەکە باربکرێت. ئینتەرنێتەکەت بپشکنە.<div style="margin-top:12px"><button class="btn" data-act="aretry">دووبارە هەوڵ بدەرەوە</button></div>':'فەرهەنگ باردەکرێت…')+'</div></div>'}
+  if(V.arev)return viewDictArRev();
+  const t=V.at||'words',W=AX.d.w,nx=W.filter(x=>x.x).length,ns=aSaved().length;
+  let h=hd+'<div class="dtabs"><button data-act="atab" data-t="words"'+(t==='words'?' aria-current="page"':'')+'>وشەکان</button><button data-act="atab" data-t="exam"'+(t==='exam'?' aria-current="page"':'')+'>وشەی وزاری</button><button data-act="atab" data-t="saved"'+(t==='saved'?' aria-current="page"':'')+'>سەیڤکراوەکان'+(ns?' <span class="num">('+ns+')</span>':'')+'</button></div>';
+  if(t==='words'){
+    h+='<div class="dsearch"><input type="search" id="aq" dir="auto" placeholder="وشەیەک بنووسە… (عەرەبی یان کوردی)" value="'+esc(V.aq||'')+'" autocomplete="off" spellcheck="false"></div>';
+    const q=(V.aq||'').trim();
+    if(q){const bq=aBare(q),hit=[];W.forEach((x,i)=>{const b=aBare(x.w),bn=b.replace(/^ال/,'');let s=(b===bq||bn===bq)?0:(b.startsWith(bq)||bn.startsWith(bq))?1:b.includes(bq)?2:(x.ku.includes(q)||aBare(x.ar).includes(bq))?3:9;if(s<9)hit.push([s,b.length,i])});
+      hit.sort((a,b)=>a[0]-b[0]||a[1]-b[1]);
+      h+=hit.length?'<div class="dlist">'+hit.slice(0,60).map(z=>aRow(z[2])).join('')+'</div>':'<div class="card muted" style="text-align:center">ئەم وشەیە لە فەرهەنگەکەدا نییە.</div>'}
+    else if(V.ag){const s=aSrc(V.ag),L=W.map((x,i)=>[x,i]).filter(z=>z[0].u===V.ag);
+      h+='<div class="dgh"><button class="linkbtn" data-act="agrp" data-g="">‹ هەموو دەقەکان</button><b class="ar" style="text-align:right">'+esc(s.t)+'</b><span class="muted"><span class="ar">'+esc(s.a)+'</span> · <span class="num">'+L.length+'</span> وشە</span></div><div class="dlist">'+L.map(z=>aRow(z[1])).join('')+'</div>'}
+    else{const G={};W.forEach(x=>{G[x.u]=(G[x.u]||0)+1});
+      h+='<p class="muted" style="font-size:14px;margin:4px 2px 10px;line-height:1.8"><span class="num">'+W.length+'</span> وشەی قورسی دەقەکانی کتێبی عەرەبی، لە خانەی «معاني الكلمات» و ئەسئیلەی وزارییەوە. هەر وشەیەک بە مانای کوردی، واتای کتێب و دێڕەکەی ناو دەق.</p>';
+      let lastg='';AX.d.order.forEach((k,n)=>{const s=aSrc(k);if(!G[k])return;if(s.g!==lastg){if(lastg)h+='</div>';h+='<h2 class="ar" style="font-size:17px">'+esc(s.g)+'</h2><div class="stack">';lastg=s.g}
+        h+='<button class="row deckrow" data-act="agrp" data-g="'+k+'"><div class="ix num">'+(n+1)+'</div><div class="tx"><b class="ar">'+esc(s.t)+'</b><span><span class="ar">'+esc(s.a)+'</span> · <span class="num">'+G[k]+'</span> وشە</span></div></button>'});
+      if(lastg)h+='</div>'}
+  }else if(t==='exam'){
+    const L=W.map((x,i)=>[x,i]).filter(z=>z[0].x);
+    h+='<p class="muted" style="font-size:14px;margin:4px 2px 10px;line-height:1.8">ئەم <span class="num">'+nx+'</span> وشەیە لە ئەسئیلەی وزاری (مرادف، مضاد، معنى، مفرد/جمع) هاتوون. پێش تاقیکردنەوە باش لەبەریان بکە.</p><div class="dlist">'+L.map(z=>aRow(z[1])).join('')+'</div>';
+  }else{
+    const L=aSavedIdx();
+    h+=L.length?'<button class="btn" data-act="arev" style="margin:4px 0 12px">پێداچوونەوەی وشە سەیڤکراوەکان (<span class="num">'+L.length+'</span>)</button><div class="dlist">'+L.map(aRow).join('')+'</div>'
+      :'<div class="card muted" style="text-align:center;line-height:1.9">هێشتا هیچ وشەیەکی عەرەبیت سەیڤ نەکردووە.<br>کرتە لە ئەستێرەی تەنیشت هەر وشەیەک بکە بۆ سەیڤکردنی.</div>'}
+  return h+'</div>'+(V.aw!=null?aSheet(V.aw):'')}
+function aSheet(i){const x=AX.d.w[i],s=aSrc(x.u),sv=aSaved().includes(aKey(i));
+  return '<div class="sheet" id="asx"><div class="box dsheet"><div class="dhead"><div><b class="dw ar">'+esc(x.w)+'</b>'+(x.x?'<div><i class="axb">لە ئەسئیلەی وزاری هاتووە</i></div>':'')+'</div><button class="dic big" data-act="asay" data-w="'+i+'" aria-label="گوێگرتن">'+DSPK+'</button></div>'+
+   '<button class="btn alt sm" style="margin-top:8px" data-act="aslow" data-w="'+i+'">'+DSPK+' گوێگرتن بە هێواشی</button>'+
+   '<div class="dmean"><small class="muted">مانای کوردی</small><p>'+esc(x.ku)+'</p></div>'+
+   (x.ar?'<div class="dmean"><small class="muted">مانا لە کتێبدا</small><p class="ar" style="font-weight:700">'+esc(x.ar)+'</p></div>':'')+
+   (x.n?'<div class="ann">'+esc(x.n)+'</div>':'')+
+   (x.ex?'<h3 class="dh3">لە ناو دەقدا</h3><div class="dex aex"><div class="aen">'+esc(x.ex)+' <button class="dic sm" data-act="asayex" data-w="'+i+'">'+DSPK+'</button></div><small class="muted"><span class="ar">'+esc(s.t)+' — '+esc(s.a)+'</span></small></div>':'<small class="muted" style="display:block;margin-top:10px"><span class="ar">'+esc(s.t)+' — '+esc(s.a)+'</span></small>')+
+   '<div class="grid2" style="margin-top:14px"><button class="btn'+(sv?' alt':'')+'" data-act="asave" data-w="'+i+'">'+(sv?'لابردن لە سەیڤکراوەکان':'سەیڤکردن')+'</button><button class="btn alt" data-act="aclose">داخستن</button></div></div></div>'}
+function viewDictArRev(){const R=V.arev;if(R.i>=R.ids.length){return header('پێداچوونەوە','وشە عەرەبییە سەیڤکراوەکان',true)+'<div class="wrap"><div class="card" style="text-align:center;margin-top:16px"><b style="font-size:20px">تەواو بوو!</b><p class="muted">هەموو وشە سەیڤکراوەکانت بینی.</p><button class="btn" data-act="arevend">گەڕانەوە</button></div></div>'}
+  const x=AX.d.w[R.ids[R.i]];
+  return header('پێداچوونەوە','وشەی '+(R.i+1)+' لە '+R.ids.length,true)+'<div class="wrap"><button class="drcard'+(R.flip?' on':'')+'" data-act="arflip"><b class="ar">'+esc(x.w)+'</b>'+(R.flip?'<p>'+esc(x.ku)+'</p>'+(x.ar?'<small class="ar">'+esc(x.ar)+'</small>':''):'<small class="muted">کرتە بکە بۆ مانا</small>')+'</button>'+
+    '<div class="grid2" style="margin-top:12px"><button class="btn alt" data-act="asay" data-w="'+R.ids[R.i]+'">'+DSPK+' گوێگرتن</button><button class="btn" data-act="arnext">دواتر</button></div></div>'}
+function aClick(a,b){const W=AX.d?AX.d.w:[];
+  if(a==='atab'){V.at=b.dataset.t;V.ag=null;render();scrollTo(0,0);return true}
+  if(a==='agrp'){V.ag=b.dataset.g||null;render();scrollTo(0,0);return true}
+  if(a==='aword'){V.aw=+b.dataset.w;render();return true}
+  if(a==='aclose'){V.aw=null;render();return true}
+  if(a==='asay'){aSay(W[+b.dataset.w].w);return true}
+  if(a==='aslow'){aSay(W[+b.dataset.w].w,1);return true}
+  if(a==='asayex'){aSay(W[+b.dataset.w].ex);return true}
+  if(a==='asave'){const i=aKey(+b.dataset.w);let L=aSaved();if(L.includes(i)){L=L.filter(j=>j!==i);toast('لابرا')}else{L.push(i);toast('سەیڤ کرا')}aSetSaved(L);render();return true}
+  if(a==='arev'){V.arev={ids:shuffle(aSavedIdx()),i:0,flip:0};render();scrollTo(0,0);return true}
+  if(a==='arflip'){V.arev.flip=V.arev.flip?0:1;render();return true}
+  if(a==='arnext'){V.arev.i++;V.arev.flip=0;render();return true}
+  if(a==='arevend'){V.arev=null;render();return true}
+  if(a==='aretry'){AX.err=0;aLoad();render();return true}
+  return false}
 
 render();
 boot();
