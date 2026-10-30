@@ -1613,7 +1613,8 @@ const DSPK='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="
 const DSTAR=on=>'<svg viewBox="0 0 24 24" width="20" height="20" fill="'+(on?'currentColor':'none')+'" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.2l1.1-6.2L3 9.6l6.2-.9Z"/></svg>';
 function dTile(){const n=dSaved().length;return 'وشە و ڕستەکانی کتێب بە کوردی، بە دەنگی بەریتانی'+(n?' · <span class="num">'+n+'</span> سەیڤکراو':'')}
 // tappable English sentence: words in the dictionary open their card
-function dLink(en){if(!DX.idx)return esc(en);return esc(en).replace(/[A-Za-z][A-Za-z'’-]*/g,m=>{const k=m.toLowerCase().replace(/[’']s$/,'');const i=DX.idx[k];return i==null?m:'<span class="dl" data-act="dword" data-w="'+i+'">'+m+'</span>'})}
+const DSTOP=new Set(['were','very','found','set','kind','matter','state','type','turn','turned','people','heart','period','will','unit','mate','sir','below','well','aim','shape','sheet','order','focus','function','limit','supply','support','service','source','system','scale','wish','load','loan','law','spot','mean','complete','feed','fresh','living','native','total','treble','inner','outer','coming','senior','medium','private','available','active']);
+function dLink(en){if(!DX.idx)return esc(en);return esc(en).replace(/[A-Za-z][A-Za-z'’-]*/g,m=>{const k=m.toLowerCase().replace(/[’']s$/,'');if(DSTOP.has(k))return m;const i=DX.idx[k];return i==null?m:'<span class="dl" data-act="dword" data-w="'+i+'">'+m+'</span>'})}
 function dWordRow(i){const x=DX.d.w[i],sv=dSaved().includes(x.w);
   return '<div class="drow"><button class="dmain" data-act="dword" data-w="'+i+'"><b dir="ltr">'+esc(x.w)+'</b><span>'+esc(x.ku)+'</span></button><button class="dic" data-act="dsay" data-t="'+esc(x.w)+'" aria-label="گوێگرتن">'+DSPK+'</button><button class="dic'+(sv?' on':'')+'" data-act="dsave" data-w="'+i+'" aria-label="سەیڤ">'+DSTAR(sv)+'</button></div>'}
 function viewDict(){
@@ -1633,8 +1634,8 @@ function viewDict(){
       h+='<div class="dgh"><button class="linkbtn" data-act="dgrp" data-g="">‹ هەموو بەشەکان</button><b dir="ltr">'+esc(DSRC[V.dg]||V.dg)+'</b><span class="muted"><span class="num">'+L.length+'</span> وشە</span></div><div class="dlist">'+L.map(z=>dWordRow(z[1])).join('')+'</div>'}
     else{const G={};DX.d.w.forEach(x=>{const k=dSrcKey(x.u);G[k]=(G[k]||0)+1});
       const order=['U1','U2','U3','U4','U5','U6','U7','U8','E1','E2','E3','E4','E5','E6','E7','E8'].filter(k=>G[k]);
-      h+='<p class="muted" style="font-size:14px;margin:4px 2px 10px">'+'<span class="num">'+DX.d.w.length+'</span> وشەی کتێبی Sunrise 12، هەریەکە بە مانای کوردی و گۆکردنی بەریتانی.</p>';
-      h+='<h2>Unit ـەکان</h2><div class="stack">'+order.filter(k=>k[0]==='U').map(k=>'<button class="row deckrow" data-act="dgrp" data-g="'+k+'"><div class="ix num">'+k.slice(1)+'</div><div class="tx"><b dir="ltr" style="text-align:right">'+esc(DSRC[k])+'</b><span><span class="num">'+G[k]+'</span> وشە</span></div></button>').join('')+'</div>';
+      h+='<p class="muted" style="font-size:14px;margin:4px 2px 10px">'+'<span class="num">'+DX.d.w.length+'</span> وشەی کتێبی Sunrise 12، هەریەکە بە مانای کوردی و دەنگی بەریتانی.</p>';
+      h+='<h2>یەکەکانی کتێب</h2><div class="stack">'+order.filter(k=>k[0]==='U').map(k=>'<button class="row deckrow" data-act="dgrp" data-g="'+k+'"><div class="ix num">'+k.slice(1)+'</div><div class="tx"><b dir="ltr" style="text-align:right">'+esc(DSRC[k])+'</b><span><span class="num">'+G[k]+'</span> وشە</span></div></button>').join('')+'</div>';
       h+='<h2>Treasure Island</h2><div class="stack">'+order.filter(k=>k[0]==='E').map(k=>'<button class="row deckrow" data-act="dgrp" data-g="'+k+'"><div class="ix num">'+k.slice(1)+'</div><div class="tx"><b dir="ltr" style="text-align:right">'+esc(DSRC[k])+'</b><span><span class="num">'+G[k]+'</span> وشە</span></div></button>').join('')+'</div>'}
   }else if(t==='read'){
     const C={},T={};DX.d.s.forEach(s=>{if(s.h||s.x)return;C[s.u]=(C[s.u]||0)+1;if(s.ku)T[s.u]=(T[s.u]||0)+1});
@@ -1650,7 +1651,7 @@ function viewDict(){
 function dWordSheet(i){const x=DX.d.w[i],sv=dSaved().includes(x.w),pos=x.pos.split('/').map(p=>DPOS[p]||p).join(' / ');
   const ex=(x.ex||[]).map(j=>{const s=DX.d.s[j];return '<div class="dex"><div class="den" dir="ltr">'+dLink(s.en)+' <button class="dic sm" data-act="dsay" data-t="'+esc(s.en)+'">'+DSPK+'</button></div>'+(s.ku?'<div class="dku">'+esc(s.ku)+'</div>':'')+'<small class="muted" dir="ltr">'+esc(DSRC[s.u]||s.u)+' · p. '+s.p+'</small></div>'}).join('');
   return '<div class="sheet" id="dsx"><div class="box dsheet"><div class="dhead"><div><b class="dw" dir="ltr">'+esc(x.w)+'</b><div class="dipa" dir="ltr">/'+esc(x.ipa)+'/ <span class="dbr">BrE</span></div></div><button class="dic big" data-act="dsay" data-t="'+esc(x.w)+'" aria-label="گوێگرتن">'+DSPK+'</button></div>'+
-   '<div class="dkp">گۆکردن: <b>'+esc(x.kp)+'</b> <button class="linkbtn" data-act="dslow" data-t="'+esc(x.w)+'">هێواش</button></div>'+
+   '<div class="dkp"><span class="muted">بەم شێوەیە دەخوێنرێتەوە:</span> <b>'+esc(x.kp)+'</b></div><button class="btn alt sm" style="margin-top:8px" data-act="dslow" data-t="'+esc(x.w)+'">'+DSPK+' گوێگرتن بە هێواشی</button>'+
    '<div class="dmean"><small class="muted">'+esc(pos)+'</small><p>'+esc(x.ku)+'</p></div>'+
    (ex?'<h3 class="dh3">لە ناو کتێبدا</h3>'+ex:'')+
    '<small class="muted" style="display:block;margin-top:8px" dir="ltr">'+esc(DSRC[dSrcKey(x.u)]||x.u)+'</small>'+
