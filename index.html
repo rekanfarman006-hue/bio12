@@ -732,7 +732,8 @@ function exRich(t,sub,opts,pick,ans){const L0=t.slice(1).split(/\n/).map(x=>x.tr
   const ml=x=>'<span class="lr lw" dir="ltr">'+sx(esc(x))+'</span>',AR=/[؀-ۿ]/,cm=x=>x.replace(/\s*،\s*/g,' , ');
   const ltrFirst=x=>{const m=x.replace(/[،⇐⇒]/g,'').match(/[A-Za-z0-9\u0370-\u03ff√∫πΔθ|]|[؀-ۿ]/);return !!(m&&!AR.test(m[0]))};
   const mixL=x=>'<span class="lr lw" dir="ltr">'+lx(cm(x).replace(/⇐/g,'⇒'))+'</span>';
-  const tx=x=>!AR.test(x.replace(/،/g,''))?ml(cm(x)):ltrFirst(x)?mixL(x):fx(x);
+  const mixK=x=>x.split(/([^؀-ۿ]*[A-Za-z0-9√π∞][^؀-ۿ]*)/).map((r,i)=>i%2?(()=>{const a=r.match(/^\s*/)[0],b=r.match(/\s*$/)[0],c=r.trim();return a+'<bdi dir="ltr">'+fx(c)+'</bdi>'+b})():fx(r)).join('');
+  const tx=x=>!AR.test(x.replace(/،/g,''))?ml(cm(x)):ltrFirst(x)?mixL(x):mixK(x);
   return '<div class="et st xr" dir="rtl">'+L.map(x=>{let m;
     if(x[0]==='?')return '<div class="xi"><b>بیرۆکە</b> '+tx(x.slice(1).trim())+'</div>';
     if(x[0]==='>'){const y=x.slice(1).trim();return '<div class="xm">'+(!AR.test(y.replace(/،/g,''))?ml(y):mixL(y))+'</div>'}
