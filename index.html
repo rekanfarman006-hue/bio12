@@ -564,6 +564,10 @@ html[data-theme=dark] .sg .sgi{filter:saturate(.8) brightness(.85)}
 .xr .xst{flex:1;min-width:0}
 .xr .lr bdi{font-family:var(--f);font-size:.94em}
 .ytch{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;font-size:13px;font-weight:800;color:var(--fg);text-decoration:none}.ytch svg{width:22px;height:22px}
+
+.xr .xo .xov{display:block;font-size:15px}.xr .xo .xnote{display:block;font-size:13px;color:var(--muted);line-height:1.6;margin-top:2px}.xr .xo .xme{display:block;font-size:12px;color:#C0392B;font-weight:700;margin-top:2px}.xr .xo.me{border-color:#C0392B;background:rgba(192,57,43,.06)}
+.fct3w{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0 4px}.fct3{background:rgba(127,127,127,.07);border-radius:14px;padding:10px 6px;text-align:center;display:flex;flex-direction:column;gap:2px}.fct3 b{font-size:24px;line-height:1.1}.fct3 span{font-size:13px;font-weight:700}.fct3 i{font-style:normal;font-size:11px;color:var(--muted);line-height:1.4}
+.fchow{margin-top:12px;font-size:14px}.fchow summary{cursor:pointer;font-weight:700;color:#5B5BD6}.fchow ol{margin:8px 0 0;padding-inline-start:20px;line-height:1.9;color:var(--muted)}
 </style>
 
 <div id="app" dir="rtl" lang="ckb"></div>
@@ -721,7 +725,10 @@ function ltrLine(x,step){if(!step)return false;const s=x.replace(/[.،:]\s*$/,''
   if(/[=≈→⇒×÷]/.test(s)&&la>=2&&aw<=4)return true;if(!/^[\s(]*[A-Za-z0-9ΔΣπ√∫−-]/.test(s))return false;const ar=(s.match(/[؀-ۿ]/g)||[]).length;return ar<la}
 function lx(t){return sx(esc(t)).replace(/[؀-ۿ][؀-ۿ\s\u200c]*[؀-ۿ]|[؀-ۿ]/g,m=>'<bdi>'+m+'</bdi>')}
 // explanations: one step per line so Kurdish text and maths never get mixed
-function exRich(t,sub,opts){const L0=t.slice(1).split(/\n/).map(x=>x.trim()).filter(Boolean),L=[],isO=x=>/^[A-E][✓✗]/.test(x);for(let i=0;i<L0.length;){if(isO(L0[i])){const r=[];while(i<L0.length&&isO(L0[i]))r.push(L0[i++]);r.sort((a,b)=>a.charCodeAt(0)-b.charCodeAt(0));L.push(...r)}else L.push(L0[i++])}let n=0;
+function exRich(t,sub,opts,pick,ans){const L0=t.slice(1).split(/\n/).map(x=>x.trim()).filter(Boolean),L=[],isO=x=>/^[A-E][✓✗]/.test(x);
+  if(pick!=null&&pick>=0&&pick!==ans&&opts&&opts[pick]!=null&&!L0.some(x=>x[0]==='ABCDE'[pick]&&isO(x))){const fi=L0.findIndex(isO),row='ABCDE'[pick]+'✗';if(fi>=0)L0.splice(fi,0,row);else{const k=L0.findIndex(x=>x[0]==='!');L0.splice(k<0?L0.length:k,0,row)}}
+  for(let i=0;i<L0.length;){if(isO(L0[i])){const r=[];while(i<L0.length&&isO(L0[i]))r.push(L0[i++]);r.sort((a,b)=>a.charCodeAt(0)-b.charCodeAt(0));L.push(...r)}else L.push(L0[i++])}let n=0;
+  const oT=k=>{const v=opts&&opts[k];return v!=null&&!/^[A-E]$/.test(String(v))?String(v):''},nz=x=>String(x).replace(/[\s−\-–()]/g,'').toLowerCase();
   const ml=x=>'<span class="lr lw" dir="ltr">'+sx(esc(x))+'</span>',AR=/[؀-ۿ]/,cm=x=>x.replace(/\s*،\s*/g,' , ');
   const ltrFirst=x=>{const m=x.replace(/[،⇐⇒]/g,'').match(/[A-Za-z0-9\u0370-\u03ff√∫πΔθ|]|[؀-ۿ]/);return !!(m&&!AR.test(m[0]))};
   const mixL=x=>'<span class="lr lw" dir="ltr">'+lx(cm(x).replace(/⇐/g,'⇒'))+'</span>';
@@ -731,9 +738,12 @@ function exRich(t,sub,opts){const L0=t.slice(1).split(/\n/).map(x=>x.trim()).fil
     if(x[0]==='>'){const y=x.slice(1).trim();return '<div class="xm">'+(!AR.test(y.replace(/،/g,''))?ml(y):mixL(y))+'</div>'}
     if(x[0]==='#'){n++;return '<div class="xs"><span class="xn">'+n+'</span><span class="xst">'+tx(x.slice(1).trim())+'</span></div>'}
     if(x[0]==='!')return '<div class="xf"><b>وەڵام</b> '+tx(x.slice(1).trim())+'</div>';
-    if((m=x.match(/^([A-E])([✓✗])\s*(.*)$/)))return '<div class="xo '+(m[2]==='✓'?'ok':'no')+'"><span class="xl">'+m[1]+'</span><span class="xt">'+(m[3]?tx(m[3]):(opts&&opts['ABCDE'.indexOf(m[1])]!=null&&!/^[A-E]$/.test(String(opts['ABCDE'.indexOf(m[1])]))?tx(String(opts['ABCDE'.indexOf(m[1])])):'ڕاستە'))+'</span><span class="xk">'+(m[2]==='✓'?'✓':'✗')+'</span></div>';
+    if((m=x.match(/^([A-E])([✓✗])\s*(.*)$/))){const k='ABCDE'.indexOf(m[1]),ov=oT(k),note=m[3],mine=pick===k&&pick!==ans;
+      const showO=ov&&(!note||!nz(note).startsWith(nz(ov)));
+      const body=(showO?'<b class="xov">'+(/[؀-ۿ]/.test(ov)?tx(ov):'<bdi dir="ltr">'+sx(esc(ov))+'</bdi>')+'</b>':'')+(note?(showO?'<small class="xnote">'+tx(note)+'</small>':tx(note)):(showO?'':(m[2]==='✓'?'ڕاستە':'هەڵەیە')))+(mine?'<small class="xme">ئەمە وەڵامەکەی تۆ بوو</small>':'');
+      return '<div class="xo '+(m[2]==='✓'?'ok':'no')+(mine?' me':'')+'"><span class="xl">'+m[1]+'</span><span class="xt">'+body+'</span><span class="xk">'+(m[2]==='✓'?'✓':'✗')+'</span></div>'}
     return '<div class="el">'+tx(x)+'</div>'}).join('')+'</div>'}
-function exFx(t,sub,opts){t=String(t||'');if(t[0]==='§')return exRich(t,sub,opts);const AR=/[؀-ۿ]/;
+function exFx(t,sub,opts,pick,ans){t=String(t||'');if(t[0]==='§')return exRich(t,sub,opts,pick,ans);const AR=/[؀-ۿ]/;
   if(!AR.test(t))return '<div class="et" dir="ltr">'+fx(t)+'</div>';
   const step=/^(math|phys|chem)$/.test(sub||CUR);
   let parts=step?t.split(/(?<=[.؟!:،])\s+(?=\S)/):[t];
@@ -1221,7 +1231,7 @@ function qBody(q){
   return h;
 }
 function explHTML(q,pick){const A=ST.ans[q.id];if(!A)return '';const ok=pick===A.a;
-  return '<div class="expl '+(ok?'ok':'no')+'"><b class="v">'+(ok?'ڕاستە!':(pick==null||pick<0?'وەڵامت نەداوەتەوە. ':'هەڵەیە. ')+'وەڵامی ڕاست: '+LET[A.a])+'</b>'+exFx(A.e,q.sub,q.o)+
+  return '<div class="expl '+(ok?'ok':'no')+'"><b class="v">'+(ok?'ڕاستە!':(pick==null||pick<0?'وەڵامت نەداوەتەوە. ':'هەڵەیە. ')+'وەڵامی ڕاست: '+LET[A.a])+'</b>'+exFx(A.e,q.sub,q.o,pick,A.a)+
    '<div class="ref"><span class="tag">'+esc(srcLabel(q))+'</span>'+(grpOf(q)?'<span class="tag rep">هاوشێوەکەی لە: '+grpOf(q).filter(x=>x!==q.id&&BYID[x]).map(x=>EX[BYID[x].ex].round+' '+EX[BYID[x].ex].year).join('، ')+'</span>':'')+'<span class="tag">کتێب: '+esc(SEC[q.s]?SEC[q.s][0]:'')+(pgOf(q.s)?' · لاپەڕە <span class="num">'+SEC[q.s][1]+'</span>':'')+'</span></div>'+
    (!ok&&ST.user?'<div class="dueinfo" style="margin-top:6px">ئەم پرسیارە بەیانی لە «پێداچوونەوە» دەگەڕێتەوە.</div>':'')+'</div>'}
 
@@ -1750,7 +1760,7 @@ async function fcInit(){
   if(sb){try{const r=await sb.rpc('card_index');FC.err=r.error?(r.error.message||String(r.error)):null;if(!r.error&&Array.isArray(r.data)){save('klil_cidx',r.data);FC.idx=r.data.map(r=>({id:r[0],sub:r[1],ch:r[2],deck:r[3],sec:r[4]}))}}catch(e){}}
   if(!FC.idx)FC.idx=[];
   if(ST.user&&sb){try{const r=await allRows(()=>sb.from('card_progress').select('cid,box,due').eq('user_id',ST.user.id));
-    if(!r.error){(r.data||[]).forEach(x=>{const L=FC.prog[x.cid];if(!L||!L.t||(L.box<=x.box))FC.prog[x.cid]={box:x.box,due:x.due,t:L&&L.t||0}});fcSaveLocal()}}catch(e){}}
+    if(!r.error){(r.data||[]).forEach(x=>{const L=FC.prog[x.cid];if(!L||!L.t||(L.box<=x.box))FC.prog[x.cid]=Object.assign({},L||{},{box:x.box,due:x.due,t:L&&L.t||0})});fcSaveLocal()}}catch(e){}}
   const s=fcCur();if(s)await fcText(s);
   if(V.sec==='cards')render()}
 async function fcText(sub){if(FC.loaded[sub]||!sb)return;
@@ -1761,11 +1771,14 @@ function fcBox(id){const p=FC.prog[id];return p?p.box:0}
 function fcDue(id){const p=FC.prog[id];return !!(p&&p.box>0&&p.due&&p.due<=todayStr())}
 function fcNew(id){return !FC.prog[id]}
 function fcDone(id){return fcBox(id)>=4}
-function fcStats(L){const n=L.length,seen=L.filter(c=>!fcNew(c.id)).length,master=L.filter(c=>fcDone(c.id)).length,due=L.filter(c=>fcDue(c.id)).length;return {n,seen,master,due,newN:n-seen,pct:n?Math.round(master/n*100):0}}
+function fcKnown(id){const p=FC.prog[id];return !!p&&(p.k!=null?p.k===1:p.box>=2)}
+function fcNewToday(){const t=todayStr();return Object.values(FC.prog).filter(p=>p&&p.f===t).length}
+function fcNewLeft(){return Math.max(0,fcNewPer()-fcNewToday())}
+function fcStats(L){const n=L.length,seen=L.filter(c=>!fcNew(c.id)).length,master=L.filter(c=>fcDone(c.id)).length,due=L.filter(c=>fcDue(c.id)).length,known=L.filter(c=>fcKnown(c.id)).length;return {n,seen,master,known,due,newN:n-seen,pct:n?Math.round(master/n*100):0}}
 function fcDecks(sub){const by={};fcCards(sub).forEach(c=>{const k=c.ch+'|'+c.deck;(by[k]=by[k]||{ch:c.ch,deck:c.deck,cards:[]}).cards.push(c)});
   return Object.values(by).sort((a,b)=>a.ch-b.ch)}
 function fcTodayIds(sub){const L=fcCards(sub).filter(fcOpen);const due=L.filter(c=>fcDue(c.id)).map(c=>c.id);
-  const nw=L.filter(c=>fcNew(c.id)).slice(0,Math.max(0,fcNewPer()-Math.min(due.length,fcNewPer()))).map(c=>c.id);return due.concat(nw)}
+  const nw=L.filter(c=>fcNew(c.id)).slice(0,fcNewLeft()).map(c=>c.id);return due.concat(nw)}
 
 // ---------- views ----------
 function fcSubBar(){const L=fcSubs();if(L.length<2)return '';
@@ -1778,17 +1791,18 @@ function viewCards(){
   if(!sub)return h+'<div class="card empty" style="margin-top:16px">بەم زووانە فلاشکارد زیاد دەکرێت.'+(FC.err?'<br><small class="ltr" style="color:var(--bad)">'+esc(FC.err)+'</small>':'')+'</div></div>';
   const all=fcCards(sub),S=fcStats(all.filter(fcOpen)),today=fcTodayIds(sub);
   h+=fcSubBar();
-  h+='<div class="card fchero"><div class="fch1">'+ring(S.n?S.master/S.n*100:0,'لەبەرکراو')+'<div class="stack" style="gap:4px;flex:1"><b style="font-size:18px">کارتەکانی ئەمڕۆ</b>'+
-     '<span class="muted" style="font-size:14px"><span class="num">'+S.due+'</span> بۆ پێداچوونەوە · <span class="num">'+Math.min(S.newN,Math.max(0,fcNewPer()-Math.min(S.due,fcNewPer())))+'</span> کارتی نوێ</span>'+
-     '<span class="muted" style="font-size:13px">لەبەرکراو <span class="num">'+S.master+'</span> لە <span class="num">'+S.n+'</span></span></div></div>'+
+  const nNew=Math.min(S.newN,fcNewLeft()),tl=(n,l,d,c)=>'<div class="fct3"><b class="num" style="color:'+c+'">'+n+'</b><span>'+l+'</span><i>'+d+'</i></div>';
+  h+='<div class="card fchero"><div class="fch1">'+ring(S.n?S.known/S.n*100:0,'دەیزانیت')+'<div class="stack" style="gap:4px;flex:1"><b style="font-size:18px">کارتەکانی ئەمڕۆ</b>'+
+     '<span class="muted" style="font-size:14px">لە <span class="num">'+S.n+'</span> کارت، <span class="num">'+S.seen+'</span> ت بینیوە و <span class="num">'+S.known+'</span> ت زانیوە</span></div></div>'+
+     '<div class="fct3w">'+tl(S.due,'دووبارەکردنەوە','کارتی پێشوو کە کاتی گەڕانەوەیانە','var(--gold)')+tl(nNew,'کارتی نوێ','کارتی تازە بۆ ئەمڕۆ','#5B5BD6')+tl(S.master,'جێگیر بوو','4 جار لە سەر یەک زانیوتە','var(--good)')+'</div>'+
      '<div class="fcset"><div><span>کارتی نوێ لە ڕۆژێکدا<i>چەند کارتی تازە ڕۆژانە زیاد بێت</i></span><div class="seg2">'+[10,20,30,50,100].map(n=>'<button data-act="fcnew" data-n="'+n+'"'+(fcNewPer()===n?' aria-pressed="true"':'')+'>'+n+'</button>').join('')+'</div></div>'+
      '<div><span>چەند کارت ئێستا؟<i>ژمارەی کارت لەم جارەدا</i></span><div class="seg2">'+[[10,'10'],[20,'20'],[50,'50'],[0,'هەمووی']].map(x=>'<button data-act="fcss" data-n="'+x[0]+'"'+(fcSess()===x[0]?' aria-pressed="true"':'')+'>'+x[1]+'</button>').join('')+'</div></div></div>'+
-     (today.length?'<button class="btn" data-act="fctoday">دەستپێبکە ('+(fcSess()?Math.min(fcSess(),today.length):today.length)+' کارت)</button>':'<div class="okmsg">ئەمڕۆ تەواوت کرد ✓ سبەینێ کارتی نوێ و پێداچوونەوە چاوەڕێتن.</div>')+'</div>';
+     (today.length?'<button class="btn" data-act="fctoday">دەستپێبکە ('+(fcSess()?Math.min(fcSess(),today.length):today.length)+' کارت)</button>':'<div class="okmsg">ئەمڕۆ تەواوت کرد ✓ سبەینێ کارتی نوێ و دووبارەکردنەوە چاوەڕێتن.</div>')+
+     '<details class="fchow"><summary>چۆن کار دەکات؟</summary><ol><li>کارتێک دەبینیت کە پرسیارێکی لەسەرە. لە مێشکی خۆتدا وەڵام بدەرەوە.</li><li>کرتە بکە بۆ بینینی وەڵامی ڕاست.</li><li>ئەگەر وەڵامەکەت ڕاست بوو «زانیم» دابگرە، ئەگەر نا «نەمزانی».</li><li>«نەمزانی» ⇐ کارتەکە هەر ئێستا و سبەینێ دەگەڕێتەوە.<br>«زانیم» ⇐ دوای <span class="num">1</span> ، <span class="num">3</span> ، <span class="num">7</span> ، <span class="num">14</span> ، <span class="num">30</span> ڕۆژ دەگەڕێتەوە.</li><li>کە <span class="num">4</span> جار لە سەر یەک زانیت ⇐ «جێگیر بوو».</li></ol></details></div>';
   const DK=fcDecks(sub),CHN=(fcMeta(sub).CH||{});let lastc=null;
   h+='<h2>بەندەکان</h2><div class="stack">'+DK.map(d=>{const open=canCh(d.ch),s=fcStats(d.cards);let gh='';
     if(d.ch!==lastc){lastc=d.ch;const CC=DK.filter(x=>x.ch===d.ch),cs=fcStats([].concat(...CC.map(x=>x.cards)));gh='<div class="fchh"><b><span class="num">'+d.ch+'</span> · '+esc(CHN[d.ch]||('بەندی '+d.ch))+'</b>'+(CC.length>1&&open?'<button class="linkbtn" data-act="fcchap" data-c="'+d.ch+'">هەموو بەندەکە (<span class="num">'+cs.n+'</span>)</button>':'')+'</div>'}
-    return gh+'<button class="row deckrow" data-act="fcdeck" data-c="'+d.ch+'" data-d="'+esc(d.deck)+'"><div class="ix num">'+(DK.filter(x=>x.ch===d.ch).length>1?d.ch+'.'+(DK.filter(x=>x.ch===d.ch).indexOf(d)+1):d.ch)+'</div><div class="tx"><b>'+esc(d.deck)+'</b><span><span class="num">'+s.n+'</span> کارت'+(s.seen?' · لەبەرکراو <span class="num">'+s.master+'</span>':'')+(s.due?' · <b style="color:var(--gold)"><span class="num">'+s.due+'</span> ئەمڕۆ</b>':'')+'</span>'+(s.seen?'<div class="bar"><i style="width:'+Math.max(3,s.master/s.n*100)+'%"></i></div>':'')+'</div>'+(open?'':'<span class="lock">🔒</span>')+'</button>'}).join('')+'</div>';
-  h+='<div class="card stack" style="margin-top:16px"><b>چۆن کار دەکات؟</b><span class="muted" style="font-size:14px;line-height:1.9">کرتە لە کارتەکە بکە بۆ بینینی وەڵامەکە. ئەگەر زانیت «زانیم» دابگرە، ئەگەر نا «نەمزانی». ئەوەی نەتزانیوە زوو دەگەڕێتەوە، ئەوەی زانیوتە دوای <span class="num">1</span>، <span class="num">3</span>، <span class="num">7</span>، <span class="num">14</span> و <span class="num">30</span> ڕۆژ دەگەڕێتەوە هەتا بە تەواوی لەبەری دەکەیت.</span></div>';
+    return gh+'<button class="row deckrow" data-act="fcdeck" data-c="'+d.ch+'" data-d="'+esc(d.deck)+'"><div class="ix num">'+(DK.filter(x=>x.ch===d.ch).length>1?d.ch+'.'+(DK.filter(x=>x.ch===d.ch).indexOf(d)+1):d.ch)+'</div><div class="tx"><b>'+esc(d.deck)+'</b><span><span class="num">'+s.n+'</span> کارت'+(s.seen?' · زانیوتە <span class="num">'+s.known+'</span>':'')+(s.due?' · <b style="color:var(--gold)"><span class="num">'+s.due+'</span> ئەمڕۆ</b>':'')+'</span>'+(s.seen?'<div class="bar"><i style="width:'+Math.max(3,s.known/s.n*100)+'%"></i></div>':'')+'</div>'+(open?'':'<span class="lock">🔒</span>')+'</button>'}).join('')+'</div>';
   return h+'</div>'}
 function fcStart(ids,title){ids=ids.filter(id=>FC.idx.find(c=>c.id===id&&fcOpen(c)));if(!ids.length){toast('هیچ کارتێک نییە');return}const ss=fcSess();if(ss&&ids.length>ss)ids=ids.slice(0,ss);
   V.fcrun={title,ids:ids.slice(),i:0,flip:0,ok:0,bad:0,again:{},n0:ids.length};render();scrollTo(0,0)}
@@ -1815,10 +1829,10 @@ function viewCardRun(){const R=V.fcrun;
 let FCSAVE=[],FCT=null;
 function fcPush(id){const p=FC.prog[id];FCSAVE=FCSAVE.filter(x=>x.c!==id);FCSAVE.push({c:id,box:p.box,due:p.due});clearTimeout(FCT);FCT=setTimeout(fcFlush,1500)}
 async function fcFlush(){if(!ST.user||!sb||!FCSAVE.length)return;const b=FCSAVE;FCSAVE=[];try{const r=await sb.rpc('save_cards',{p:b});if(r.error)FCSAVE=b.concat(FCSAVE)}catch(e){FCSAVE=b.concat(FCSAVE)}}
-function fcAnswer(ok){const R=V.fcrun,id=R.ids[R.i],t=todayStr();const old=FC.prog[id]?Object.assign({},FC.prog[id]):null,h={id,old,ok:R.ok,bad:R.bad,again:!!R.again[id],len:R.ids.length};(R.hist=R.hist||[]).push(h);let p=FC.prog[id]?Object.assign({},FC.prog[id]):{box:0,due:t};
+function fcAnswer(ok){const R=V.fcrun,id=R.ids[R.i],t=todayStr();const old=FC.prog[id]?Object.assign({},FC.prog[id]):null,h={id,old,ok:R.ok,bad:R.bad,again:!!R.again[id],len:R.ids.length};(R.hist=R.hist||[]).push(h);let p=FC.prog[id]?Object.assign({},FC.prog[id]):{box:0,due:t,f:t};
   if(ok){if(!R.again[id]){p.box=Math.min(5,p.box+1);R.ok++}p.due=addDays(t,FC_GAP[p.box]||1)}
   else{p.box=1;p.due=addDays(t,1);if(!R.again[id]){R.bad++;R.again[id]=1;R.ids.push(id)}}
-  p.t=Date.now();FC.prog[id]=p;markAct(1);fcSaveLocal();fcPush(id);
+  p.k=ok?1:0;p.t=Date.now();FC.prog[id]=p;markAct(1);fcSaveLocal();fcPush(id);
   R.i++;R.flip=0;render()}
 function fcPrev(){const R=V.fcrun;if(!R||!R.hist||!R.hist.length)return;const h=R.hist.pop();
   R.ids.length=h.len;R.ok=h.ok;R.bad=h.bad;if(h.again)R.again[h.id]=1;else delete R.again[h.id];
