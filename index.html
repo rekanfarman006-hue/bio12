@@ -575,6 +575,7 @@ html[data-theme=dark] .sg .sgi{filter:saturate(.8) brightness(.85)}
 .fibqr{display:block;width:220px;max-width:70%;margin:4px auto;background:#fff;padding:8px;border-radius:14px;border:1px solid var(--line)}
 .fibtime{text-align:center;font-size:14px;color:var(--muted)}.fibtime b{color:var(--bad);font-size:18px}
 .fibsteps{margin:0;padding-inline-start:20px;line-height:1.8;font-size:14px}
+.fpbtn{background:#E5097F!important}
 </style>
 
 <div id="app" dir="rtl" lang="ckb"></div>
@@ -733,7 +734,10 @@ function ltrLine(x,step){if(!step)return false;const s=x.replace(/[.،:]\s*$/,''
 function lx(t){return sx(esc(t)).replace(/[؀-ۿ][؀-ۿ\s\u200c]*[؀-ۿ]|[؀-ۿ]/g,m=>'<bdi>'+m+'</bdi>')}
 // explanations: one step per line so Kurdish text and maths never get mixed
 const KXV='0.16.11';
-function kxLoad(){if(window.katex||kxLoad.p)return;kxLoad.p=1;const l=document.createElement('link');l.rel='stylesheet';l.href='kx/katex.min.css';document.head.appendChild(l);const s=document.createElement('script');s.src='kx/katex.min.js';s.onload=()=>{if(document.querySelector('.kxraw'))render()};s.onerror=()=>{kxLoad.p=0};document.head.appendChild(s)}
+const KXS=[['https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/','katex.min'],['kx/','katex.min'],['https://unpkg.com/katex@0.16.11/dist/','katex.min']];
+function kxLoad(k){k=k||0;if(window.katex||(kxLoad.p&&!k)||k>=KXS.length)return;kxLoad.p=1;const b=KXS[k][0];const s=document.createElement('script');s.src=b+'katex.min.js';
+  s.onload=()=>{const l=document.createElement('link');l.rel='stylesheet';l.href=b+'katex.min.css';l.onload=()=>{if(document.querySelector('.kxraw'))render()};document.head.appendChild(l);if(document.querySelector('.kxraw'))render()};
+  s.onerror=()=>{s.remove();kxLoad(k+1)};document.head.appendChild(s)}
 function kx(t,disp){if(!window.katex){kxLoad();return '<span dir="ltr" class="kxraw">'+esc(t)+'</span>'}try{return katex.renderToString(t,{displayMode:!!disp,throwOnError:false,strict:false})}catch(e){return '<span dir="ltr">'+esc(t)+'</span>'}}
 function kxText(x){return x.split(/\$([^$]+)\$/).map((p,i)=>i%2?'<bdi dir="ltr">'+kx(p)+'</bdi>':fx(p)).join('')}
 setTimeout(kxLoad,2500);
@@ -780,7 +784,7 @@ let V={tab:'home',stack:[]};
 let RUN=null; // {title,ids,i,mode,ans,exId,end,submitted,res,wait}
 const app=document.getElementById('app');
 
-function paid(){return !!(ST.prof&&(ST.prof.paid||ST.prof.is_admin))}
+function paid(){const P=ST.prof;return !!(P&&(P.is_admin||(P.paid&&(!P.paid_until||new Date(P.paid_until)>new Date()))))}
 function unlocked(){return paid()}
 function canCh(c){return paid()||FREE_CH.includes(c)}
 function plan(){if(ST.prof&&ST.prof.exam_date==='2027-06-03')ST.prof.exam_date='2027-05-31';return ST.prof?{per:ST.prof.daily_goal,date:ST.prof.exam_date}:ST.guestPlan}
@@ -957,7 +961,7 @@ function accSheet(){const reg=V.accMode!=='login';
    '<div class="err" id="ace"></div><button class="btn" data-act="doacc">'+(reg?'دروستکردن':'چوونەژوورەوە')+'</button>'+(reg?'':'<button class="linkbtn" data-act="forgot">وشەی نهێنیت لەبیرکردووە؟</button>')+'<button class="btn alt" data-act="closelk">داخستن</button>')}
 function meInner(){const P=ST.prof||{},dk=document.documentElement.dataset.theme==='dark',ini=esc((P.nick||P.username||'?').trim().slice(0,1).toUpperCase());
   const row=(act,ic,t,v,cls)=>'<button class="mrow'+(cls?' '+cls:'')+'" data-act="'+act+'"><span class="mi">'+ic+'</span><span class="mt">'+t+'</span>'+(v?'<span class="mv">'+v+'</span>':'')+'<span class="mc">‹</span></button>';
-  return ('<div class="mcard"><div class="mav">'+ini+'</div><b>'+esc(P.nick||P.username)+'</b><span class="muted ltr">'+esc(P.username)+'</span><span class="pill" style="'+(paid()?'background:var(--good);color:#fff':'')+'">'+(paid()?(course()?'قوتابیی کۆرس':'ئەندامی چالاک'):'بەخۆڕایی')+'</span></div>'+
+  return ('<div class="mcard"><div class="mav">'+ini+'</div><b>'+esc(P.nick||P.username)+'</b><span class="muted ltr">'+esc(P.username)+'</span><span class="pill" style="'+(paid()?'background:var(--good);color:#fff':'')+'">'+(paid()?(course()?'قوتابیی کۆرس':'پرۆ'+(ST.prof.paid_until?' · تا '+fmtD(String(ST.prof.paid_until).slice(0,10)):'')):(ST.prof&&ST.prof.paid&&ST.prof.paid_until?'بەسەرچوو':'بەخۆڕایی'))+'</span></div>'+
    (paid()?'':'<button class="btn dark" data-act="unlock">🔑 کردنەوەی هەموو بەندەکان</button>')+
    '<div class="mh">هەژمار</div><div class="mgrp">'+
    '<details class="mdet"><summary class="mrow"><span class="mi">✏️</span><span class="mt">گۆڕینی نازناو</span><span class="mc">‹</span></summary><div class="stack" style="padding:10px 14px"><input type="text" id="mnk" maxlength="20" value="'+esc(P.nick)+'"><div class="err" id="mee"></div><button class="btn" data-act="savenick">پاشەکەوت</button></div></details>'+
@@ -977,7 +981,12 @@ function forgotSheet(){
 function lockSheet(){
   if(!ST.user)return sheet('<h2 style="margin:0">کردنەوەی هەموو پرسیارەکان</h2><p class="muted" style="margin:0">بەندی ١ و ٢ بەخۆڕایین. بۆ کردنەوەی هەموو بەندەکان و ئەسیلەکان:</p><ol style="margin:0;padding-inline-start:22px"><li>هەژمارێک دروست بکە (بەخۆڕایی).</li><li>ناوی بەکارهێنەرەکەت بنێرە بۆ <b class="ltr">@'+CONTACT+'</b> لە تێلیگرام.</li><li>دوای چالاککردن هەموو شتێک دەکرێتەوە.</li></ol><button class="btn" data-act="joinlb">هەژمار دروست بکە</button><button class="btn alt" data-act="closelk">داخستن</button>');
   if(V.fib)return fibSheet();
-  return sheet('<h2 style="margin:0">کردنەوەی هەموو پرسیارەکان</h2>'+(ST.fibOff?'':'<button class="btn fibbtn" data-act="fibpay"><b>پارەدان بە FIB</b><small>خۆکار · لە چەند چرکەیەکدا چالاک دەبێت</small></button><div class="ordiv"><span>یان</span></div>')+'<p class="muted" style="margin:0">ئەم ناوی بەکارهێنەرە بنێرە بۆ <b class="ltr">@'+CONTACT+'</b> لە تێلیگرام. دوای ئەوەی هەژمارەکەت چالاک کرا، دوگمەی «نوێکردنەوە» دابگرە.</p>'+
+  const PI=ST.payInfo;if(!PI)payInfo();
+  const ends=PI?fmtD(PI.until.slice(0,10)):'';
+  return sheet('<h2 style="margin:0">ببە بە پرۆ</h2>'+(PI&&(PI.fib||PI.fastpay)?'<div class="fibamt"><span>هەموو دەرسەکان و ئەسیلەکان و AI'+(ends?'<br><small class="muted">تا '+ends+'</small>':'')+'</span><b><span class="num">'+Number(PI.price).toLocaleString('en-US')+'</span> دینار</b></div>'+
+   (PI.fib?'<button class="btn fibbtn" data-act="fibpay" data-p="fib"><b>پارەدان بە FIB</b><small>QR یان کۆد · خۆکار چالاک دەبێت</small></button>':'')+
+   (PI.fastpay?'<button class="btn fibbtn fpbtn" data-act="fibpay" data-p="fastpay"><b>پارەدان بە FastPay</b><small>خۆکار چالاک دەبێت</small></button>':'')+
+   '<div class="ordiv"><span>یان لە ڕێگەی تێلیگرامەوە</span></div>':'')+'<p class="muted" style="margin:0">ئەم ناوی بەکارهێنەرە بنێرە بۆ <b class="ltr">@'+CONTACT+'</b> لە تێلیگرام. دوای ئەوەی هەژمارەکەت چالاک کرا، دوگمەی «نوێکردنەوە» دابگرە.</p>'+
    '<div class="copy"><button data-act="copyuser">کۆپی</button><b>'+esc(ST.prof?ST.prof.username:'')+'</b></div>'+
    '<a class="btn dark" style="text-decoration:none" href="https://t.me/'+CONTACT+'" target="_blank" rel="noopener">کردنەوەی تێلیگرام</a>'+
    '<button class="btn" data-act="recheck">نوێکردنەوە (چالاک کراوە؟)</button><button class="btn alt" data-act="closelk">داخستن</button>')}
@@ -985,7 +994,11 @@ function lockSheet(){
 // ---------- FIB payment ----------
 let FIBT=null;
 function fibLeft(){const v=V.fib&&V.fib.valid_until?new Date(V.fib.valid_until).getTime()-Date.now():0;return Math.max(0,v)}
-function fibSheet(){const P=V.fib;if(P.wait)return sheet('<h2 style="margin:0">پارەدان بە FIB</h2><div class="empty">کۆدی پارەدان ئامادە دەکرێت…</div>');
+async function payInfo(){if(payInfo.b||!sb)return;payInfo.b=1;try{const r=await sb.functions.invoke('pay',{body:{act:'info'}});if(r.data&&r.data.ok){ST.payInfo=r.data;if(V.lock)render()}}catch(e){}payInfo.b=0}
+function fibSheet(){const P=V.fib;if(P.wait)return sheet('<h2 style="margin:0">پارەدان</h2><div class="empty">ئامادە دەکرێت…</div>');
+  if(P.provider==='fastpay')return sheet('<h2 style="margin:0">پارەدان بە FastPay</h2><div class="fibamt"><span>بڕی پارە</span><b><span class="num">'+Number(P.amount||0).toLocaleString('en-US')+'</span> دینار</b></div>'+
+   '<ol class="fibsteps"><li>دوگمەی خوارەوە دابگرە، پەڕەی FastPay دەکرێتەوە.</li><li>بە ژمارەی مۆبایل و PIN ی FastPay پارەکە بدە.</li><li>بگەڕێوە بۆ ئێرە. هەژمارەکەت خۆکارانە چالاک دەبێت.</li></ol>'+
+   '<a class="btn dark" style="text-decoration:none" href="'+esc(P.link||'')+'" target="_blank" rel="noopener">کردنەوەی FastPay</a><button class="btn" data-act="fibcheck">پارەم دا، بپشکنە</button><button class="btn alt" data-act="fibclose">گەڕانەوە</button>');
   const ms=fibLeft(),mm=Math.floor(ms/60000),ss=Math.floor(ms%60000/1000);
   if(!ms)return sheet('<h2 style="margin:0">کاتی کۆدەکە تەواو بوو</h2><p class="muted" style="margin:0">کۆدی پارەدان تەنها چەند خولەکێک کار دەکات. کۆدێکی نوێ وەربگرە.</p><button class="btn" data-act="fibpay">کۆدی نوێ</button><button class="btn alt" data-act="fibclose">گەڕانەوە</button>');
   return sheet('<h2 style="margin:0">پارەدان بە FIB</h2>'+
@@ -1000,13 +1013,13 @@ function fibTick(){clearInterval(FIBT);let n=0;FIBT=setInterval(()=>{if(!V.lock|
   const el=document.getElementById('fibt'),ms=fibLeft();if(!ms){clearInterval(FIBT);render();return}
   if(el)el.textContent=Math.floor(ms/60000)+':'+String(Math.floor(ms%60000/1000)).padStart(2,'0');
   if(++n%5===0)fibCheck(true)},1000)}
-async function fibStart(){V.fib={wait:1};render();let r;try{r=await sb.functions.invoke('fib-pay',{body:{act:'create'}})}catch(e){r={error:e}}
+async function fibStart(prov){V.fib={wait:1};render();let r;try{r=await sb.functions.invoke('pay',{body:{act:'create',prov}})}catch(e){r={error:e}}
   const d=r&&r.data;if(d&&d.paid){V.fib=null;fibDone();return}
-  if(!d||!d.ok||!d.pay){V.fib=null;if(d&&d.err==='nokey'){ST.fibOff=1;toast('پارەدان بە FIB هێشتا ئامادە نییە، لە ڕێگەی تێلیگرامەوە بیکە.')}else toast(d&&d.err==='auth'?'سەرەتا بچۆ ژوورەوە.':'هەڵەیەک ڕوویدا، دووبارە هەوڵ بدەرەوە.');render();return}
-  V.fib=d.pay;render();fibTick()}
-async function fibCheck(silent){if(!V.fib||!V.fib.id)return;let r;try{r=await sb.functions.invoke('fib-pay',{body:{act:'status',id:V.fib.id}})}catch(e){r={error:e}}
+  if(!d||!d.ok||!d.pay){V.fib=null;if(d&&d.err==='nokey'){toast('ئەم ڕێگەیە هێشتا ئامادە نییە، لە ڕێگەی تێلیگرامەوە بیکە.')}else toast(d&&d.err==='auth'?'سەرەتا بچۆ ژوورەوە.':'هەڵەیەک ڕوویدا، دووبارە هەوڵ بدەرەوە.');render();return}
+  V.fib=d.pay;render();fibTick();if(prov==='fastpay'&&d.pay.link)window.open(d.pay.link,'_blank')}
+async function fibCheck(silent){if(!V.fib||!V.fib.id)return;let r;try{r=await sb.functions.invoke('pay',{body:{act:'status',id:V.fib.id}})}catch(e){r={error:e}}
   const d=r&&r.data;if(d&&d.paid){fibDone();return}if(!silent)toast(d&&d.status==='DECLINED'?'پارەدانەکە ڕەتکرایەوە یان کاتی تەواو بوو.':'هێشتا پارەکە نەگەیشتووە. چەند چرکەیەک چاوەڕێ بکە.')}
-async function fibDone(){clearInterval(FIBT);V.fib=null;V.lock=0;await loadMe().catch(()=>{});render();toast('پیرۆزە! هەژمارەکەت چالاک کرا، هەموو شتێک کرایەوە.')}
+async function fibDone(){clearInterval(FIBT);V.fib=null;V.lock=0;await loadMe().catch(()=>{});render();toast('پیرۆزە! ئێستا پرۆیت، هەموو شتێک کرایەوە.')}
 const AIERR={lic:'یاریدەدەری AI تەنها بۆ هەژمارە چالاککراوەکانە.',quota:'ئەمڕۆ هەموو پرسیارەکانت بەکارهێنا (١٠ پرسیار). سبەینێ دووبارە هەوڵ بدەرەوە.',auth:'سەرەتا بچۆ ژوورەوە.',net:'پەیوەندی بە ئینتەرنێتەوە نییە.',nokey:'یاریدەدەری AI هێشتا ئامادە نییە.',ai:'هەڵەیەک ڕوویدا. دووبارە هەوڵ بدەرەوە.'};
 function aiSheet(){const A=ST.ai[V.aiq]||{};
   let h='<h2 style="margin:0">پرسیار لە یاریدەدەری AI بکە</h2><p class="muted" style="margin:0;font-size:13px">دەربارەی ئەم پرسیارە یان هەر شتێکی کتێبی '+esc(subName())+' بپرسە. وەڵامەکان بە AI دروست دەکرێن و دەشێت هەڵەیان تێدابێت؛ بۆ دڵنیایی سەیری کتێب بکە. ڕۆژانە ١٠ پرسیار.</p>';
@@ -1502,7 +1515,7 @@ app.addEventListener('click',e=>{
   if(a==='gosub'){const k=b.dataset.s;if(k!==CUR)setSub(k);V.sec='bank';V.tab='home';V.stack=[];render();scrollTo(0,0);return}
   if(a==='qgrid'){RUN.grid=!RUN.grid;render();return}
   if(a==='unlock'){V.me=0;V.lock=1;render();return}
-  if(a==='fibpay'){fibStart();return}
+  if(a==='fibpay'){fibStart(b.dataset.p||(V.fib&&V.fib.provider)||'fib');return}
   if(a==='fibcheck'){fibCheck(false);return}
   if(a==='fibclose'){clearInterval(FIBT);V.fib=null;render();return}
   if(a==='fibcopy'){const u=V.fib&&V.fib.readable||'';(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(()=>toast('کۆپی کرا')).catch(()=>toast(u));return}
