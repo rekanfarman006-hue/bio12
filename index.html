@@ -683,6 +683,7 @@ function mt(s){
     else if(AT.test(s[i])){const b=i;while(i<n&&(AT.test(s[i])))i++;h=s.slice(b,i);
       if(s[i]==='('){const g=grp();h+=g.h;}}
     else return null;
+    if(s[i]==='_'&&i+1<n){let b;if(s[i+1]==='{'){const e=s.indexOf('}',i+2);if(e>0){h+='<sub>'+s.slice(i+2,e)+'</sub>';i=e+1;isg=false}}else{b=i+1;let j=b;while(j<n&&/[A-Za-z0-9]/.test(s[j]))j++;if(j>b){h+='<sub>'+s.slice(b,j)+'</sub>';i=j;isg=false}}}
     while(i<n&&/[⁰-⁹⁻⁺ⁿ²³¹′]/.test(s[i])){h+=s[i];i++;isg=false}
     return {h,inner:isg?inner:null,atom:true}}
   const out=[];
@@ -698,7 +699,7 @@ function mt(s){
     const a=atom();if(a){out.push(a);continue}
     out.push({h:c,t:c});i++}
   return out.map(x=>x.h).join('')}
-function sx(h){if(MTON)h=mt(h);return h.replace(/_\{([^}]*)\}/g,'<sub>$1</sub>').replace(/\^\{([^}]*)\}/g,'<sup>$1</sup>')}
+function sx(h){if(MTON)h=mt(h);return h.replace(/_\{([^}]*)\}/g,'<sub>$1</sub>').replace(/([A-Za-zΔεμωλτΦ′)])_([A-Za-z0-9]{1,6})(?![A-Za-z0-9])/g,'$1<sub>$2</sub>').replace(/\^\{([^}]*)\}/g,'<sup>$1</sup>')}
 // formulas, numbers with units and English inside Kurdish/Arabic text: keep them left-to-right so they are not scrambled
 function fx(t){t=String(t==null?'':t);if(!/[؀-ۿ]/.test(t))return sx(esc(t));
   // Kurdish words glued to a formula in brackets, e.g. Ea(پاشینە) or C(گرافیت), stay inside the formula
