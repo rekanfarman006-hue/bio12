@@ -576,6 +576,8 @@ html[data-theme=dark] .sg .sgi{filter:saturate(.8) brightness(.85)}
 .fibtime{text-align:center;font-size:14px;color:var(--muted)}.fibtime b{color:var(--bad);font-size:18px}
 .fibsteps{margin:0;padding-inline-start:20px;line-height:1.8;font-size:14px}
 .fpbtn{background:#E5097F!important}
+.xr bdi{display:inline-block;white-space:nowrap;vertical-align:middle}
+.qtext .katex,.opt .katex{font-size:1.08em}
 </style>
 
 <div id="app" dir="rtl" lang="ckb"></div>
@@ -711,7 +713,65 @@ function mt(s){
     const a=atom();if(a){out.push(a);continue}
     out.push({h:c,t:c});i++}
   return out.map(x=>x.h).join('')}
-function sx(h){if(MTON)h=mt(h);return h.replace(/_\{([^}]*)\}/g,'<sub>$1</sub>').replace(/([A-Za-zΔεμωλτΦ′)])_([A-Za-z0-9]{1,6})(?![A-Za-z0-9])/g,'$1<sub>$2</sub>').replace(/\^\{([^}]*)\}/g,'<sup>$1</sup>')}
+// plain math (as typed in the question bank) -> LaTeX
+function p2tex(s){
+  const SUP={'⁰':'0','¹':'1','²':'2','³':'3','⁴':'4','⁵':'5','⁶':'6','⁷':'7','⁸':'8','⁹':'9','⁻':'-','ⁿ':'n','⁺':'+','ˣ':'x','ᐟ':'/','⁽':'(','⁾':')'};
+  const SUB={'₀':'0','₁':'1','₂':'2','₃':'3','₄':'4','₅':'5','₆':'6','₇':'7','₈':'8','₉':'9','₋':'-','ₖ':'k','ₓ':'x','ₙ':'n','₊':'+'};
+  const SYM={'−':'-','–':'-','×':'\\times ','÷':'\\div ','→':'\\to ','≤':'\\le ','≥':'\\ge ','≠':'\\ne ','∞':'\\infty ','π':'\\pi ','θ':'\\theta ','±':'\\pm ','·':'\\cdot ','∘':'\\circ ','⇒':'\\Rightarrow ','Δ':'\\Delta ','α':'\\alpha ','β':'\\beta ','λ':'\\lambda ','μ':'\\mu ','ω':'\\omega ','ρ':'\\rho ','σ':'\\sigma ','Σ':'\\sum ','φ':'\\varphi ','Φ':'\\Phi ','ε':'\\varepsilon ','τ':'\\tau ','≈':'\\approx ','∫':'\\int ','°':'^{\\circ}','∈':'\\in ','∪':'\\cup ','∩':'\\cap ','′':"'",'%':'\\%','∴':'\\therefore ','∠':'\\angle ','¼':'\\tfrac{1}{4}','½':'\\tfrac{1}{2}','¾':'\\tfrac{3}{4}','⅓':'\\tfrac{1}{3}','⅔':'\\tfrac{2}{3}','Ω':'\\Omega ','µ':'\\mu ','⅖':'\\tfrac{2}{5}','⅕':'\\tfrac{1}{5}','⅛':'\\tfrac{1}{8}','}':'\\}','″':"''",'‴':"'''"};
+  const UN=/^(m|s|kg|g|N|J|W|V|A|C|km|h|cm|mm|mol|L|K|Pa|Hz|T|Ω|\\Omega|min|ms)$/,UW=/^(m|s|kg|g|N|J|W|V|A|C|km|cm|mm|mol|K|Pa|Hz|T|eV|kJ|kW|mA|μA|nm|kV|MeV|ms)$/;
+  const FN=['sin','cos','tan','cot','sec','csc','ln','log','lim','max','min'];
+  let i=0;const n=s.length;
+  function atom(){ // returns {t:latex, p:true if it was a (group)}
+    while(i<n&&s[i]===' ')i++;
+    if(i>=n)return null;
+    const c=s[i];
+    if(c==='('||c==='['||c==='{'){const cl={'(':')','[':']','{':'}'}[c];i++;const inner=seq(cl);if(s[i]===cl)i++;
+      return {t:(c==='{'?'\\{':c==='['?'[':'\\left(')+inner+(c==='{'?'\\}':c==='['?']':'\\right)'),inner,p:c==='('}}
+    if(c==='√'||c==='∛'){i++;let a;while(s[i]===' ')i++;if(s[i]==='('){i++;a=seq(')');if(s[i]===')')i++}else{const b=atom();a=b?b.t:''}
+      return {t:(c==='∛'?'\\sqrt[3]{':'\\sqrt{')+a+'}'}}
+    if(c==='|'){i++;const inner=seq('|');if(s[i]==='|')i++;return {t:'\\left|'+inner+'\\right|'}}
+    for(const f of FN){if(s.startsWith(f,i)&&!/[A-Za-z]/.test(s[i+f.length]||'')){i+=f.length;
+      if(f==='lim'){while(s[i]===' ')i++;if(s[i]==='('){i++;const sub=seq(')');if(s[i]===')')i++;return {t:'\\lim_{'+sub+'}'}}
+        if(s[i]==='_'){i++;const b=atom();return {t:'\\lim_{'+(b?(b.inner!=null?b.inner:b.t):'')+'}'}}return {t:'\\lim '}}
+      return {t:'\\'+f+' '}}}
+    if(/[0-9.]/.test(c)){let b=i;while(i<n&&/[0-9.]/.test(s[i]))i++;return {t:s.slice(b,i)}}
+    if(/[A-Za-z]/.test(c)){let b=i;while(i<n&&/[A-Za-z]/.test(s[i]))i++;const w=s.slice(b,i);const fm=w.match(/^(sin|cos|tan|cot|sec|csc|ln|log)([A-Za-z]{1,2})$/);if(fm){i=b+fm[1].length;return {t:'\\'+fm[1]+' '}}if(w.length>=3){return {t:'\\text{'+w+'}',w}}return {t:w,w}}
+    if(SYM[c]!=null){i++;return {t:SYM[c],op:/^[-+=<>]|\\(times|div|to|le|ge|ne|pm|cdot|circ|Rightarrow|approx|in|cup|cap)/.test(SYM[c])}}
+    i++;return {t:c,op:/[-+=<>,;:]/.test(c)};
+  }
+  function post(a){ // superscripts / subscripts / primes after an atom
+    for(;;){
+      if(i<n&&SUP[s[i]]!=null){let e='';while(i<n&&SUP[s[i]]!=null)e+=SUP[s[i++]];a={t:'{'+a.t+'}^{'+e+'}'};continue}
+      if(i<n&&SUB[s[i]]!=null){let e='';while(i<n&&SUB[s[i]]!=null)e+=SUB[s[i++]];a={t:'{'+a.t+'}_{'+e+'}'};continue}
+      if(s[i]==='^'){i++;const b=atom();a={t:'{'+a.t+'}^{'+(b?(b.inner!=null?b.inner:b.t):'')+'}'};continue}
+      if(s[i]==='_'&&!/lim/.test(a.t)){i++;const b=atom();a={t:'{'+a.t+'}_{'+(b?(b.inner!=null?b.inner:b.t):'')+'}'};continue}
+      if(s[i]==="'"||s[i]==='′'){i++;a={t:a.t+"'"};continue}
+      if(s[i]==='″'){i++;a={t:a.t+"''"};continue}if(s[i]==='‴'){i++;a={t:a.t+"'''"};continue}
+      return a;
+    }
+  }
+  function unit(){ // atom + calls like f(x) + postfix
+    let a=atom();if(!a)return null;if(a.op&&!/^\\int/.test(a.t))return a;a=post(a);
+    while(i<n&&s[i]==='('&&/[A-Za-z']$|\\(sin|cos|tan|cot|sec|csc|ln|log) $/.test(a.t)){const b=atom();a=post({t:a.t+b.t})}
+    return a;
+  }
+  function seq(close){const out=[];
+    while(i<n){while(s[i]===' '){i++;}if(i>=n||s[i]===close)break;
+      if(s[i]==='/'&&out.length&&!out[out.length-1].op){i++;const num=out.pop();while(s[i]===' ')i++;const den=unit();
+        if(den&&UN.test(num.w||num.t)&&UN.test(den.w||den.t)){out.push({t:(num.un?'\\,':'')+'\\mathrm{'+(num.w||num.t)+'/'+(den.w||den.t)+'}'});continue}
+        const nt=num.p&&num.inner!=null?num.inner:num.t,dt=den?(den.p&&den.inner!=null?den.inner:den.t):'';
+        out.push({t:'\\frac{'+nt+'}{'+dt+'}'});continue}
+      const sp=s[i-1]===' ',st=i;let u=unit();if(!u)break;
+      if(sp&&u.w&&UW.test(u.w)&&out.length&&/(\d|\})$/.test(out[out.length-1].t)&&!/^[A-Za-z]/.test(s.slice(i).trim())){u={t:'\\,\\mathrm{'+u.t+'}',w:u.w,un:1}}
+      else if(sp&&/^\{?[A-Za-z]{1,3}\}?\^/.test(u.t)===false&&false){}
+      out.push(u)}
+    return out.map(x=>x.t).join(' ').replace(/\s+/g,' ').trim()}
+  const r=seq(null);return r;
+}
+const KXC=new Map();
+function kxPlain(h){const t=h.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&amp;/g,'&');
+  if(KXC.has(t))return KXC.get(t);let r=null;try{let x=p2tex(t);if(/\\(frac|lim|int)/.test(x))x='\\displaystyle '+x;r=katex.renderToString(x,{throwOnError:true,strict:'ignore'})}catch(e){r=null}if(KXC.size>4000)KXC.clear();KXC.set(t,r);return r}
+function sx(h){if(MTON&&window.katex&&/[A-Za-z0-9]/.test(h)&&!/</.test(h)){const k=kxPlain(h);if(k)return k}if(MTON)h=mt(h);return h.replace(/_\{([^}]*)\}/g,'<sub>$1</sub>').replace(/([A-Za-zΔεμωλτΦ′)])_([A-Za-z0-9]{1,6})(?![A-Za-z0-9])/g,'$1<sub>$2</sub>').replace(/\^\{([^}]*)\}/g,'<sup>$1</sup>')}
 // formulas, numbers with units and English inside Kurdish/Arabic text: keep them left-to-right so they are not scrambled
 function fx(t){t=String(t==null?'':t);if(!/[؀-ۿ]/.test(t))return sx(esc(t));
   // Kurdish words glued to a formula in brackets, e.g. Ea(پاشینە) or C(گرافیت), stay inside the formula
@@ -736,7 +796,7 @@ function lx(t){return sx(esc(t)).replace(/[؀-ۿ][؀-ۿ\s\u200c]*[؀-ۿ]|[؀-ۿ]
 const KXV='0.16.11';
 const KXS=[['https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/','katex.min'],['kx/','katex.min'],['https://unpkg.com/katex@0.16.11/dist/','katex.min']];
 function kxLoad(k){k=k||0;if(window.katex||(kxLoad.p&&!k)||k>=KXS.length)return;kxLoad.p=1;const b=KXS[k][0];const s=document.createElement('script');s.src=b+'katex.min.js';
-  s.onload=()=>{const l=document.createElement('link');l.rel='stylesheet';l.href=b+'katex.min.css';l.onload=()=>{if(document.querySelector('.kxraw'))render()};document.head.appendChild(l);if(document.querySelector('.kxraw'))render()};
+  s.onload=()=>{const l=document.createElement('link');l.rel='stylesheet';l.href=b+'katex.min.css';l.onload=()=>{if(document.querySelector('.kxraw')||MTON)render()};document.head.appendChild(l)};
   s.onerror=()=>{s.remove();kxLoad(k+1)};document.head.appendChild(s)}
 function kx(t,disp){if(!window.katex){kxLoad();return '<span dir="ltr" class="kxraw">'+esc(t)+'</span>'}try{return katex.renderToString(t,{displayMode:!!disp,throwOnError:false,strict:false})}catch(e){return '<span dir="ltr">'+esc(t)+'</span>'}}
 function kxText(x){return x.split(/\$([^$]+)\$/).map((p,i)=>i%2?'<bdi dir="ltr">'+kx(p)+'</bdi>':fx(p)).join('')}
@@ -1600,7 +1660,7 @@ const YT={L:null,i:0,tm:null};
 function ytId(u){const m=String(u||'').match(/(?:youtu\.be\/|v=|shorts\/|embed\/)([\w-]{11})/);return m?m[1]:''}
 function ytLoad(){if(YT.L)return;YT.L=[];fetch('yt.json?v='+Math.floor(Date.now()/36e5)).then(r=>r.json()).then(d=>{YT.L=(Array.isArray(d)?d:[]).filter(x=>ytId(x.url));if(YT.L.length&&V.sec==='main'&&!RUN)render()}).catch(()=>{})}
 function ytBanner(){ytLoad();if(!YT.L||!YT.L.length)return '';
-  return '<div class="ytb"><div class="ytr" id="ytr" data-hs="1">'+YT.L.map(x=>{const id=ytId(x.url);return '<a class="yts" href="https://www.youtube.com/watch?v='+id+'" target="_blank" rel="noopener"><img loading="lazy" src="'+esc(x.img||('https://i.ytimg.com/vi/'+id+'/maxresdefault.jpg'))+'" onerror="if(!this.dataset.f){this.dataset.f=1;this.src=this.src.replace(\'maxresdefault\',\'hqdefault\')}" alt=""><span class="ytp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="#fff"/></svg></span>'+(x.t?'<b>'+esc(x.t)+'</b>':'')+'</a>'}).join('')+'</div>'+
+  return '<div class="ytb"><div class="ytr" id="ytr" data-hs="1">'+YT.L.map(x=>{const id=ytId(x.url);return '<a class="yts" href="https://www.youtube.com/watch?v='+id+'" target="_blank" rel="noopener"><img loading="lazy" src="'+esc(x.img||('https://i.ytimg.com/vi/'+id+'/maxresdefault.jpg'))+'" onerror="if(!this.dataset.f){this.dataset.f=1;this.src=this.src.replace(\'maxresdefault\',\'hqdefault\')}" onload="if(this.naturalWidth<=120&&!this.dataset.f){this.dataset.f=1;this.src=this.src.replace(\'maxresdefault\',\'hqdefault\')}" alt=""><span class="ytp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="#fff"/></svg></span>'+(x.t?'<b>'+esc(x.t)+'</b>':'')+'</a>'}).join('')+'</div>'+
    (YT.L.length>1?'<div class="ytd">'+YT.L.map((x,i)=>'<i'+(i===0?' class="on"':'')+'></i>').join('')+'</div>':'')+'<a class="ytch" href="https://www.youtube.com/@rekanfarman12" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="4" fill="#FF0000"/><path d="M10 9v6l5-3z" fill="#fff"/></svg>هەموو ڤیدیۆکان لە کەناڵی یوتیوبەکەم ›</a></div>'}
 function ytWire(){const r=document.getElementById('ytr');clearInterval(YT.tm);if(!r||YT.L.length<2)return;
   const dots=()=>{const w=r.clientWidth,i=Math.round(Math.abs(r.scrollLeft)/w);document.querySelectorAll('.ytd i').forEach((d,k)=>d.classList.toggle('on',k===i));return i};
