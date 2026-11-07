@@ -1,14 +1,16 @@
 // Klil service worker: lets the app open without internet.
 // index.html is always fetched fresh first (so updates show at once) and the saved copy is used only when offline.
-const V='klil-v43';
+const V='klil-v44';
 const SHELL=['./','index.html','manifest.webmanifest'];
-self.addEventListener('install',e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(SHELL)).catch(()=>{}).then(()=>self.skipWaiting()))});
-self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(K=>Promise.all(K.filter(k=>k!==V).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
+const RQ=u=>new Request(u,{cache:'reload'});
+self.addEventListener('install',e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(SHELL.map(RQ))).catch(()=>{}).then(()=>self.skipWaiting()))});
+// when an older version was installed, reload open windows once so the new app shows at once
+self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(K=>{const old=K.filter(k=>k!==V);return Promise.all(old.map(k=>caches.delete(k))).then(()=>self.clients.claim()).then(()=>{if(old.length)return self.clients.matchAll({type:'window'}).then(cs=>cs.forEach(c=>{try{c.navigate(c.url)}catch(x){}}))})}))});
 function put(req,res){if(res&&(res.ok||res.type==='opaque')){const c=res.clone();caches.open(V).then(x=>x.put(req,c)).catch(()=>{})}return res}
 function netFirst(req,ms){return new Promise(ok=>{let done=false;
   const fb=()=>caches.match(req,{ignoreSearch:req.mode==='navigate'}).then(r=>r||(req.mode==='navigate'?caches.match('index.html'):null));
   const t=setTimeout(()=>{fb().then(r=>{if(r&&!done){done=true;ok(r)}})},ms);
-  fetch(req).then(r=>{clearTimeout(t);put(req,r);if(!done){done=true;ok(r)}}).catch(()=>{clearTimeout(t);fb().then(r=>{if(!done){done=true;ok(r||new Response('',{status:504}))}})})})}
+  fetch(req,req.mode==='navigate'?{cache:'no-cache'}:{}).then(r=>{clearTimeout(t);put(req,r);if(!done){done=true;ok(r)}}).catch(()=>{clearTimeout(t);fb().then(r=>{if(!done){done=true;ok(r||new Response('',{status:504}))}})})})}
 function swr(req){return caches.match(req).then(hit=>{const n=fetch(req).then(r=>put(req,r)).catch(()=>hit);return hit||n})}
 self.addEventListener('fetch',e=>{const r=e.request;if(r.method!=='GET')return;const u=new URL(r.url);
   if(u.pathname.endsWith('admin.html'))return;
