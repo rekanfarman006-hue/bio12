@@ -1,4 +1,20 @@
-// Minimal service worker: lets the site be installed as an app. Always uses the network (no stale copies).
-self.addEventListener('install',e=>self.skipWaiting());
-self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));
-self.addEventListener('fetch',()=>{});
+// Klil service worker: lets the app open without internet.
+// index.html is always fetched fresh first (so updates show at once) and the saved copy is used only when offline.
+const V='klil-v43';
+const SHELL=['./','index.html','manifest.webmanifest'];
+self.addEventListener('install',e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(SHELL)).catch(()=>{}).then(()=>self.skipWaiting()))});
+self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(K=>Promise.all(K.filter(k=>k!==V).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
+function put(req,res){if(res&&(res.ok||res.type==='opaque')){const c=res.clone();caches.open(V).then(x=>x.put(req,c)).catch(()=>{})}return res}
+function netFirst(req,ms){return new Promise(ok=>{let done=false;
+  const fb=()=>caches.match(req,{ignoreSearch:req.mode==='navigate'}).then(r=>r||(req.mode==='navigate'?caches.match('index.html'):null));
+  const t=setTimeout(()=>{fb().then(r=>{if(r&&!done){done=true;ok(r)}})},ms);
+  fetch(req).then(r=>{clearTimeout(t);put(req,r);if(!done){done=true;ok(r)}}).catch(()=>{clearTimeout(t);fb().then(r=>{if(!done){done=true;ok(r||new Response('',{status:504}))}})})})}
+function swr(req){return caches.match(req).then(hit=>{const n=fetch(req).then(r=>put(req,r)).catch(()=>hit);return hit||n})}
+self.addEventListener('fetch',e=>{const r=e.request;if(r.method!=='GET')return;const u=new URL(r.url);
+  if(u.pathname.endsWith('admin.html'))return;
+  if(u.pathname.includes('/auth/')||u.pathname.includes('/functions/')||u.pathname.includes('/realtime/'))return;
+  if(r.mode==='navigate'||u.pathname.endsWith('/index.html')){e.respondWith(netFirst(r,5000));return}
+  if(u.hostname.endsWith('supabase.co')){if(u.pathname.startsWith('/rest/v1/'))e.respondWith(netFirst(r,8000));return}
+  if(u.origin===location.origin){if(/yt\.json$/.test(u.pathname)){e.respondWith(netFirst(r,4000));return}e.respondWith(swr(r));return}
+  if(/cdn\.jsdelivr\.net|unpkg\.com|fonts\.(googleapis|gstatic)\.com/.test(u.hostname))e.respondWith(swr(r));
+});
