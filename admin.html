@@ -702,7 +702,27 @@ function viewImport(){const I=S.imp;
   let h='<div class="card stack" style="margin-top:16px"><h2 style="margin:0">هێنانی پرسیارەکان</h2><p class="muted" style="margin:0;font-size:14px">فایلی <b class="ltr">bio12-data.json</b> یان <b class="ltr">subjects-data.json</b> یان <b class="ltr">klil-cards.json</b> (فلاشکارد) هەڵبژێرە. پرسیار و وەڵام و وێنەکان دەچنە ناو داتابەیسەکە. ئەگەر دووبارەی بکەیتەوە هیچ شتێک دووبارە نابێتەوە، تەنها نوێ دەکرێنەوە. ئەم فایلە هەرگیز لە GitHub دامەنێ.</p>'+
    '<input type="file" id="f">'+(typeof CARDS!=='undefined'?'<button class="btn" data-act="impcards" style="margin-top:6px">هێنانی فلاشکاردی زیندەزانی ('+CARDS.length+' کارت) — بێ فایل</button>':'');
   if(I){h+='<div>'+esc(I.msg)+'</div><div class="bar" style="height:10px"><i style="width:'+(I.total?I.done/I.total*100:0)+'%"></i></div>'}
-  return h+'</div><div class="card" style="margin-top:12px"><span class="muted">ئێستا لە داتابەیس: </span><b class="num" id="cnt">'+(S.count==null?'…':S.count)+'</b> <span class="muted">پرسیار</span></div>'+gemPanel()+voicesEditor()}
+  return h+'</div>'+expPanel()+'<div class="card" style="margin-top:12px"><span class="muted">ئێستا لە داتابەیس: </span><b class="num" id="cnt">'+(S.count==null?'…':S.count)+'</b> <span class="muted">پرسیار</span></div>'+gemPanel()+voicesEditor()}
+// ---- export a whole subject (questions + answers + explanations + pictures) ----
+const EXSUBS=[['arab','عەرەبی'],['kurd','کوردی'],['eng','ئینگلیزی'],['isl','ئیسلامی'],['chem','کیمیا'],['math','بیرکاری'],['phys','فیزیا']];
+function expPanel(){const E=S.exp||{};
+  return '<div class="card stack" style="margin-top:12px"><h2 style="margin:0">هەناردەکردنی وانەیەک</h2><p class="muted" style="margin:0;font-size:13px">هەموو پرسیار و وەڵام و ڕوونکردنەوە و وێنەکانی وانەیەک وەک فایلێک دادەبەزێنێت. بۆ Claude بینێرە. لە GitHub دای مەنێ.</p>'+
+   '<select id="exsub">'+EXSUBS.map(x=>'<option value="'+x[0]+'"'+(E.sub===x[0]?' selected':'')+'>'+x[1]+'</option>').join('')+'</select>'+
+   '<button class="btn dark" data-act="expsub">دابەزاندن</button>'+(E.msg?'<div class="'+(E.err?'err':'muted')+'">'+esc(E.msg)+'</div>':'')+'</div>'}
+async function expSub(){const sub=document.getElementById('exsub').value;S.exp={sub,msg:'…'};render();
+  const token=await tokenNow();if(!token){S.exp={sub,msg:'دووبارە بچۆ ژوورەوە',err:1};render();return}
+  const H={apikey:SB_KEY,Authorization:'Bearer '+token};
+  try{const er=await fetch(SB_URL+'/rest/v1/exams?sub=eq.'+sub+'&select=id,year,round,ord,sub&order=ord',{headers:H});const exams=await er.json();
+    if(!Array.isArray(exams)||!exams.length)throw new Error('هیچ ئەسیلەیەک نییە');
+    const qs=[];for(let i=0;i<exams.length;i++){const r=await rpcJson('admin_get_qs',{p_ex:exams[i].id});if(r.error)throw new Error(r.error);
+      r.data.forEach(q=>{q.ex=q.ex||exams[i].id;q.sub=q.sub||sub;q.n=q.n||+String(q.id).split('-').pop();q.s=q.s||q.sec;qs.push(q)});S.exp={sub,msg:(i+1)+' / '+exams.length+' ئەسیلە · '+qs.length+' پرسیار'};render()}
+    const need=qs.filter(q=>q.img&&!(typeof q.img==='string'&&q.img.startsWith('data:'))).map(q=>q.id);
+    for(let i=0;i<need.length;i+=30){const part=need.slice(i,i+30);const ir=await fetch(SB_URL+'/rest/v1/qimages?select=qid,data&qid=in.('+part.map(encodeURIComponent).join(',')+')',{headers:H});const im=await ir.json();
+      if(Array.isArray(im))im.forEach(x=>{const q=qs.find(y=>y.id===x.qid);if(q)q.img=x.data});S.exp={sub,msg:'وێنەکان: '+Math.min(i+30,need.length)+' / '+need.length};render()}
+    qs.forEach(q=>{if(q.img&&!(typeof q.img==='string'&&q.img.startsWith('data:')))delete q.img});
+    const blob=new Blob([JSON.stringify({v:2,exams,qs})],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=sub+'-export.json';document.body.appendChild(a);a.click();a.remove();
+    S.exp={sub,msg:'تەواو: '+qs.length+' پرسیار · فایلی '+sub+'-export.json دابەزی'};render()}
+  catch(e){S.exp={sub,msg:'هەڵە: '+e.message,err:1};render()}}
 // ---- Gemini explanation workflow ----
 const GEM_PROMPT=`You are an expert teacher for Kurdistan Region grade-12 (science stream). Write a step-by-step explanation in KURDISH SORANI for EVERY question below, in the exact "Klil" format.
 
@@ -853,6 +873,7 @@ app.addEventListener('click',async e=>{const b=e.target.closest('[data-act],[dat
   if(a==='copypw'){const st=S.list.find(x=>x.id===S.pw.id)||{};const msg='سڵاو '+(st.nick||'')+'\nناوی بەکارهێنەر: '+st.username+'\nوشەی نهێنی کاتی: '+S.pw.pw+'\nبەم وشەیە بچۆ ژوورەوە، پاشان لە «هەژمارەکەم» ← «گۆڕینی وشەی نهێنی» وشەیەکی نوێ دابنێ.';
     (navigator.clipboard?navigator.clipboard.writeText(msg):Promise.reject()).then(()=>toast('کۆپی کرا، لە تێلیگرام Paste بکە')).catch(()=>toast(msg));return}
   if(a==='sgst'){const x=S.sg.find(z=>z.id==b.dataset.id),old=x.status;x.status=b.dataset.v;render();const r=await sb.rpc('admin_signup_status',{p_id:+b.dataset.id,p_status:b.dataset.v});if(r.error){x.status=old;render();toast(r.error.message)}return}
+  if(a==='expsub'){expSub();return}
   if(a==='gemcopy'){gemCopy();return}
   if(a==='gemsave'){gemSave();return}
   if(a==='gemcp2'){const t=S.gem&&S.gem.prompt;if(!t)return;const ta=document.getElementById('gprompt');(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('کۆپی کرا ✓')).catch(()=>{ta.focus();ta.select();try{document.execCommand('copy');toast('کۆپی کرا ✓')}catch(e){}});return}
