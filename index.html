@@ -578,7 +578,7 @@ html[data-theme=dark] .sg .sgi{filter:saturate(.8) brightness(.85)}
 .fpbtn{background:#E5097F!important}
 .xr bdi{display:inline-block;white-space:nowrap;vertical-align:middle}
 .qtext .katex,.opt .katex{font-size:1.08em}
-.sgi:has(.sico){padding:0;overflow:visible}.sico{width:100%;height:100%;object-fit:contain;display:block}.fsub span .sico,.fsub .sico{width:22px;height:22px;display:inline-block;vertical-align:middle}</style>
+.sgi:has(.sico){padding:0;overflow:visible}.sico{width:100%;height:100%;object-fit:contain;display:block}.fsub span .sico,.fsub .sico{width:22px;height:22px;display:inline-block;vertical-align:middle}input[type=text],input[type=password],input[type=search],input[type=tel],input[type=email],input[type=number],textarea{-webkit-appearance:none;appearance:none;color:var(--fg);-webkit-text-fill-color:var(--fg);caret-color:var(--fg);opacity:1;font-size:16px;line-height:1.35;min-height:46px;-webkit-user-select:text;user-select:text;pointer-events:auto;box-sizing:border-box}input::placeholder{color:var(--muted,#8a94a6);-webkit-text-fill-color:var(--muted,#8a94a6);opacity:1}.sheet .box{max-height:90dvh;-webkit-overflow-scrolling:touch}@media (min-width:700px){.sheet{align-items:center;padding:16px}.sheet .box{border-radius:22px;max-height:85dvh}}</style>
 
 <div id="app" dir="rtl" lang="ckb"></div>
 <script>
@@ -1015,7 +1015,7 @@ function accSheet(){const reg=V.accMode!=='login';
    '<div class="seg"><button data-accm="reg" aria-pressed="'+reg+'">هەژماری نوێ</button><button data-accm="login" aria-pressed="'+!reg+'">هەژمارم هەیە</button></div>'+
    (reg?'<div class="field"><label for="acn">ناوی تەواو <span class="muted">(تەنها مامۆستا دەیبینێت)</span></label><input type="text" id="acn" maxlength="60" autocomplete="name"></div>'+
      '<div class="field"><label for="ack">نازناو <span class="muted">(لە لیستی پێشەنگەکاندا دەردەکەوێت)</span></label><input type="text" id="ack" maxlength="20"></div>':'')+
-   '<div class="field"><label for="acu">ژمارەی مۆبایل <span class="muted">(یان ناوی بەکارهێنەر)</span></label><input type="text" id="acu" maxlength="20" inputmode="tel" placeholder="07501234567" autocomplete="username" autocapitalize="off" spellcheck="false" style="direction:ltr;text-align:left"></div>'+
+   '<div class="field"><label for="acu">ژمارەی مۆبایل <span class="muted">(یان ناوی بەکارهێنەر)</span></label><input type="text" id="acu" maxlength="20" inputmode="text" placeholder="07501234567" autocomplete="username" autocapitalize="off" spellcheck="false" style="direction:ltr;text-align:left"></div>'+
    '<div class="field"><label for="acp">وشەی نهێنی <span class="muted">(لانیکەم ٦ پیت یان ژمارە)</span></label><input type="password" id="acp" autocomplete="'+(reg?'new-password':'current-password')+'" style="direction:ltr;text-align:left"></div>'+
    (reg?'<p class="muted" style="margin:0;font-size:13px">ژمارە و وشەی نهێنییەکەت لە شوێنێک بنووسە. ژمارەکە تەنها بۆ چوونەژوورەوەیە و نامەی بۆ نانێردرێت. بە هەمان هەژمار لە هەر مۆبایل و تابلێتێک دەچیتە ژوورەوە و پرسیارەکانت نافەوتێن.</p>':'')+
    '<div class="err" id="ace"></div><button class="btn" data-act="doacc">'+(reg?'دروستکردن':'چوونەژوورەوە')+'</button>'+(reg?'':'<button class="linkbtn" data-act="forgot">وشەی نهێنیت لەبیرکردووە؟</button>')+'<button class="btn alt" data-act="closelk">داخستن</button>')}
@@ -1603,6 +1603,7 @@ if(!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNat
   history.replaceState({k:'base'},'');history.pushState({k:'trap'},'');
   addEventListener('popstate',()=>{if(backAction()){history.pushState({k:'trap'},'')}else{history.back()}});
 }catch(e){}}
+app.addEventListener('focusin',e=>{const t=e.target;if(t&&t.matches&&t.matches('.sheet input,.sheet textarea'))setTimeout(()=>{try{t.scrollIntoView({block:'center'})}catch(x){}},300)});
 app.addEventListener('click',e=>{if(e.target.id==='lk'){V.lock=0;V.acc=0;V.aiq=null;V.me=0;V.forgot=0;render()}});
 app.addEventListener('change',e=>{const t=e.target;
   if(t.id==='pch'){ST.pick.c=+t.value;ST.pick.secs=[]}
