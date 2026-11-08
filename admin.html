@@ -702,9 +702,15 @@ function viewImport(){const I=S.imp;
   let h='<div class="card stack" style="margin-top:16px"><h2 style="margin:0">هێنانی پرسیارەکان</h2><p class="muted" style="margin:0;font-size:14px">فایلی <b class="ltr">bio12-data.json</b> یان <b class="ltr">subjects-data.json</b> یان <b class="ltr">klil-cards.json</b> (فلاشکارد) هەڵبژێرە. پرسیار و وەڵام و وێنەکان دەچنە ناو داتابەیسەکە. ئەگەر دووبارەی بکەیتەوە هیچ شتێک دووبارە نابێتەوە، تەنها نوێ دەکرێنەوە. ئەم فایلە هەرگیز لە GitHub دامەنێ.</p>'+
    '<input type="file" id="f">'+(typeof CARDS!=='undefined'?'<button class="btn" data-act="impcards" style="margin-top:6px">هێنانی فلاشکاردی زیندەزانی ('+CARDS.length+' کارت) — بێ فایل</button>':'');
   if(I){h+='<div>'+esc(I.msg)+'</div><div class="bar" style="height:10px"><i style="width:'+(I.total?I.done/I.total*100:0)+'%"></i></div>'}
-  return h+'</div>'+annPanel()+expPanel()+'<div class="card" style="margin-top:12px"><span class="muted">ئێستا لە داتابەیس: </span><b class="num" id="cnt">'+(S.count==null?'…':S.count)+'</b> <span class="muted">پرسیار</span></div>'+gemPanel()+voicesEditor()}
+  return h+'</div>'+annPanel()+chatPanel()+expPanel()+'<div class="card" style="margin-top:12px"><span class="muted">ئێستا لە داتابەیس: </span><b class="num" id="cnt">'+(S.count==null?'…':S.count)+'</b> <span class="muted">پرسیار</span></div>'+gemPanel()+voicesEditor()}
 
 // ---- announcements: a message that pops up in the app for every student ----
+function chatPanel(){const C=S.chat||{};if(!C.list&&!C.loading){S.chat={loading:1};chatLoadA()}
+  return '<div class="card stack" style="margin-top:12px"><b>گفتوگۆ · چاودێری</b><span class="muted" style="font-size:13px">ڕاپۆرتکراوەکان سەرەوەن. سڕینەوە نامەکە لای هەمووان لادەبات؛ ڕاگرتن ناهێڵێت ئەو قوتابییە نامە بنێرێت.</span>'+(C.msg?'<div class="muted">'+esc(C.msg)+'</div>':'')+
+   (C.list||[]).map(x=>'<div style="display:flex;gap:8px;align-items:flex-start;border-top:1px solid #ddd;padding:6px 0;'+(x.deleted?'opacity:.45':'')+'"><div style="flex:1"><b>'+esc(x.nick)+'</b> <span class="muted" style="font-size:12px">'+esc(x.room)+' · '+new Date(x.created_at).toLocaleString('en-GB')+(x.reports?' · <b style="color:#c00">'+x.reports+' ڕاپۆرت</b>':'')+'</span><div style="font-size:14px" dir="auto">'+esc(x.body)+(x.file_name?' 📎 '+esc(x.file_name):'')+'</div></div>'+
+     (x.deleted?'':'<button class="btn" data-act="chdelA" data-id="'+x.id+'">سڕینەوە</button>')+'<button class="btn" data-act="chbanA" data-u="'+x.user_id+'">ڕاگرتن</button></div>').join('')+
+   '<button class="btn" data-act="chreload">نوێکردنەوە</button></div>'}
+async function chatLoadA(){const r=await sb.from('chat_msgs').select('*').order('reports',{ascending:false}).order('id',{ascending:false}).limit(80);S.chat={loading:0,list:r.error?[]:r.data,msg:r.error?'خشتەکە نییە، update-22.sql Run بکە':''};render()}
 function annPanel(){const A=S.ann||{};if(!A.list&&!A.loading){S.ann={loading:1};annLoad()}
   return '<div class="card stack" style="margin-top:12px"><h2 style="margin:0">ناردنی ئاگادارکردنەوە بۆ قوتابیان</h2><p class="muted" style="margin:0;font-size:13px">لە سەرەوەی ئەپەکە بۆ 10 چرکە دەردەکەوێت، بۆ هەر قوتابییەک تەنها یەک جار.</p>'+
    '<input id="antitle" maxlength="80" placeholder="ناونیشان (بۆ نموونە: تاقیکردنەوەی هەینی)">'+
@@ -887,6 +893,9 @@ app.addEventListener('click',async e=>{const b=e.target.closest('[data-act],[dat
   if(a==='sgst'){const x=S.sg.find(z=>z.id==b.dataset.id),old=x.status;x.status=b.dataset.v;render();const r=await sb.rpc('admin_signup_status',{p_id:+b.dataset.id,p_status:b.dataset.v});if(r.error){x.status=old;render();toast(r.error.message)}return}
   if(a==='expsub'){expSub();return}
   if(a==='annsend'){annSend();return}
+  if(a==='chreload'){S.chat={};chatLoadA();return}
+  if(a==='chdelA'){const r=await sb.rpc('chat_delete',{p_id:+b.dataset.id});if(r.error)toast(r.error.message);S.chat={};chatLoadA();return}
+  if(a==='chbanA'){if(!confirm('ئەم قوتابییە لە ناردنی نامە ڕابگیرێت؟ نامەکانی ئەمڕۆی دەسڕدرێنەوە.'))return;const r=await sb.rpc('chat_ban',{p_uid:b.dataset.u,p_ban:true});if(r.error)toast(r.error.message);else toast('ڕاگیرا');S.chat={};chatLoadA();return}
   if(a==='anndel'){const r=await sb.from('announcements').delete().eq('id',+b.dataset.id);if(r.error)toast(r.error.message);S.ann={};annLoad();return}
   if(a==='gemcopy'){gemCopy();return}
   if(a==='gemsave'){gemSave();return}
