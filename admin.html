@@ -702,7 +702,19 @@ function viewImport(){const I=S.imp;
   let h='<div class="card stack" style="margin-top:16px"><h2 style="margin:0">هێنانی پرسیارەکان</h2><p class="muted" style="margin:0;font-size:14px">فایلی <b class="ltr">bio12-data.json</b> یان <b class="ltr">subjects-data.json</b> یان <b class="ltr">klil-cards.json</b> (فلاشکارد) هەڵبژێرە. پرسیار و وەڵام و وێنەکان دەچنە ناو داتابەیسەکە. ئەگەر دووبارەی بکەیتەوە هیچ شتێک دووبارە نابێتەوە، تەنها نوێ دەکرێنەوە. ئەم فایلە هەرگیز لە GitHub دامەنێ.</p>'+
    '<input type="file" id="f">'+(typeof CARDS!=='undefined'?'<button class="btn" data-act="impcards" style="margin-top:6px">هێنانی فلاشکاردی زیندەزانی ('+CARDS.length+' کارت) — بێ فایل</button>':'');
   if(I){h+='<div>'+esc(I.msg)+'</div><div class="bar" style="height:10px"><i style="width:'+(I.total?I.done/I.total*100:0)+'%"></i></div>'}
-  return h+'</div>'+expPanel()+'<div class="card" style="margin-top:12px"><span class="muted">ئێستا لە داتابەیس: </span><b class="num" id="cnt">'+(S.count==null?'…':S.count)+'</b> <span class="muted">پرسیار</span></div>'+gemPanel()+voicesEditor()}
+  return h+'</div>'+annPanel()+expPanel()+'<div class="card" style="margin-top:12px"><span class="muted">ئێستا لە داتابەیس: </span><b class="num" id="cnt">'+(S.count==null?'…':S.count)+'</b> <span class="muted">پرسیار</span></div>'+gemPanel()+voicesEditor()}
+
+// ---- announcements: a message that pops up in the app for every student ----
+function annPanel(){const A=S.ann||{};if(!A.list&&!A.loading){S.ann={loading:1};annLoad()}
+  return '<div class="card stack" style="margin-top:12px"><h2 style="margin:0">ناردنی ئاگادارکردنەوە بۆ قوتابیان</h2><p class="muted" style="margin:0;font-size:13px">لە سەرەوەی ئەپەکە بۆ 10 چرکە دەردەکەوێت، بۆ هەر قوتابییەک تەنها یەک جار.</p>'+
+   '<input id="antitle" maxlength="80" placeholder="ناونیشان (بۆ نموونە: تاقیکردنەوەی هەینی)">'+
+   '<textarea id="anbody" maxlength="400" rows="3" placeholder="دەقی نامەکە"></textarea>'+
+   '<select id="andays"><option value="1">بۆ 1 ڕۆژ</option><option value="3" selected>بۆ 3 ڕۆژ</option><option value="7">بۆ 7 ڕۆژ</option></select>'+
+   '<button class="btn dark" data-act="annsend">ناردن</button>'+(A.msg?'<div class="muted">'+esc(A.msg)+'</div>':'')+
+   ((A.list||[]).length?'<b>نامە چالاکەکان</b>'+A.list.map(x=>'<div style="display:flex;gap:8px;align-items:center;border-top:1px solid #ddd;padding:6px 0"><div style="flex:1"><b>'+esc(x.title)+'</b><div class="muted" style="font-size:13px">'+esc(x.body)+'</div></div><button class="btn" data-act="anndel" data-id="'+x.id+'">سڕینەوە</button></div>').join(''):'')+'</div>'}
+async function annLoad(){const r=await sb.from('announcements').select('*').order('id',{ascending:false}).limit(20);S.ann=Object.assign(S.ann||{},{loading:0,list:r.error?[]:r.data,msg:r.error?'خشتەکە نییە، update-21.sql Run بکە':''});render()}
+async function annSend(){const t=document.getElementById('antitle').value.trim(),b=document.getElementById('anbody').value.trim(),d=+document.getElementById('andays').value;if(!t){toast('ناونیشان بنووسە');return}
+  const r=await sb.from('announcements').insert({title:t,body:b,expires_at:new Date(Date.now()+d*864e5).toISOString()});if(r.error){toast(r.error.message);return}toast('نێردرا');S.ann={};annLoad()}
 // ---- export a whole subject (questions + answers + explanations + pictures) ----
 const EXSUBS=[['arab','عەرەبی'],['kurd','کوردی'],['eng','ئینگلیزی'],['isl','ئیسلامی'],['chem','کیمیا'],['math','بیرکاری'],['phys','فیزیا']];
 function expPanel(){const E=S.exp||{};
@@ -874,6 +886,8 @@ app.addEventListener('click',async e=>{const b=e.target.closest('[data-act],[dat
     (navigator.clipboard?navigator.clipboard.writeText(msg):Promise.reject()).then(()=>toast('کۆپی کرا، لە تێلیگرام Paste بکە')).catch(()=>toast(msg));return}
   if(a==='sgst'){const x=S.sg.find(z=>z.id==b.dataset.id),old=x.status;x.status=b.dataset.v;render();const r=await sb.rpc('admin_signup_status',{p_id:+b.dataset.id,p_status:b.dataset.v});if(r.error){x.status=old;render();toast(r.error.message)}return}
   if(a==='expsub'){expSub();return}
+  if(a==='annsend'){annSend();return}
+  if(a==='anndel'){const r=await sb.from('announcements').delete().eq('id',+b.dataset.id);if(r.error)toast(r.error.message);S.ann={};annLoad();return}
   if(a==='gemcopy'){gemCopy();return}
   if(a==='gemsave'){gemSave();return}
   if(a==='gemcp2'){const t=S.gem&&S.gem.prompt;if(!t)return;const ta=document.getElementById('gprompt');(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('کۆپی کرا ✓')).catch(()=>{ta.focus();ta.select();try{document.execCommand('copy');toast('کۆپی کرا ✓')}catch(e){}});return}
