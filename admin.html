@@ -615,14 +615,19 @@ function SBC(url,key,opt){
       const parts=[];if(st.m==='GET')parts.push('select='+encodeURIComponent(st.c));
       parts.push(...st.f);if(st.o.length)parts.push('order='+st.o.join(','));
       if(st.r)parts.push('offset='+st.r[0],'limit='+(st.r[1]-st.r[0]+1));
-      const pref=st.m==='PATCH'||st.m==='DELETE'?{Prefer:'return=minimal'}:st.m==='POST'?{Prefer:'return=representation'}:{};
+      if(st.up&&st.oc)parts.push('on_conflict='+encodeURIComponent(st.oc));
+      const pref=st.m==='PATCH'||st.m==='DELETE'?{Prefer:'return=minimal'}:st.m==='POST'?{Prefer:st.up?'resolution=merge-duplicates,return=minimal':'return=representation'}:{};
       const r=await req('/rest/v1/'+table+'?'+parts.join('&'),{method:st.m,headers:await H(pref),body:st.m==='PATCH'||st.m==='POST'?JSON.stringify(st.v):undefined});
       if(!r.error&&st.one)r.data=Array.isArray(r.data)?(r.data[0]||null):r.data;
       return r;
     }
-    const q={select(c){st.m='GET';st.c=c||'*';return q},update(v){st.m='PATCH';st.v=v;return q},insert(v){st.m='POST';st.v=v;return q},delete(){st.m='DELETE';return q},
+    const q={select(c){st.m='GET';st.c=c||'*';return q},update(v){st.m='PATCH';st.v=v;return q},upsert(v,o){st.m='POST';st.v=v;st.up=1;st.oc=o&&o.onConflict;return q},insert(v){st.m='POST';st.v=v;return q},delete(){st.m='DELETE';return q},
       eq(c,v){st.f.push(c+'=eq.'+encodeURIComponent(v));return q},
       order(c,o){st.o.push(c+'.'+(o&&o.ascending===false?'desc':'asc'));return q},
+      gt(c,v){st.f.push(c+'=gt.'+encodeURIComponent(v));return q},gte(c,v){st.f.push(c+'=gte.'+encodeURIComponent(v));return q},
+      lt(c,v){st.f.push(c+'=lt.'+encodeURIComponent(v));return q},lte(c,v){st.f.push(c+'=lte.'+encodeURIComponent(v));return q},
+      neq(c,v){st.f.push(c+'=neq.'+encodeURIComponent(v));return q},in(c,a){st.f.push(c+'=in.('+a.map(x=>encodeURIComponent(x)).join(',')+')');return q},
+      limit(n){st.r=[0,n-1];return q},single(){st.one=1;return q},
       range(a,b){st.r=[a,b];return q},maybeSingle(){st.one=1;return q},
       then(res,rej){return run().then(res,rej)}};
     return q;
@@ -633,6 +638,14 @@ function SBC(url,key,opt){
   return {
     from,
     async rpc(fn,args){return req('/rest/v1/rpc/'+fn,{method:'POST',headers:await H(),body:JSON.stringify(args||{})})},
+    // file storage: upload a picture/PDF, get its public link, remove it, or a short-lived private link
+    storage:{from(bucket){const enc=p=>p.split('/').map(encodeURIComponent).join('/');return {
+      async upload(path,file,o){const h=await H({'Content-Type':(o&&o.contentType)||file.type||'application/octet-stream','x-upsert':o&&o.upsert?'true':'false','cache-control':'3600'});
+        return req('/storage/v1/object/'+bucket+'/'+enc(path),{method:'POST',headers:h,body:file},180000)},
+      getPublicUrl(path){return {data:{publicUrl:url+'/storage/v1/object/public/'+bucket+'/'+enc(path)}}},
+      async remove(paths){return req('/storage/v1/object/'+bucket,{method:'DELETE',headers:await H(),body:JSON.stringify({prefixes:paths})})},
+      async createSignedUrl(path,secs){const r=await req('/storage/v1/object/sign/'+bucket+'/'+enc(path),{method:'POST',headers:await H(),body:JSON.stringify({expiresIn:secs||600})});
+        if(r.data&&r.data.signedURL)r.data.signedUrl=url+'/storage/v1'+r.data.signedURL;return r}}}},
     functions:{async invoke(name,o){return req('/functions/v1/'+name,{method:'POST',headers:await H(),body:JSON.stringify((o&&o.body)||{})},60000)}},
     auth:{
       async getSession(){await token();return {data:{session:sess},error:null}},
@@ -711,7 +724,7 @@ function viewImport(){const I=S.imp;
   let h='<div class="card stack" style="margin-top:16px"><h2 style="margin:0">هێنانی پرسیارەکان</h2><p class="muted" style="margin:0;font-size:14px">فایلی <b class="ltr">bio12-data.json</b> یان <b class="ltr">subjects-data.json</b> یان <b class="ltr">klil-cards.json</b> (فلاشکارد) هەڵبژێرە. پرسیار و وەڵام و وێنەکان دەچنە ناو داتابەیسەکە. ئەگەر دووبارەی بکەیتەوە هیچ شتێک دووبارە نابێتەوە، تەنها نوێ دەکرێنەوە. ئەم فایلە هەرگیز لە GitHub دامەنێ.</p>'+
    '<input type="file" id="f">'+(typeof CARDS!=='undefined'?'<button class="btn" data-act="impcards" style="margin-top:6px">هێنانی فلاشکاردی زیندەزانی ('+CARDS.length+' کارت) — بێ فایل</button>':'');
   if(I){h+='<div>'+esc(I.msg)+'</div><div class="bar" style="height:10px"><i style="width:'+(I.total?I.done/I.total*100:0)+'%"></i></div>'}
-  return h+'</div>'+payPanel()+annPanel()+chatPanel()+expPanel()+'<div class="card" style="margin-top:12px"><span class="muted">ئێستا لە داتابەیس: </span><b class="num" id="cnt">'+(S.count==null?'…':S.count)+'</b> <span class="muted">پرسیار</span></div>'+gemPanel()+voicesEditor()}
+  return h+'</div>'+supPanel()+payPanel()+annPanel()+chatPanel()+expPanel()+'<div class="card" style="margin-top:12px"><span class="muted">ئێستا لە داتابەیس: </span><b class="num" id="cnt">'+(S.count==null?'…':S.count)+'</b> <span class="muted">پرسیار</span></div>'+gemPanel()+voicesEditor()}
 
 // ---- announcements: a message that pops up in the app for every student ----
 function chatPanel(){const C=S.chat||{};if(!C.list&&!C.loading){S.chat={loading:1};chatLoadA()}
@@ -720,6 +733,17 @@ function chatPanel(){const C=S.chat||{};if(!C.list&&!C.loading){S.chat={loading:
      (x.deleted?'':'<button class="btn" data-act="chdelA" data-id="'+x.id+'">سڕینەوە</button>')+'<button class="btn" data-act="chbanA" data-u="'+x.user_id+'">ڕاگرتن</button></div>').join('')+
    '<button class="btn" data-act="chreload">نوێکردنەوە</button></div>'}
 async function chatLoadA(){const r=await sb.from('chat_msgs').select('*').order('reports',{ascending:false}).order('id',{ascending:false}).limit(80);S.chat={loading:0,list:r.error?[]:r.data,msg:r.error?'خشتەکە نییە، update-22.sql Run بکە':''};render()}
+function supPanel(){const P=S.sup||{};if(!P.list&&!P.loading){S.sup={loading:1};supLoadA()}
+  const L=P.list||[],un=L.reduce((a,x)=>a+(+x.unread||0),0);
+  let h='<div class="card stack" style="margin-top:12px"><b>چاتی کڕینی Pro'+(un?' <span class="pill" style="background:var(--bad);color:#fff">'+un+' نامەی نوێ</span>':'')+'</b>';
+  if(P.u){const T=L.find(x=>x.user_id===P.u)||{},M=P.msgs;
+    h+='<button class="linkbtn" data-act="supx">→ هەموو چاتەکان</button><div><b>'+esc(T.full_name||T.nick||'')+'</b> <span class="ltr muted">'+esc(T.username||'')+'</span> · '+(T.paid?'<span class="pill" style="background:var(--good);color:#fff">Pro</span>':'<span class="pill">بەخۆڕایی</span>')+'</div>';
+    h+='<div style="display:flex;flex-direction:column;gap:6px;max-height:420px;overflow:auto;background:var(--surface2);border-radius:12px;padding:8px">'+(!M?'<div class="muted">دەهێنرێت…</div>':M.map(m=>'<div style="align-self:'+(m.from_admin?'flex-start':'flex-end')+';max-width:85%;background:'+(m.from_admin?'#fff':'#E9F0FB')+';border-radius:12px;padding:6px 10px;font-size:14px"><small class="muted">'+(m.from_admin?'تۆ':'قوتابی')+' · '+new Date(m.created_at).toLocaleString('en-GB')+'</small>'+(m.img_path?'<div><button class="linkbtn" data-act="pcimg" data-p="'+esc(m.img_path)+'">🖼 بینینی وێنە</button></div>':'')+(m.body?'<div dir="auto">'+esc(m.body).replace(/\n/g,'<br>')+'</div>':'')+'</div>').join(''))+'</div>';
+    h+='<textarea id="supr" rows="2" placeholder="وەڵام…"></textarea><div style="display:flex;gap:8px"><button class="btn" data-act="supsend">ناردن</button>'+(T.paid?'':'<button class="btn dark" data-act="supact">✓ چالاککردنی Pro</button>')+'</div>'}
+  else h+=L.length?L.map(x=>'<button class="linkbtn" style="text-align:start;display:flex;justify-content:space-between;gap:8px;border-top:1px solid #ddd;padding:8px 0" data-act="supo" data-u="'+x.user_id+'"><span><b>'+esc(x.full_name||x.nick||x.username||'')+'</b> '+(x.paid?'<span class="pill" style="background:var(--good);color:#fff">Pro</span>':'')+'<br><small class="muted">'+esc(String(x.lastmsg||'🖼').slice(0,60))+'</small></span><span>'+(x.unread?'<span class="pill" style="background:var(--bad);color:#fff">'+x.unread+'</span>':'')+'<br><small class="muted">'+new Date(x.last).toLocaleDateString('en-GB')+'</small></span></button>').join(''):'<div class="muted">هێشتا هیچ نامەیەک نییە</div>';
+  return h+'</div>'}
+async function supLoadA(){const r=await sb.rpc('admin_support_threads');S.sup=Object.assign(S.sup||{},{loading:0,list:r.error?[]:r.data});if(r.error&&/function/.test(r.error.message||''))toast('update-25.sql Run بکە');render()}
+async function supOpenA(u){S.sup.u=u;S.sup.msgs=null;render();const r=await sb.from('support_msgs').select('id,from_admin,body,img_path,created_at').eq('user_id',u).order('id',{ascending:true}).limit(300);S.sup.msgs=r.data||[];await sb.rpc('admin_support_reply',{p_uid:u,p_body:''});render()}
 function payPanel(){const P=S.pay||{};if(!P.list&&!P.loading){S.pay={loading:1};payLoadA()}
   const st={new:'نوێ',ok:'چالاک کرا',no:'ڕەتکرایەوە'},L=P.list||[],nNew=L.filter(x=>x.status==='new').length;
   let h='<div class="card stack" style="margin-top:12px"><b>پارەدان و کۆدی چالاککردن'+(nNew?' <span class="pill" style="background:var(--bad);color:#fff">'+nNew+' نوێ</span>':'')+'</b>';
@@ -914,6 +938,10 @@ app.addEventListener('click',async e=>{const b=e.target.closest('[data-act],[dat
   if(a==='sgst'){const x=S.sg.find(z=>z.id==b.dataset.id),old=x.status;x.status=b.dataset.v;render();const r=await sb.rpc('admin_signup_status',{p_id:+b.dataset.id,p_status:b.dataset.v});if(r.error){x.status=old;render();toast(r.error.message)}return}
   if(a==='expsub'){expSub();return}
   if(a==='annsend'){annSend();return}
+  if(a==='supo'){supOpenA(b.dataset.u);return}
+  if(a==='supx'){S.sup.u=null;S.sup.list=null;S.sup.loading=0;render();return}
+  if(a==='supsend'){const t=document.getElementById('supr').value.trim();if(!t)return;const r=await sb.rpc('admin_support_reply',{p_uid:S.sup.u,p_body:t});if(r.error){toast(r.error.message);return}supOpenA(S.sup.u);return}
+  if(a==='supact'){if(!confirm('ئەم قوتابییە Pro بکرێت؟'))return;const r=await sb.rpc('admin_activate',{p_uid:S.sup.u});if(r.error){toast(r.error.message);return}toast('Pro کرا');const u=S.sup.u;S.sup={u};await supLoadA();supOpenA(u);return}
   if(a==='pcsave'){const r=await sb.from('pay_cfg').update({price:+document.getElementById('pcprice').value.replace(/\D/g,'')||30000,info:document.getElementById('pcinfo').value}).eq('id',1);toast(r.error?r.error.message:'پاشەکەوت کرا');S.pay=null;payLoadA();return}
   if(a==='pcok'||a==='pcno'){const r=await sb.rpc('admin_pay_decide',{p_id:+b.dataset.id,p_ok:a==='pcok'});toast(r.error?r.error.message:a==='pcok'?'چالاک کرا':'ڕەتکرایەوە');S.pay=null;payLoadA();return}
   if(a==='pcimg'){const r=await sb.storage.from('receipts').createSignedUrl(b.dataset.p,600);if(r.error){toast(r.error.message);return}window.open(r.data.signedUrl,'_blank');return}
