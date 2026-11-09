@@ -1,0 +1,57 @@
+═══ Klil · زانیارییەکانی Play Store (کۆپی بکە و لە شوێنی خۆی دایبنێ) ═══
+
+App name (ناوی ئەپ، زۆرترین 30 پیت):
+Klil - Grade 12 Exam Bank
+
+Short description (کورتە، زۆرترین 80 پیت):
+پرسیارە وەزارییەکانی پۆلی ١٢ بە وەڵام و ڕوونکردنەوە · Kurdistan grade 12
+
+Full description (وەسفی تەواو):
+Klil (کلیل) بانکی پرسیارە وەزارییەکانی پۆلی ١٢ ی زانستیی کوردستانە.
+
+• هەموو ئەسیلە وەزارییەکانی 2015 تا 2026 بۆ هەر ٨ دەرسەکە: زیندەزانی، کیمیا، فیزیا، بیرکاری، کوردی، ئینگلیزی، عەرەبی، ئیسلامی
+• پرسیارەکان بەپێی بەند و کەرتی کتێب ڕیزکراون
+• ڕوونکردنەوەی هەنگاو بە هەنگاو بۆ هەموو بژاردەیەک: بزانە بۆچی ڕاستە و بۆچی هەڵەیە
+• تاقیکردنەوەی تێکەڵ، هەفتانە و مانگانە وەک ڕۆژی وەزاری
+• پێداچوونەوەی هەڵەکانت و دەفتەری تێبینی
+• فلاشکاردی زیرەک
+• کاتژمێری خوێندن (پۆمۆدۆرۆ) بە ئاگادارکردنەوە
+• پلانی ڕۆژانە و ژماردنی ڕۆژەکان تا وەزاری
+• لیستی پێشەنگەکان و خوێندنی گرووپی
+• فەرهەنگ و گفتوگۆ لەگەڵ هاوپۆلەکانت
+
+بە هەمان هەژمار لە هەر مۆبایل و تابلێتێک دەچیتە ژوورەوە و پێشکەوتنت نافەوتێت.
+
+Klil is a study app for grade-12 science students in Kurdistan: every ministerial exam question from 2015 to 2026 for all 8 subjects, sorted by textbook chapter, with step-by-step explanations for every option, practice exams, smart flashcards, a study timer, daily plans and leaderboards.
+
+App category: Education
+Contact email: (ئیمەیڵەکەت)
+Privacy policy URL:   https://rekanfarman006-hue.github.io/bio12/privacy.html
+Account deletion URL: https://rekanfarman006-hue.github.io/bio12/delete-account.html
+
+Graphics:
+  App icon 512x512  → icon-512-v3.png ی ناو GitHub (یان icon-512.png ی ئەم زیپە)
+  Feature graphic   → feature-graphic-1024x500.png
+  Phone screenshots → screenshot-1.png … screenshot-6.png
+
+═══ وەڵامی پرسیارەکانی App content ═══
+Privacy policy: لینکی سەرەوە
+Ads: No, my app does not contain ads
+App access: All or some functionality is restricted → Add instructions:
+   Username: (ژمارە/ناوی هەژمارێکی تاقیکردنەوە کە Pro ی کردووە)
+   Password: (وشە نهێنییەکەی)
+   Instructions: "Open the app, tap هەژمارم هەیە (I have an account), enter the username and password above."
+Content rating: Category = Education/Reference. Violence, sexual content, drugs, gambling = No.
+   "Can users interact or exchange content?" = Yes (in-app chat).  "Shares user location?" = No.  "Digital purchases?" = No.
+Target audience: 16-17 و 18 and over  (خوار 13 هەڵمەبژێرە)
+News app: No · Government app: No · Financial features: None · Health: None
+Data safety:
+   Does your app collect or share user data? Yes
+   Is all data encrypted in transit? Yes
+   Can users request deletion? Yes (لینکی Account deletion)
+   Data types (Collected, NOT shared, purpose = App functionality + Account management):
+     Personal info → Name, Phone number, User IDs
+     Messages → Other in-app messages
+     Photos and videos → Photos (optional)
+     App activity → Other user-generated content, Other actions (answers, progress)
+     Device or other IDs → (بۆ ئاگادارکردنەوە)
