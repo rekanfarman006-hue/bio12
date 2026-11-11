@@ -1,7 +1,7 @@
 // Klil service worker: lets the app open without internet.
 // index.html is always fetched fresh first (so updates show at once) and the saved copy is used only when offline.
-const V='klil-v60';
-const SHELL=['./','index.html','manifest.webmanifest'];
+const V='klil-v61';
+const SHELL=['./','index.html','manifest.webmanifest','rabar.woff'];
 const RQ=u=>new Request(u,{cache:'reload'});
 self.addEventListener('install',e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(SHELL.map(RQ))).catch(()=>{}).then(()=>self.skipWaiting()))});
 // when an older version was installed, reload open windows once so the new app shows at once
