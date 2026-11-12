@@ -785,7 +785,7 @@ async function annLoad(){const r=await sb.from('announcements').select('*').orde
 async function annSend(){const t=document.getElementById('antitle').value.trim(),b=document.getElementById('anbody').value.trim(),d=+document.getElementById('andays').value;if(!t){toast('ناونیشان بنووسە');return}
   const r=await sb.from('announcements').insert({title:t,body:b,expires_at:new Date(Date.now()+d*864e5).toISOString()});if(r.error){toast(r.error.message);return}toast('نێردرا');S.ann={};annLoad()}
 // ---- export a whole subject (questions + answers + explanations + pictures) ----
-const EXSUBS=[['arab','عەرەبی'],['kurd','کوردی'],['eng','ئینگلیزی'],['isl','ئیسلامی'],['chem','کیمیا'],['math','بیرکاری'],['phys','فیزیا']];
+const EXSUBS=[['bio','زیندەزانی'],['arab','عەرەبی'],['kurd','کوردی'],['eng','ئینگلیزی'],['isl','ئیسلامی'],['chem','کیمیا'],['math','بیرکاری'],['phys','فیزیا']];
 function expPanel(){const E=S.exp||{};
   return '<div class="card stack" style="margin-top:12px"><h2 style="margin:0">هەناردەکردنی وانەیەک</h2><p class="muted" style="margin:0;font-size:13px">هەموو پرسیار و وەڵام و ڕوونکردنەوە و وێنەکانی وانەیەک وەک فایلێک دادەبەزێنێت. بۆ Claude بینێرە. لە GitHub دای مەنێ.</p>'+
    '<select id="exsub">'+EXSUBS.map(x=>'<option value="'+x[0]+'"'+(E.sub===x[0]?' selected':'')+'>'+x[1]+'</option>').join('')+'</select>'+
