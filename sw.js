@@ -1,7 +1,7 @@
 // Klil service worker: lets the app open without internet.
 // index.html is always fetched fresh first (so updates show at once) and the saved copy is used only when offline.
-const V='klil-v72';
-const SHELL=['./','index.html','manifest.webmanifest','rabar.woff','ic3/exams.webp','ic3/daily.webp','ic3/weekly.webp','ic3/cards.webp','ic3/focus.webp','ic3/nb.webp','ic3/lb.webp','ic3/ai.webp','ic3/dict.webp','ic3/zikr.webp'];
+const V='klil-v73';
+const SHELL=['./','index.html','manifest.webmanifest','rabar.woff','ic3/exams.webp','ic3/daily.webp','ic3/weekly.webp','ic3/cards.webp','ic3/focus.webp','ic3/nb.webp','ic3/lb.webp','ic3/ai.webp','ic3/dict.webp','ic3/zikr.webp','ic3/grp.webp','ic3/mix.webp'];
 const RQ=u=>new Request(u,{cache:'reload'});
 self.addEventListener('install',e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(SHELL.map(RQ))).catch(()=>{}).then(()=>self.skipWaiting()))});
 // when an older version was installed, reload open windows once so the new app shows at once
