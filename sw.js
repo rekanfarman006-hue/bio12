@@ -1,6 +1,6 @@
 // Klil service worker: lets the app open without internet.
-// index.html is always fetched fresh first (so updates show at once) and the saved copy is used only when offline.
-const V='klil-v91';
+// the saved index.html opens at once; a fresh copy is fetched in the background, and a new version reloads the app when its service worker activates.
+const V='klil-v92';
 const SHELL=['./','index.html','manifest.webmanifest','rabar.woff'];
 const RQ=u=>new Request(u,{cache:'reload'});
 self.addEventListener('install',e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(SHELL.map(RQ))).catch(()=>{}).then(()=>self.skipWaiting()))});
@@ -15,8 +15,8 @@ function swr(req){return caches.match(req).then(hit=>{const n=fetch(req).then(r=
 self.addEventListener('fetch',e=>{const r=e.request;if(r.method!=='GET')return;const u=new URL(r.url);
   if(u.pathname.endsWith('admin.html'))return;
   if(u.pathname.includes('/auth/')||u.pathname.includes('/functions/')||u.pathname.includes('/realtime/'))return;
-  if(r.mode==='navigate'||u.pathname.endsWith('/index.html')){e.respondWith(netFirst(r,5000));return}
-  if(u.hostname.endsWith('supabase.co')){if(u.pathname.startsWith('/rest/v1/'))e.respondWith(netFirst(r,8000));return}
+  if(r.mode==='navigate'||u.pathname.endsWith('/index.html')){e.respondWith(caches.match(r,{ignoreSearch:true}).then(hit=>hit||caches.match('index.html')).then(hit=>{const n=fetch(r,{cache:'no-cache'}).then(x=>put(r,x));if(hit){e.waitUntil(n.catch(()=>{}));return hit}return n.catch(()=>new Response('',{status:504}))}));return}
+  if(u.hostname.endsWith('supabase.co')){if(u.pathname.startsWith('/rest/v1/'))e.respondWith(netFirst(r,3500));return}
   if(u.origin===location.origin){if(/yt\.json$/.test(u.pathname)){e.respondWith(netFirst(r,4000));return}e.respondWith(swr(r));return}
   if(/cdn\.jsdelivr\.net|unpkg\.com|fonts\.(googleapis|gstatic)\.com/.test(u.hostname))e.respondWith(swr(r));
 });
