@@ -1,6 +1,6 @@
 // Klil service worker: lets the app open without internet.
 // the saved index.html opens at once; a fresh copy is fetched in the background, and a new version reloads the app when its service worker activates.
-const V='klil-v97';
+const V='klil-v98';
 const SHELL=['./','index.html','manifest.webmanifest','rabar.woff'];
 const RQ=u=>new Request(u,{cache:'reload'});
 self.addEventListener('install',e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(SHELL.map(RQ))).catch(()=>{}).then(()=>self.skipWaiting()))});
