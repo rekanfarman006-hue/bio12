@@ -734,7 +734,7 @@ function viewImport(){const I=S.imp;
   let h='<div class="card stack" style="margin-top:16px"><h2 style="margin:0">هێنانی پرسیارەکان</h2><p class="muted" style="margin:0;font-size:14px">فایلی <b class="ltr">bio12-data.json</b> یان <b class="ltr">subjects-data.json</b> یان <b class="ltr">klil-cards.json</b> (فلاشکارد) هەڵبژێرە. پرسیار و وەڵام و وێنەکان دەچنە ناو داتابەیسەکە. ئەگەر دووبارەی بکەیتەوە هیچ شتێک دووبارە نابێتەوە، تەنها نوێ دەکرێنەوە. ئەم فایلە هەرگیز لە GitHub دامەنێ.</p>'+
    '<input type="file" id="f">'+(typeof CARDS!=='undefined'?'<button class="btn" data-act="impcards" style="margin-top:6px">هێنانی فلاشکاردی زیندەزانی ('+CARDS.length+' کارت) — بێ فایل</button>':'');
   if(I){h+='<div>'+esc(I.msg)+'</div><div class="bar" style="height:10px"><i style="width:'+(I.total?I.done/I.total*100:0)+'%"></i></div>'}
-  return h+'</div>'+supPanel()+payPanel()+annPanel()+chatPanel()+expPanel()+'<div class="card" style="margin-top:12px"><span class="muted">ئێستا لە داتابەیس: </span><b class="num" id="cnt">'+(S.count==null?'…':S.count)+'</b> <span class="muted">پرسیار</span></div>'+gemPanel()+voicesEditor()}
+  return h+'</div>'+supPanel()+payPanel()+refPanel()+annPanel()+chatPanel()+expPanel()+'<div class="card" style="margin-top:12px"><span class="muted">ئێستا لە داتابەیس: </span><b class="num" id="cnt">'+(S.count==null?'…':S.count)+'</b> <span class="muted">پرسیار</span></div>'+gemPanel()+voicesEditor()}
 
 // ---- announcements: a message that pops up in the app for every student ----
 function chatPanel(){const C=S.chat||{};if(!C.list&&!C.loading){S.chat={loading:1};chatLoadA()}
@@ -762,6 +762,25 @@ function imgViewA(u){let o=document.getElementById('imgbox');if(o)o.remove();o=d
 async function supLoadA(){const r=await sb.rpc('admin_support_threads');S.sup=Object.assign(S.sup||{},{loading:0,list:r.error?[]:r.data});if(r.error&&/function/.test(r.error.message||''))toast('update-25.sql Run بکە');render()}
 async function supOpenA(u){S.sup.u=u;S.sup.msgs=null;render();const r=await sb.from('support_msgs').select('id,from_admin,body,img_path,created_at').eq('user_id',u).order('id',{ascending:true}).limit(300);S.sup.msgs=r.data||[];await sb.rpc('admin_support_reply',{p_uid:u,p_body:''});render()}
 setInterval(async()=>{const P=S.sup;if(!P||!P.u||!P.msgs||document.visibilityState!=='visible'||!document.getElementById('salist'))return;const t=document.getElementById('supr');if(t&&t.value.trim())return;const r=await sb.from('support_msgs').select('id,from_admin,body,img_path,created_at').eq('user_id',P.u).order('id',{ascending:true}).limit(300);if(!r.error&&r.data&&r.data.length!==P.msgs.length&&S.sup&&S.sup.u===P.u){S.sup.msgs=r.data;await sb.rpc('admin_support_reply',{p_uid:P.u,p_body:''});render()}},10000);
+function refPanel(){const F=S.refs||{};if(!F.list&&!F.loading){S.refs={loading:1};refLoad()}
+  const L=F.list||[],n=x=>Number(x||0).toLocaleString('en-US'),tot=L.reduce((a,x)=>a+Number(x.owed||0),0);
+  let h='<div class="card stack" style="margin-top:12px"><b>ڕێکلامکاران (کۆدی ناساندن)'+(tot?' <span class="pill" style="background:var(--bad);color:#fff">'+n(tot)+' دینار قەرز</span>':'')+'</b>'+
+   '<div class="muted" style="font-size:13px">هەر قوتابییەک کە کۆدی ڕێکلامکارێک بنووسێت و دواتر Pro بکرێت، یەک فرۆشتن بۆ ئەو ڕێکلامکارە تۆمار دەکرێت.</div>';
+  if(F.err)h+='<div class="muted">'+esc(F.err)+'</div>';
+  h+=L.length?'<table style="width:100%;border-collapse:collapse;font-size:14px"><tr style="text-align:right;border-bottom:1px solid #ccc"><th>ناو / کۆد</th><th>قوتابی</th><th>Pro</th><th>قەرز</th><th></th></tr>'+
+   L.map(x=>'<tr style="border-bottom:1px solid #eee'+(x.active?'':';opacity:.5')+'"><td><b>'+esc(x.name||'')+'</b><br><span class="ltr muted" style="font-size:12px">'+esc(x.code)+(x.pin?' · PIN '+esc(x.pin):'')+' · '+n(x.rate)+'</span></td><td>'+x.students+'</td><td><b>'+x.sold+'</b></td><td dir="ltr" style="text-align:right"><b>'+n(x.owed)+'</b>'+(Number(x.paid_total)?'<br><span class="muted" style="font-size:11px">دراو: '+n(x.paid_total)+'</span>':'')+'</td><td style="white-space:nowrap">'+
+     (Number(x.owed)?'<button class="linkbtn" data-act="refpay" data-c="'+esc(x.code)+'" data-o="'+x.owed+'">دام</button> ':'')+'<button class="linkbtn" data-act="refedit" data-c="'+esc(x.code)+'">دەستکاری</button></td></tr>').join('')+'</table>':(F.loading?'<div class="muted">دەهێنرێت…</div>':'<div class="muted">هێشتا هیچ ڕێکلامکارێک نییە</div>');
+  const E=F.edit||{};
+  h+='<b>'+(E.code?'دەستکاریکردنی '+esc(E.code):'زیادکردنی ڕێکلامکار')+'</b>'+
+   '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><input type="text" id="rfname" placeholder="ناو (وەک محمد)" value="'+esc(E.name||'')+'"><input type="text" id="rfcode" placeholder="کۆد (وەک MOHAMMED)" dir="ltr" value="'+esc(E.code||'')+'"'+(E.code?' readonly':'')+'>'+
+   '<input type="text" id="rfphone" placeholder="ژمارەی مۆبایل" dir="ltr" value="'+esc(E.phone||'')+'"><input type="text" id="rfrate" placeholder="پشک بۆ هەر قوتابی" dir="ltr" value="'+esc(E.rate||5000)+'">'+
+   '<input type="text" id="rfpin" placeholder="PIN بۆ بینینی ژمارەکانی" dir="ltr" value="'+esc(E.pin||String(Math.floor(1000+Math.random()*9000)))+'"><label style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="rfact"'+(E.active===false?'':' checked')+'> چالاک</label></div>'+
+   '<div style="display:flex;gap:8px"><button class="btn" data-act="refsave">پاشەکەوتکردن</button>'+(E.code?'<button class="btn alt" data-act="refnew">نوێ</button>':'')+'</div>';
+  h+='<b>دانانی ڕێکلامکار بۆ قوتابییەک</b><div class="muted" style="font-size:13px">ئەگەر قوتابی لە چاتدا گوتی «لە گرووپی محمدەوە هاتووم»، لێرە دایبنێ (پێش یان دوای Pro کردنی).</div>'+
+   '<div style="display:flex;gap:8px;flex-wrap:wrap"><input type="text" id="rsuser" placeholder="ناوی بەکارهێنەری قوتابی" dir="ltr" style="flex:1;min-width:130px"><input type="text" id="rscode" placeholder="کۆد" dir="ltr" style="width:110px"><button class="btn" data-act="refset" style="width:auto">دانان</button></div>'+
+   '<div class="muted" style="font-size:12px">لاپەڕەی ڕێکلامکار: <span class="ltr">rekanfarman006-hue.github.io/bio12/ref.html</span> (بە کۆد و PIN ژمارەکانی خۆی دەبینێت)</div>';
+  return h+'</div>'}
+async function refLoad(){const r=await sb.rpc('admin_refs');const e=S.refs&&S.refs.edit;S.refs={loading:0,list:r.error?[]:r.data,err:r.error?(/admin_refs/.test(r.error.message)?'update-30.sql Run بکە':r.error.message):'',edit:e};render()}
 function payPanel(){const P=S.pay||{};if(!P.list&&!P.loading){S.pay={loading:1};payLoadA()}
   const st={new:'نوێ',ok:'چالاک کرا',no:'ڕەتکرایەوە'},L=P.list||[],nNew=L.filter(x=>x.status==='new').length;
   let h='<div class="card stack" style="margin-top:12px"><b>پارەدان و کۆدی چالاککردن'+(nNew?' <span class="pill" style="background:var(--bad);color:#fff">'+nNew+' نوێ</span>':'')+'</b>';
@@ -969,6 +988,11 @@ app.addEventListener('click',async e=>{const b=e.target.closest('[data-act],[dat
   if(a==='pcimg'){const r=await sb.storage.from('receipts').createSignedUrl(b.dataset.p,600);if(r.error){toast(r.error.message);return}imgViewA(r.data.signedUrl);return}
   if(a==='saimg'){imgViewA(b.getAttribute('src'));return}
   if(a==='cdmake'){const n=+document.getElementById('cdn').value||10,bt=document.getElementById('cdb').value.trim();const r=await sb.rpc('admin_make_codes',{p_n:n,p_batch:bt});if(r.error){toast(r.error.message);return}const keep=S.pay;S.pay=null;await payLoadA();S.pay.codes=r.data.map(x=>typeof x==='string'?x:Object.values(x)[0]);render();return}
+  if(a==='refedit'){const x=(S.refs.list||[]).find(z=>z.code===b.dataset.c);S.refs.edit=Object.assign({},x);render();return}
+  if(a==='refnew'){S.refs.edit=null;render();return}
+  if(a==='refsave'){const g=id=>document.getElementById(id).value.trim();const r=await sb.rpc('admin_ref_save',{p_code:g('rfcode'),p_name:g('rfname'),p_phone:g('rfphone'),p_rate:+g('rfrate').replace(/\D/g,'')||5000,p_pin:g('rfpin'),p_active:document.getElementById('rfact').checked});if(r.error){toast(r.error.message);return}toast('پاشەکەوت کرا: '+r.data);S.refs.edit=null;refLoad();return}
+  if(a==='refpay'){if(!confirm('پارەی '+Number(b.dataset.o).toLocaleString('en-US')+' دینارت داوە بە ئەم ڕێکلامکارە؟'))return;const r=await sb.rpc('admin_ref_payout',{p_code:b.dataset.c});toast(r.error?r.error.message:'تۆمار کرا');refLoad();return}
+  if(a==='refset'){const r=await sb.rpc('admin_set_ref',{p_username:document.getElementById('rsuser').value,p_code:document.getElementById('rscode').value});const d=r.data||{};toast(r.error?r.error.message:d.error==='no student'?'قوتابی نەدۆزرایەوە':d.error==='no promoter'?'ئەم کۆدە نییە':d.sale?'دانرا و فرۆشتنەکە تۆمار کرا':'دانرا (کاتێک Pro بکرێت تۆمار دەبێت)');refLoad();return}
   if(a==='cdcom'){try{localStorage.setItem('klil_com',(document.getElementById('cdcom').value.replace(/\D/g,''))||'5000')}catch(e){}render();return}
   if(a==='cdcopy'){try{await navigator.clipboard.writeText((S.pay.codes||[]).join('\n'));toast('کۆپی کرا')}catch(e){toast('هەڵبژێرە و کۆپی بکە')}return}
   if(a==='chreload'){S.chat={};chatLoadA();return}
