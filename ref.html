@@ -1,0 +1,39 @@
+<!doctype html><html lang="ckb" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Klil · ڕێکلامکاران</title>
+<meta name="robots" content="noindex">
+<style>
+@font-face{font-family:R;src:url(rabar.woff)}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:R,system-ui,sans-serif;color:#fff;background:#0b1029;background-image:radial-gradient(700px 500px at 90% 0%,rgba(245,193,90,.16),transparent 60%),linear-gradient(160deg,#121a3d,#0b1029)}
+.w{max-width:440px;margin:0 auto;padding:28px 16px 40px}
+.hd{display:flex;align-items:center;gap:12px;margin-bottom:22px}.hd img{width:52px;height:52px;border-radius:14px}.hd b{font-size:22px;display:block}.hd small{color:rgba(255,255,255,.6)}
+.card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:18px;margin-bottom:14px}
+label{display:block;font-size:14px;color:rgba(255,255,255,.7);margin:10px 0 6px}
+input{width:100%;padding:13px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.25);color:#fff;font-size:18px;direction:ltr;text-align:left;font-family:inherit}
+button{width:100%;margin-top:16px;padding:14px;border:0;border-radius:14px;background:#F5C15A;color:#16233F;font-size:18px;font-family:inherit;font-weight:bold}
+.err{color:#ff8a8a;margin-top:10px;min-height:20px}
+.big{display:grid;grid-template-columns:1fr 1fr;gap:10px}.st{background:rgba(255,255,255,.06);border-radius:16px;padding:14px;text-align:center}.st b{display:block;font-size:30px;color:#F5C15A}.st span{font-size:13px;color:rgba(255,255,255,.7)}
+.owe{margin-top:10px;text-align:center;padding:16px;border-radius:16px;border:1px solid rgba(245,193,90,.5);background:rgba(245,193,90,.08)}.owe b{font-size:30px;color:#F5C15A}
+.row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:15px}
+.code{direction:ltr;display:inline-block;background:rgba(245,193,90,.15);color:#F5C15A;padding:2px 10px;border-radius:8px}
+.mut{color:rgba(255,255,255,.6);font-size:14px;line-height:1.7}
+</style></head><body><div class="w">
+<div class="hd"><img src="icon-192-v3.png" alt="" onerror="this.style.display='none'"><div><b>Klil · ڕێکلامکاران</b><small>ژمارەی قوتابییەکانت ببینە</small></div></div>
+<div id="v"></div></div>
+<script>
+const U='https://wzvbwfyntsfvtuhffngp.supabase.co',K='sb_publishable_qGRQaP2YaPsmO-oZVGSpEA_rj2jyhDy';
+const n=x=>Number(x||0).toLocaleString('en-US'),esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let S={};try{S=JSON.parse(localStorage.getItem('klil_ref')||'{}')}catch(e){}
+function form(e){document.getElementById('v').innerHTML='<div class="card"><label for="c">کۆدەکەت</label><input id="c" autocapitalize="characters" value="'+esc(S.c||'')+'"><label for="p">PIN</label><input id="p" inputmode="numeric" value="'+esc(S.p||'')+'"><button id="go">بینین</button><div class="err">'+(e||'')+'</div></div><p class="mut">کۆد و PIN ەکەت لە Klil وەربگرە. هەر قوتابییەک کە کۆدەکەت بنووسێت و دواتر Pro بکڕێت، پشکی خۆت وەردەگریت.</p>';
+  document.getElementById('go').onclick=()=>go(document.getElementById('c').value,document.getElementById('p').value)}
+async function go(c,p){document.getElementById('v').innerHTML='<div class="card mut">چاوەڕێ بکە…</div>';
+  try{const r=await fetch(U+'/rest/v1/rpc/ref_stats',{method:'POST',headers:{apikey:K,Authorization:'Bearer '+K,'Content-Type':'application/json'},body:JSON.stringify({p_code:c,p_pin:p})});const d=await r.json();
+    if(!r.ok||d.error){form('کۆد یان PIN هەڵەیە');return}
+    S={c,p};try{localStorage.setItem('klil_ref',JSON.stringify(S))}catch(e){}
+    document.getElementById('v').innerHTML='<div class="card"><div class="mut">سڵاو <b style="color:#fff">'+esc(d.name)+'</b> · کۆدەکەت: <span class="code">'+esc(d.code)+'</span></div></div>'+
+     '<div class="big"><div class="st"><b>'+n(d.students)+'</b><span>قوتابی کۆدەکەیان نووسیوە</span></div><div class="st"><b>'+n(d.sold)+'</b><span>Pro یان کڕیوە</span></div></div>'+
+     '<div class="owe"><div class="mut">پارەی ماوە بۆت</div><b>'+n(d.owed)+'</b> <span class="mut">دینار</span><div class="mut">پێشتر وەرتگرتووە: '+n(d.paid)+' دینار · بۆ هەر قوتابییەک '+n(d.rate)+'</div></div>'+
+     '<div class="card" style="margin-top:14px"><b>کڕینەکانی ٣٠ ڕۆژی ڕابردوو</b>'+(d.days.length?d.days.map(x=>'<div class="row"><span dir="ltr">'+esc(x.d)+'</span><b>'+x.n+'</b></div>').join(''):'<div class="mut">هێشتا هیچ</div>')+'</div>'+
+     '<button id="out" style="background:rgba(255,255,255,.1);color:#fff">دەرچوون</button>';
+    document.getElementById('out').onclick=()=>{try{localStorage.removeItem('klil_ref')}catch(e){}S={};form()}}
+  catch(e){form('ئینتەرنێت نییە، دووبارە هەوڵ بدەرەوە')}}
+S.c&&S.p?go(S.c,S.p):form();
+</script></body></html>
