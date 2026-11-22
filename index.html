@@ -1146,7 +1146,7 @@ function p2tex(s){
     const c=s[i];
     if(c==='('||c==='{'){const cl={'(':')','{':'}'}[c];i++;const inner=seq(cl);if(s[i]===cl)i++;
       return {t:(c==='{'?'\\{':c==='['?'[':'\\left(')+inner+(c==='{'?'\\}':c==='['?']':'\\right)'),inner,p:c==='('}}
-    if(c==='√'||c==='∛'){i++;let a;while(s[i]===' ')i++;if(s[i]==='('){i++;a=seq(')');if(s[i]===')')i++}else{const b=atom();a=b?b.t:''}
+    if(/[⁰¹²³⁴⁵⁶⁷⁸⁹ⁿ]/.test(c)){let j=i,e='';while(j<n&&SUP[s[j]]!=null){e+=SUP[s[j]];j++}if(s[j]==='√'){i=j+1;let a;while(s[i]===' ')i++;if(s[i]==='('){i++;a=seq(')');if(s[i]===')')i++}else{const b=atom();a=b?b.t:''}return {t:'\\sqrt['+e+']{'+a+'}'}}}if(c==='√'||c==='∛'){i++;let a;while(s[i]===' ')i++;if(s[i]==='('){i++;a=seq(')');if(s[i]===')')i++}else{const b=atom();a=b?b.t:''}
       return {t:(c==='∛'?'\\sqrt[3]{':'\\sqrt{')+a+'}'}}
     if(c==='|'){i++;const inner=seq('|');if(s[i]==='|')i++;return {t:'\\left|'+inner+'\\right|'}}
     for(const f of FN){if(s.startsWith(f,i)&&!/[A-Za-z]/.test(s[i+f.length]||'')){i+=f.length;
@@ -1161,7 +1161,7 @@ function p2tex(s){
   }
   function post(a){ // superscripts / subscripts / primes after an atom
     for(;;){
-      if(i<n&&SUP[s[i]]!=null){let e='';while(i<n&&SUP[s[i]]!=null)e+=SUP[s[i++]];a={t:'{'+a.t+'}^{'+e+'}'};continue}
+      if(i<n&&SUP[s[i]]!=null){let j=i;while(j<n&&SUP[s[j]]!=null)j++;if(s[j]==='√'&&!/[A-Za-z)\]|]/.test(s[i-1]||''))return a;let e='';while(i<n&&SUP[s[i]]!=null)e+=SUP[s[i++]];a={t:'{'+a.t+'}^{'+e+'}'};continue}
       if(i<n&&SUB[s[i]]!=null){let e='';while(i<n&&SUB[s[i]]!=null)e+=SUB[s[i++]];a={t:'{'+a.t+'}_{'+e+'}'};continue}
       if(s[i]==='^'){i++;const b=atom();a={t:'{'+a.t+'}^{'+(b?(b.inner!=null?b.inner:b.t):'')+'}'};continue}
       if(s[i]==='_'&&!/lim/.test(a.t)){i++;const b=atom();a={t:'{'+a.t+'}_{'+(b?(b.inner!=null?b.inner:b.t):'')+'}'};continue}
@@ -1177,7 +1177,7 @@ function p2tex(s){
   }
   function seq(close){const out=[];
     while(i<n){while(s[i]===' '){i++;}if(i>=n||s[i]===close)break;
-      if(s[i]==='/'&&out.length&&!out[out.length-1].op){i++;let num=out.pop();while(num.gl&&out.length&&!out[out.length-1].op&&!/\\(frac|lim|int)|=|\\to/.test(out[out.length-1].t)){const pv=out.pop();num={t:pv.t+' '+(num.p&&num.inner!=null?num.inner:num.t),gl:pv.gl}}if(out.length&&/^\\(sin|cos|tan|cot|sec|csc|ln|log) $/.test(out[out.length-1].t)){const pv=out.pop();num={t:pv.t+(num.p&&num.inner!=null?num.inner:num.t)}}while(s[i]===' ')i++;const den=unit();
+      if(s[i]==='/'&&out.length&&!out[out.length-1].op){i++;let num=out.pop();while(num.gl&&out.length&&!out[out.length-1].op&&!/\\(frac|lim|int)|=|\\to/.test(out[out.length-1].t)){const pv=out.pop();num={t:pv.t+' '+(num.p&&num.inner!=null?num.inner:num.t),gl:pv.gl}}if(out.length&&/^\\(sin|cos|tan|cot|sec|csc|ln|log) $/.test(out[out.length-1].t)){const pv=out.pop();num={t:pv.t+(num.p&&num.inner!=null?num.inner:num.t)}}while(s[i]===' ')i++;let den=unit();if(den&&/^(\\(sin|cos|tan|cot|sec|csc|ln|log) |\{\\(sin|cos|tan|cot|sec|csc|ln|log) \}\^\{[^}]*\})$/.test(den.t)){let j=i;while(s[j]===' ')j++;if(/[A-Za-z0-9π√θ|]/.test(s[j]||'')){i=j;const ag=unit();if(ag){den={t:den.t+ag.t};while(i<n&&/[A-Za-z0-9πθ]/.test(s[i])){const g=unit();if(!g)break;den={t:den.t+' '+g.t}}}}}else if(den&&/^[0-9.]+$/.test(den.t)&&/[A-Za-zπθ√]/.test(s[i]||'')){while(i<n&&/[A-Za-z0-9πθ√]/.test(s[i])){const g=unit();if(!g)break;den={t:den.t+' '+g.t}}}
         if(den&&UN.test(num.w||num.t)&&UN.test(den.w||den.t)){out.push({t:(num.un?'\\,':'')+'\\mathrm{'+(num.w||num.t)+'/'+(den.w||den.t)+'}'});continue}
         const nt=num.p&&num.inner!=null?num.inner:num.t,dt=den?(den.p&&den.inner!=null?den.inner:den.t):'';
         out.push({t:'\\frac{'+nt+'}{'+dt+'}'});continue}
