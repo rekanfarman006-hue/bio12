@@ -122,6 +122,9 @@ table.qt tr.pick{cursor:pointer}
 .ref{margin-top:10px;font-size:13px;color:var(--muted);display:flex;gap:6px;flex-wrap:wrap}
 .qnav{display:flex;gap:10px;margin-top:16px}
 .qnav .btn{flex:1}
+.qn2{margin-top:12px}.qnav.g3.exr{grid-template-columns:1fr 1.5fr 1fr}.qnav .exbtn{font-size:14px;padding-inline:6px;white-space:nowrap}.qnav .exbtn.on{background:var(--surface);border-color:var(--gold)}
+.pbtn{border:0;cursor:pointer;font-family:inherit}
+.resume{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0 4px;padding:10px 12px;border-radius:14px;background:var(--surface);border:1px solid var(--gold)}.resume span{flex:1 1 100%;font-size:14px}.resume .btn{flex:1}.resume .rsx{border:0;background:none;color:var(--muted);font-size:18px;cursor:pointer;padding:4px 8px}
 .prog{height:6px;background:var(--surface2);border-radius:6px;overflow:hidden;margin-top:12px}
 .prog i{display:block;height:100%;background:var(--gold)}
 .timer{font-weight:900;font-size:15px;direction:ltr}
@@ -1977,16 +1980,18 @@ function explHTML(q,pick){const A=ST.ans[q.id];if(!A)return '';const ok=pick===A
 function viewRun(){
   const R=RUN,q=BYID[R.ids[R.i]],n=R.ids.length;
   if(R.mode==='exam'&&R.submitted)return viewResult();
-  const right=R.mode==='exam'?'<span class="timer num" id="tm"></span>':'<span class="pill num">'+(R.i+1)+'/'+n+'</span>';
+  const right=R.mode==='exam'?'<span class="timer num" id="tm"></span>':'<button class="pill num pbtn" data-act="qgrid" aria-label="هەموو پرسیارەکان">'+(R.i+1)+'/'+n+'</button>';
   let h=header(R.title,R.mode==='exam'?'تاقیکردنەوە · پرسیاری '+(R.i+1)+' لە '+n:'ڕاهێنان',true,right)+'<div class="wrap"><div class="prog"><i style="width:'+((R.i+1)/n*100)+'%"></i></div>';
   h+=qBody(q);
   const nx=BYID[R.ids[R.i+1]];if(nx&&nx.img)fetchImg(nx.id);
   if(R.mode==='practice'){
     const pick=R.ans[q.id],A=ST.ans[q.id],rev=pick!=null&&R.done&&R.done[q.id];
     h+='<div class="'+(R.wait===q.id?'pending':'')+'">'+optsHTML(q,{pick,reveal:rev,a:A?A.a:-1})+'</div>';
+    const exo=rev&&R.exo&&R.exo[q.id];
+    if(R.res0!=null&&R.i===0&&!Object.keys(R.ans).length)h+='<div class="resume"><span>پێشتر تا پرسیاری <b class="num">'+R.res0+'</b> ت کردووە</span><button class="btn" data-act="resume">بەردەوامبە لە پرسیاری '+(R.res0+1)+'</button><button class="rsx" data-act="resno" aria-label="داخستن">✕</button></div>';
+    h+='<div class="qnav g3 qn2'+(rev?' exr':'')+'"><button class="btn alt" data-act="prev"'+(R.i?'':' disabled')+'>پێشوو</button>'+(rev?'<button class="btn alt exbtn'+(exo?' on':'')+'" data-act="extog">'+(exo?'داخستنی ڕوونکردنەوە':'بینینی ڕوونکردنەوە')+'</button>':'<button class="btn alt gbtn" data-act="qgrid" aria-label="هەموو پرسیارەکان">'+(R.grid?'✕':'⋮⋮⋮')+'</button>')+'<button class="btn" data-act="next">'+(R.i===n-1?'تەواو':'دواتر')+'</button></div>';
+    if(exo)h+=explHTML(q,pick);
     h+=aiBtn(q)+nbBtn(q);
-    if(rev)h+=explHTML(q,pick);
-    h+='<div class="qnav g3"><button class="btn alt" data-act="prev"'+(R.i?'':' disabled')+'>پێشوو</button><button class="btn alt gbtn" data-act="qgrid" aria-label="هەموو پرسیارەکان">'+(R.grid?'✕':'⋮⋮⋮')+'</button><button class="btn" data-act="next">'+(R.i===n-1?'تەواو':'دواتر')+'</button></div>';
     if(R.grid)h+='<div class="dots">'+R.ids.map((id,i)=>{const d=R.done&&R.done[id],A=ST.ans[id];return '<button class="num'+(d&&A?(R.ans[id]===A.a?' ok':' no'):'')+(i===R.i?' cur':'')+'" data-jump="'+i+'">'+(i+1)+'</button>'}).join('')+'</div>';
   }else{
     h+=optsHTML(q,{pick:R.ans[q.id],reveal:false})+nbBtn(q);
@@ -2075,7 +2080,9 @@ function hardLogout(key){const clear=()=>{try{Object.keys(localStorage).forEach(
   Promise.race([Promise.resolve(p).catch(()=>{}),new Promise(r=>setTimeout(r,1500))]).then(()=>{clear();location.reload()})}
 function toast(t,ms){const el=document.createElement('div');el.className='toast';el.textContent=t;document.body.appendChild(el);setTimeout(()=>el.remove(),ms||2200)}
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-function start(title,ids,mode,exId){const all=ids.filter(id=>BYID[id]&&BYID[id].full);ids=all.filter(id=>canQ(BYID[id]));if(!ids.length){if(all.length){V.lock=1;render()}else toast('هیچ پرسیارێک نییە');return}RUN={title,ids,i:0,mode,ans:{},done:{},exId,end:mode==='exam'?Date.now()+180*60000:0};render();scrollTo(0,0)}
+function start(title,ids,mode,exId){const all=ids.filter(id=>BYID[id]&&BYID[id].full);ids=all.filter(id=>canQ(BYID[id]));if(!ids.length){if(all.length){V.lock=1;render()}else toast('هیچ پرسیارێک نییە');return}RUN={title,ids,i:0,mode,ans:{},done:{},exId,end:mode==='exam'?Date.now()+180*60000:0};{const k=rKey(RUN);if(k){const r=load('klil_resume',{})[k],x=r?ids.indexOf(r.id):-1;if(x>=0&&x<ids.length-1)RUN.res0=x+1}}render();scrollTo(0,0)}
+function rKey(R){return R&&R.mode==='practice'&&R.title!=='هەڵەکانم'?CUR+'|'+R.title+'|'+R.ids.length:null}
+function rSave(R,id){const k=rKey(R);if(!k)return;const M=load('klil_resume',{});M[k]={id,t:Date.now()};const ks=Object.keys(M);if(ks.length>80)ks.sort((a,b)=>M[a].t-M[b].t).slice(0,ks.length-80).forEach(x=>delete M[x]);save('klil_resume',M)}
 function needLock(c){if(c!=null&&canCh(c))return false;if(c==null&&unlocked())return false;V.lock=1;render();return true}
 function needLogin(why){if(ST.user)return false;V.acc=1;V.accMode='reg';V.accWhy=why||'';render();return true}
 let TM=null;
@@ -2096,7 +2103,7 @@ async function submitExam(){const R=RUN;if(!R||R.submitted||R.sending)return;R.s
   render();scrollTo(0,0)}
 async function answer(q,p){
   if(needLogin('بۆ وەڵامدانەوەی پرسیارەکان و پاشەکەوتکردنی پێشکەوتنت، هەژمارێکی بەخۆڕایی دروست بکە.'))return;
-  const R=RUN;R.ans[q.id]=p;R.wait=q.id;render();
+  const R=RUN;R.ans[q.id]=p;R.wait=q.id;R.res0=null;rSave(R,q.id);render();
   const r=await sb.rpc('submit_answer',{p_qid:q.id,p_choice:p}).catch(e=>({error:e}));
   R.wait=null;
   if(r.error){const k=errKey(r.error);if(k==='net'){const L=await offAns(q);if(L){ST.ans[q.id]={a:L.a,e:L.e};const ok=+p===+L.a;R.done[q.id]=1;recLocal(q.id,ok);const Q=offQ();Q.push({q:q.id,p:p});save('klil_offq',Q);if(RUN===R)render();return}}delete R.ans[q.id];toast(ERR[k]);if(k==='locked')V.lock=1;render();return}
@@ -2222,6 +2229,9 @@ app.addEventListener('click',e=>{
   if(a==='theme'){const nt=document.documentElement.dataset.theme==='dark'?'light':'dark';setTheme(nt);render();if(nt==='light'&&/SamsungBrowser/i.test(navigator.userAgent)&&matchMedia('(prefers-color-scheme: dark)').matches)toast('Samsung Internet خۆی ئەپەکە تاریک دەکات. لە Samsung Internet: ☰ ← Dark mode بکوژێنەوە، یان ئەپەکە لە Google Play دابەزێنە.',7000);return}
   if(a==='gosub'){const k=b.dataset.s;if(k!==CUR)setSub(k);V.sec='bank';V.tab='home';V.stack=[];render();scrollTo(0,0);return}
   if(a==='qgrid'){RUN.grid=!RUN.grid;render();return}
+  if(a==='extog'){const id=RUN.ids[RUN.i];RUN.exo=RUN.exo||{};RUN.exo[id]=!RUN.exo[id];render();if(RUN.exo[id])setTimeout(()=>{const e=document.querySelector('.expl');if(e)e.scrollIntoView({behavior:'smooth',block:'nearest'})},30);return}
+  if(a==='resume'){RUN.i=RUN.res0;RUN.res0=null;render();scrollTo(0,0);return}
+  if(a==='resno'){RUN.res0=null;render();return}
   if(a==='unlock'){V.me=0;V.lock=1;render();return}
   if(a==='togx'){save('klil_showx',!showX());if(ST.rawB)applyBase(ST.rawB[0].map(e=>Object.assign({},e,{year:String(e.year).replace(/[⁦⁩]/g,'')})),ST.rawB[1]);toast(showX()?'بابەتە لابراوەکان پیشان دەدرێن':'بابەتە لابراوەکانی وەزارەت شاردرانەوە');render();return}
   if(a==='annlist'){V.ann=1;save('klil_ann_read',(ST.annL||[]).map(x=>x.id).slice(0,60));render();scrollTo(0,0);return}
