@@ -1275,7 +1275,8 @@ function exRich(t,sub,opts,pick,ans){const L0=t.slice(1).split(/\n/).map(x=>x.tr
   // language subjects: Kurdish line with English words/sentences -> each Latin run is isolated, the line stays right-to-left
   const LANG=!/^(math|phys|chem)$/.test(sub||CUR),LR=/((?:[0-9]+[\/\-.,: ]*)*[A-Za-z][A-Za-z0-9'’\-.,\/:;!?&% ]*[A-Za-z0-9.!?'’%]|(?:[0-9]+[\/\-.,: ]*)*[A-Za-z])/g;
   const mixE=x=>x.split(LR).map((r,i)=>i%2?'<bdi dir="ltr" class="en">'+esc(r.trim())+'</bdi>'+(/\s$/.test(r)?' ':''):sx(esc(r))).join('');
-  const tx=x=>TEX?(/\$/.test(x)?kxText(x):AR.test(x)?fx(x):kx(x)):!AR.test(x.replace(/،/g,''))?ml(cm(x)):LANG?mixE(x):ltrFirst(x)?mixL(x):mixK(x);
+  const kxAR=x=>{let o=[],m='';const fl=()=>{if(m.trim())o.push('<bdi dir="ltr">'+kx(m.trim())+'</bdi>');m=''};x.split(/\\text\{([^{}]*)\}/).forEach((p,i)=>{if(i%2){if(AR.test(p)){fl();o.push(fx(p.trim()))}else m+='\\text{'+p+'}'}else if(AR.test(p)){fl();o.push(fx(p.trim()))}else m+=p});fl();return o.join(' ')};
+  const tx=x=>TEX?(/\$/.test(x)?kxText(x):AR.test(x)?(/\\[A-Za-z]/.test(x)?kxAR(x):fx(x)):kx(x)):!AR.test(x.replace(/،/g,''))?ml(cm(x)):LANG?mixE(x):ltrFirst(x)?mixL(x):mixK(x);
   return '<div class="et st xr" dir="rtl">'+L.map(x=>{let m;
     if(x[0]==='?')return '<div class="xi"><b>بیرۆکە</b> '+tx(x.slice(1).trim())+'</div>';
     if(x[0]==='>'&&TEX){const tt=x.slice(1).trim();return '<div class="xm kxm" data-tex="'+esc(tt)+'">'+kx(tt,true)+'</div>'}
@@ -1989,8 +1990,8 @@ function viewRun(){
     h+='<div class="'+(R.wait===q.id?'pending':'')+'">'+optsHTML(q,{pick,reveal:rev,a:A?A.a:-1})+'</div>';
     const exo=rev&&R.exo&&R.exo[q.id];
     if(R.res0!=null&&R.i===0&&!Object.keys(R.ans).length)h+='<div class="resume"><span>پێشتر تا پرسیاری <b class="num">'+R.res0+'</b> ت کردووە</span><button class="btn" data-act="resume">بەردەوامبە لە پرسیاری '+(R.res0+1)+'</button><button class="rsx" data-act="resno" aria-label="داخستن">✕</button></div>';
-    h+='<div class="qnav g3 qn2'+(rev?' exr':'')+'"><button class="btn alt" data-act="prev"'+(R.i?'':' disabled')+'>پێشوو</button>'+(rev?'<button class="btn alt exbtn'+(exo?' on':'')+'" data-act="extog">'+(exo?'داخستنی ڕوونکردنەوە':'بینینی ڕوونکردنەوە')+'</button>':'<button class="btn alt gbtn" data-act="qgrid" aria-label="هەموو پرسیارەکان">'+(R.grid?'✕':'⋮⋮⋮')+'</button>')+'<button class="btn" data-act="next">'+(R.i===n-1?'تەواو':'دواتر')+'</button></div>';
-    if(exo)h+=explHTML(q,pick);
+    const NAV='<div class="qnav g3 qn2'+(rev?' exr':'')+'"><button class="btn alt" data-act="prev"'+(R.i?'':' disabled')+'>پێشوو</button>'+(rev?'<button class="btn alt exbtn'+(exo?' on':'')+'" data-act="extog">'+(exo?'داخستنی ڕوونکردنەوە':'بینینی ڕوونکردنەوە')+'</button>':'<button class="btn alt gbtn" data-act="qgrid" aria-label="هەموو پرسیارەکان">'+(R.grid?'✕':'⋮⋮⋮')+'</button>')+'<button class="btn" data-act="next">'+(R.i===n-1?'تەواو':'دواتر')+'</button></div>';
+    if(exo)h+=explHTML(q,pick)+NAV;else h+=NAV;
     h+=aiBtn(q)+nbBtn(q);
     if(R.grid)h+='<div class="dots">'+R.ids.map((id,i)=>{const d=R.done&&R.done[id],A=ST.ans[id];return '<button class="num'+(d&&A?(R.ans[id]===A.a?' ok':' no'):'')+(i===R.i?' cur':'')+'" data-jump="'+i+'">'+(i+1)+'</button>'}).join('')+'</div>';
   }else{
