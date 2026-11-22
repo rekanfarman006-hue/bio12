@@ -1,9 +1,10 @@
 // Klil service worker: lets the app open without internet.
 // the saved index.html opens at once; a fresh copy is fetched in the background, and a new version reloads the app when its service worker activates.
-const V='klil-v106';
+const V='klil-v107';
 const SHELL=['./','index.html','manifest.webmanifest','rabar.woff'];
 const RQ=u=>new Request(u,{cache:'reload'});
-self.addEventListener('install',e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(SHELL.map(RQ))).catch(()=>{}).then(()=>self.skipWaiting()))});
+// fetch the shell with a version tag so a stale CDN copy of index.html is never saved for a new version
+self.addEventListener('install',e=>{e.waitUntil(caches.open(V).then(c=>Promise.all(SHELL.map(u=>fetch(RQ(u+(u.indexOf('?')<0?'?':'&')+'sv='+V)).then(r=>{if(r.ok)return c.put(u,r)}).catch(()=>{})))).catch(()=>{}).then(()=>self.skipWaiting()))});
 // when an older version was installed, reload open windows once so the new app shows at once
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(K=>{const old=K.filter(k=>k!==V);return Promise.all(old.map(k=>caches.delete(k))).then(()=>self.clients.claim()).then(()=>{if(old.length)return self.clients.matchAll({type:'window'}).then(cs=>cs.forEach(c=>{try{c.navigate(c.url)}catch(x){}}))})}))});
 function put(req,res){if(res&&(res.ok||res.type==='opaque')){const c=res.clone();caches.open(V).then(x=>x.put(req,c)).catch(()=>{})}return res}
