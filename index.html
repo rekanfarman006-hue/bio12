@@ -2081,7 +2081,7 @@ function render(){
 }
 // one account = one device: claim this device after login / on open; logging out frees it
 function devId(){try{let d=localStorage.getItem('klil_dev');if(!d){d=(self.crypto&&crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2));localStorage.setItem('klil_dev',d)}return d}catch(e){return null}}
-const DEVBUSY='ئەم هەژمارە ئێستا لەسەر ئامێرێکی ترە. سەرەتا لەو ئامێرە دەرچوو («هەژمارەکەم» ← «دەرچوون»)، پاشان لێرە بچۆ ژوورەوە. ئەگەر ئەو ئامێرەت لە دەست نییە (ون بووە یان ئەپەکەت سڕیوەتەوە)، نامە بۆ بەڕێوەبەر بنێرە با ئامێرەکەت بۆ بسڕێتەوە.';
+const DEVBUSY='ئەم هەژمارە ئێستا لەسەر ئامێرێکی ترە. سەرەتا لەو ئامێرە دەرچوو («هەژمارەکەم» ← «دەرچوون»)، پاشان لێرە بچۆ ژوورەوە. ئەگەر ئەو ئامێرەت لە دەست نییە (ون بووە یان ئەپەکەت سڕیوەتەوە)، نامە بۆ بەڕێوەبەر بنێرە با هەژمارەکەت بسڕێتەوە.';
 let DEVT=0;
 async function devClaim(){const d=devId();if(!d||!ST.user)return 'ok';DEVT=Date.now();
   try{const r=await Promise.race([sb.rpc('device_claim',{p_dev:d,p_label:String(navigator.userAgent||'').slice(0,160)}),new Promise(z=>setTimeout(()=>z({data:'ok'}),7000))]);return (!r||r.error)?'ok':(r.data||'ok')}catch(e){return 'ok'}}
