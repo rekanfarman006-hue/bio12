@@ -1424,6 +1424,7 @@ async function boot(){
     if(ex.error&&/sub/.test(ex.error.message||''))ex=await sb.from('exams').select('id,year,round,ord').order('ord');
     if(ex.error||ix.error)throw ex.error||ix.error;
     ST.user=r.data&&r.data.session?r.data.session.user:null;
+    if(ST.user&&(await devClaim())==='busy')await devDrop();
     BASE={exams:ex.data,index:ix.data};applyBase(ex.data,ix.data);cachedBodies();try{localStorage.setItem(CK,JSON.stringify(BASE))}catch(e){}
     await loadMe();
     ST.ready=true;ST.err=null;render();loadBoard();loadStats();fcInit();setTimeout(offFlush,2500);
@@ -2078,6 +2079,17 @@ function render(){
   tick();if(V.sec==='main'&&!RUN&&typeof ytWire==='function')ytWire();
   requestAnimationFrame(()=>{try{fitMath()}catch(e){}try{fcFit()}catch(e){}});
 }
+// one account = one device: claim this device after login / on open; logging out frees it
+function devId(){try{let d=localStorage.getItem('klil_dev');if(!d){d=(self.crypto&&crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2));localStorage.setItem('klil_dev',d)}return d}catch(e){return null}}
+const DEVBUSY='ئەم هەژمارە ئێستا لەسەر ئامێرێکی ترە. سەرەتا لەو ئامێرە دەرچوو («هەژمارەکەم» ← «دەرچوون»)، پاشان لێرە بچۆ ژوورەوە. ئەگەر ئەو ئامێرەت لە دەست نییە (ون بووە یان ئەپەکەت سڕیوەتەوە)، نامە بۆ بەڕێوەبەر بنێرە با ئامێرەکەت بۆ بسڕێتەوە.';
+let DEVT=0;
+async function devClaim(){const d=devId();if(!d||!ST.user)return 'ok';DEVT=Date.now();
+  try{const r=await Promise.race([sb.rpc('device_claim',{p_dev:d,p_label:String(navigator.userAgent||'').slice(0,160)}),new Promise(z=>setTimeout(()=>z({data:'ok'}),7000))]);return (!r||r.error)?'ok':(r.data||'ok')}catch(e){return 'ok'}}
+async function devDrop(){try{Object.keys(localStorage).forEach(k=>{if(k.startsWith('bio12-auth')||k.startsWith('bio_me_')||/^sb-.*-auth-token/.test(k))localStorage.removeItem(k)})}catch(e){}
+  try{await Promise.race([sb.auth.signOut({scope:'local'}),new Promise(z=>setTimeout(z,1500))])}catch(e){}
+  ST.user=null;ST.prof=null;ST.prog={};ST.days={};ST.best={};V.me=0;V.acc=1;V.accMode='login';V.accWhy=DEVBUSY}
+async function devRelease(){const d=devId();if(!d||!ST.user)return;try{await Promise.race([sb.rpc('device_release',{p_dev:d}),new Promise(z=>setTimeout(z,2500))])}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&ST.user&&Date.now()-DEVT>3600e3)devClaim().then(x=>{if(x==='busy')devDrop().then(()=>{RUN=null;render()})})});
 // sign out even if the network or the auth library hangs: forget the saved login, then reload
 function hardLogout(key){const clear=()=>{try{Object.keys(localStorage).forEach(k=>{if(k===key||k.startsWith(key)||k.startsWith('bio_me_')||/^sb-.*-auth-token/.test(k))localStorage.removeItem(k)})}catch(e){}};
   clear();let p;try{p=sb.auth.signOut({scope:'local'})}catch(e){p=Promise.resolve()}
@@ -2132,11 +2144,12 @@ async function doAcc(b){
       const r=await sb.auth.signUp({email,password:pass,options:{data:{username:user,nick,full_name:name,ref:g('acr').replace(/[^A-Za-z0-9]/g,'').toUpperCase()}}});
       if(r.error){er.textContent=/registered|exists/i.test(r.error.message)?'ئەم ناوی بەکارهێنەرە گیراوە.':/password/i.test(r.error.message)?'وشەی نهێنی بەهێزتر هەڵبژێرە.':/Database/i.test(r.error.message)?'ئەم نازناوە گیراوە، یەکێکی تر هەڵبژێرە.':'هەڵەیەک ڕوویدا: '+r.error.message;b.disabled=false;return}
       if(!r.data.session){er.textContent='هەژمارەکە دروست کرا بەڵام چوونەژوورەوە سەرنەکەوت. (ڕێکخستنی Confirm email دەبێت کوژابێتەوە)';b.disabled=false;return}
-      ST.user=r.data.session.user;
+      ST.user=r.data.session.user;devClaim();
     }else{
       const r=await sb.auth.signInWithPassword({email,password:pass});
       if(r.error){er.textContent='ناوی بەکارهێنەر یان وشەی نهێنی هەڵەیە.';b.disabled=false;return}
       ST.user=r.data.session.user;
+      if((await devClaim())==='busy'){await devDrop();V.acc=1;V.accMode='login';V.accWhy=DEVBUSY;render();return}
     }
     await loadMe();V.acc=0;V.accWhy='';render();loadBoard();toast(reg?'بەخێربێیت '+(ST.prof?ST.prof.nick:''):'بەخێربێیتەوە');
   }catch(e){er.textContent=ERR.net;b.disabled=false}
@@ -2256,7 +2269,7 @@ app.addEventListener('click',e=>{
   if(a==='me'){V.meY=scrollY;V.me=1;render();scrollTo(0,0);return}
   if(a==='resetme'){if(!confirm('هەموو وەڵامەکانت، هەڵەکانت و ئامارەکانت دەسڕدرێنەوە. دڵنیایت؟'))return;b.disabled=true;sb.rpc('reset_my_progress').then(r=>{b.disabled=false;if(r.error){toast(ERR.net);return}ST.prog={};ST.days={};ST.best={};ST.ans={};saveMe&&saveMe();toast('پێشکەوتنەکەت سڕایەوە');render()});return}
   if(a==='delme'){const w=prompt('هەژمارەکەت بە تەواوی دەسڕدرێتەوە و ناگەڕێتەوە. بۆ دڵنیابوون بنووسە: DELETE');if(w!=='DELETE')return;b.disabled=true;sb.rpc('delete_my_account').then(r=>{if(r.error){b.disabled=false;toast(ERR.net);return}toast('هەژمارەکەت سڕایەوە');hardLogout('bio12-auth')});return}
-  if(a==='logout'){b.disabled=true;b.textContent='دەرچوون…';hardLogout('bio12-auth');return}
+  if(a==='logout'){b.disabled=true;b.textContent='دەرچوون…';devRelease().then(()=>hardLogout('bio12-auth'));return}
   if(a==='offdl'){offDownload(b.dataset.s);return}
   if(a==='offall'){offAll();return}
   if(a==='avopen'){V.avp=1;V.avsel=myAv()||1;render();return}
