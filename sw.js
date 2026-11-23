@@ -1,6 +1,6 @@
 // Klil service worker: lets the app open without internet.
 // the saved index.html opens at once; a fresh copy is fetched in the background, and a new version reloads the app when its service worker activates.
-const V='klil-v112';
+const V='klil-v113';
 const SHELL=['./','index.html','manifest.webmanifest','rabar.woff'];
 const RQ=u=>new Request(u,{cache:'reload'});
 // fetch the shell with a version tag so a stale CDN copy of index.html is never saved for a new version
