@@ -1092,6 +1092,9 @@ let CH={},SEC={},UNIT=[],SECK=[],LAST=202,CUR=load('bio_sub','bio');
 function subName(s){return (SUBJ_META[s||CUR]||{}).n||''}
 const LET='ABCD';
 const chOf=q=>+q.s.split('.')[0];
+const CHOFF={chem:1};
+function dch(c,sb){const n=+c,o=CHOFF[sb||CUR]||0;return (!o||isNaN(n))?c:n-o}
+function dsec(k,sb){const o=CHOFF[sb||CUR]||0;if(!o||k==null)return k;const p=String(k).split('.');return isNaN(+p[0])?k:(+p[0]-o)+(p.length>1?'.'+p.slice(1).join('.'):'')}
 let EXAMS=[],QS=[],BYID={},EX={},YEARS=[],ALLQS=[],ALLEX=[];
 function secEnd(k){const i=SECK.indexOf(k);return i<SECK.length-1?Math.max(SEC[k][1],SEC[SECK[i+1]][1]-1):LAST}
 function secsForPages(a,b){return SECK.filter(k=>SEC[k][1]<=b&&secEnd(k)>=a)}
@@ -1778,7 +1781,7 @@ function reviewCard(){if(!ST.user)return '';const due=dueIds(),all=reviewIds();
 // ----- weak spots -----
 function secStats(){const out=[];SECK.forEach(k=>{const L=QS.filter(q=>q.s===k);const s=statsFor(L);if(s.seen)out.push({k,...s})});return out}
 function weakList(min){return secStats().filter(x=>x.seen>=(min||3)).sort((a,b)=>a.pct-b.pct||b.seen-a.seen)}
-function wkRow(x,extra){return '<button class="wk" data-act="runsec" data-s="'+x.k+'"><b>'+x.k+' · '+SEC[x.k][0]+'</b><span class="p num '+pctCls(x.pct)+'">'+x.pct+'%</span><div class="wb"><i style="width:'+Math.max(4,x.pct)+'%;background:'+pctCol(x.pct)+'"></i></div><small>'+(extra||('ڕاست <span class="num">'+x.ok+'</span> لە <span class="num">'+x.seen+'</span>'+pgTxt(x.k)))+'</small></button>'}
+function wkRow(x,extra){return '<button class="wk" data-act="runsec" data-s="'+x.k+'"><b>'+dsec(x.k)+' · '+SEC[x.k][0]+'</b><span class="p num '+pctCls(x.pct)+'">'+x.pct+'%</span><div class="wb"><i style="width:'+Math.max(4,x.pct)+'%;background:'+pctCol(x.pct)+'"></i></div><small>'+(extra||('ڕاست <span class="num">'+x.ok+'</span> لە <span class="num">'+x.seen+'</span>'+pgTxt(x.k)))+'</small></button>'}
 function weakCard(){const W=weakList(3).filter(x=>x.pct<70).slice(0,3);if(!W.length)return '';
   return '<h2>خاڵە لاوازەکانت</h2><div class="weak">'+W.map(x=>wkRow(x)).join('')+'</div><button class="btn alt" style="margin-top:10px" data-act="openweak">ڕاپۆرتی تەواو</button>'}
 function viewWeak(){const W=weakList(1);
@@ -1786,7 +1789,7 @@ function viewWeak(){const W=weakList(1);
   if(!W.length)return h+'<div class="card empty" style="margin-top:16px">هێشتا پرسیارت حەل نەکردووە. دوای چەند پرسیارێک ئەم ڕاپۆرتە دروست دەبێت.</div></div>';
   h+='<p class="muted" style="font-size:14px">ڕێژەی ڕاستی لە هەر بەشێک (دوایین وەڵامت). سوور = پێویستی بە خوێندنەوەیە. کرتە لە بەشێک بکە بۆ ڕاهێنان.</p><div class="weak">'+W.map(x=>wkRow(x)).join('')+'</div>';
   const nos=SECK.filter(k=>!W.find(x=>x.k===k)&&QS.some(q=>q.s===k&&canQ(q)));
-  if(nos.length)h+='<h2>هێشتا دەستت پێنەکردووە</h2><p class="muted" style="font-size:14px;margin-top:-4px">'+nos.map(k=>k+' '+SEC[k][0]).join('، ')+'</p>';
+  if(nos.length)h+='<h2>هێشتا دەستت پێنەکردووە</h2><p class="muted" style="font-size:14px;margin-top:-4px">'+nos.map(k=>dsec(k)+' '+SEC[k][0]).join('، ')+'</p>';
   return h+'</div>'}
 
 // ----- views -----
@@ -1802,13 +1805,13 @@ function viewHome(){
 function viewChapters(){
   return header('بەندەکان',subName()+' · پرسیارەکان بەپێی کتێب ڕیزکراون',false,accBtn())+'<div class="wrap">'+subBar()+lockBar()+
    UNIT.map(u=>'<div class="unit">'+u[1]+'</div><div class="stack">'+u[2].map(c=>{const L=QS.filter(q=>chOf(q)===c),s=statsFor(L),open=canCh(c);
-     return '<button class="row" data-act="chap" data-c="'+c+'"><div class="ix num">'+c+'</div><div class="tx"><b>'+CH[c]+'</b><span><span class="num">'+L.length+'</span> پرسیار'+(s.seen?' · کراوە <span class="num">'+s.seen+'</span> · ڕاست <span class="num">'+s.pct+'%</span>':'')+'</span>'+(s.seen?'<div class="bar"><i style="width:'+(s.seen/L.length*100)+'%"></i></div>':'')+'</div>'+(open?'':'<span class="lock">'+ic('lock')+'</span>')+'</button>'}).join('')+'</div>').join('')+'</div>';
+     return '<button class="row" data-act="chap" data-c="'+c+'"><div class="ix num">'+dch(c)+'</div><div class="tx"><b>'+CH[c]+'</b><span><span class="num">'+L.length+'</span> پرسیار'+(s.seen?' · کراوە <span class="num">'+s.seen+'</span> · ڕاست <span class="num">'+s.pct+'%</span>':'')+'</span>'+(s.seen?'<div class="bar"><i style="width:'+(s.seen/L.length*100)+'%"></i></div>':'')+'</div>'+(open?'':'<span class="lock">'+ic('lock')+'</span>')+'</button>'}).join('')+'</div>').join('')+'</div>';
 }
 function viewChapter(c){
   const secs=SECK.filter(k=>+k.split('.')[0]===c);const L=QS.filter(q=>chOf(q)===c);
-  return header('بەندی '+c,CH[c],true)+'<div class="wrap"><div class="stack" style="margin-top:16px">'+
+  return header('بەندی '+dch(c),CH[c],true)+'<div class="wrap"><div class="stack" style="margin-top:16px">'+
    '<button class="btn" data-act="runch" data-c="'+c+'">'+(CUR==='eng'&&c===8?'هەموو ئیپسۆدەکان پێکەوە':'هەموو پرسیارەکانی ئەم بەندە')+' ('+L.length+')</button>'+
-   secs.map(k=>{const S=QS.filter(q=>q.s===k),s=statsFor(S);return '<button class="row" data-act="runsec" data-s="'+k+'"'+(S.length?'':' disabled style="opacity:.55"')+'><div class="ix num" style="font-size:13px">'+k+'</div><div class="tx"><b>'+SEC[k][0]+'</b><span>'+(S.length?'<span class="num">'+S.length+'</span> پرسیار':'هیچ پرسیارێک نەهاتووە')+(pgOf(k)?' · کتێب لاپەڕە <span class="num">'+SEC[k][1]+'</span>':'')+(s.seen?' · ڕاست <span class="num '+pctCls(s.pct)+'">'+s.pct+'%</span>':'')+'</span></div></button>'}).join('')+'</div></div>';
+   secs.map(k=>{const S=QS.filter(q=>q.s===k),s=statsFor(S);return '<button class="row" data-act="runsec" data-s="'+k+'"'+(S.length?'':' disabled style="opacity:.55"')+'><div class="ix num" style="font-size:13px">'+dsec(k)+'</div><div class="tx"><b>'+SEC[k][0]+'</b><span>'+(S.length?'<span class="num">'+S.length+'</span> پرسیار':'هیچ پرسیارێک نەهاتووە')+(pgOf(k)?' · کتێب لاپەڕە <span class="num">'+SEC[k][1]+'</span>':'')+(s.seen?' · ڕاست <span class="num '+pctCls(s.pct)+'">'+s.pct+'%</span>':'')+'</span></div></button>'}).join('')+'</div></div>';
 }
 function viewExams(){
   return header('ئەسیلەکان',subName()+' · ئەسیلە تەواوەکانی وەزارەت',false,accBtn())+'<div class="wrap">'+subBar()+lockBar()+YEARS.slice().reverse().map(y=>'<div class="unit">'+y+'</div><div class="stack">'+
@@ -1825,7 +1828,7 @@ function viewMist(){
   return H+'<div class="wrap">'+reviewCard()+
    '<h2>هەموو هەڵەکانم</h2><div class="grid3"><div class="stat"><div class="v num">'+boxN(1)+'</div><div class="k">قۆناغی ١ (١ ڕۆژ)</div></div><div class="stat"><div class="v num">'+boxN(2)+'</div><div class="k">قۆناغی ٢ (٣ ڕۆژ)</div></div><div class="stat"><div class="v num">'+boxN(3)+'</div><div class="k">قۆناغی ٣ (٧ ڕۆژ)</div></div></div>'+
    '<div class="stack" style="margin-top:12px"><button class="btn alt" data-act="runmist">هەموو هەڵەکان ئێستا دووبارە بکەرەوە ('+ids.length+')</button>'+
-   Object.keys(by).sort((a,b)=>a-b).map(c=>{const nd=by[c].filter(id=>due.includes(id)).length;return '<button class="row" data-act="runmistch" data-c="'+c+'"><div class="ix num">'+c+'</div><div class="tx"><b>'+CH[c]+'</b><span><span class="num">'+by[c].length+'</span> هەڵە'+(nd?' · <span class="num">'+nd+'</span> ئەمڕۆ':'')+'</span></div></button>'}).join('')+
+   Object.keys(by).sort((a,b)=>a-b).map(c=>{const nd=by[c].filter(id=>due.includes(id)).length;return '<button class="row" data-act="runmistch" data-c="'+c+'"><div class="ix num">'+dch(c)+'</div><div class="tx"><b>'+CH[c]+'</b><span><span class="num">'+by[c].length+'</span> هەڵە'+(nd?' · <span class="num">'+nd+'</span> ئەمڕۆ':'')+'</span></div></button>'}).join('')+
    '</div><p class="muted" style="font-size:13px">تێبینی: ئەگەر پێش کاتی خۆی دووبارەی بکەیتەوە، قۆناغەکەی ناگۆڕێت؛ تەنها لە ڕۆژی خۆیدا بەرز دەبێتەوە.</p></div>';
 }
 function paceCard(small){
@@ -1847,11 +1850,11 @@ function viewToday(){
   if(P.mode==='page'&&!pgOf(SECK[0]))P.mode='sec';
   h+='<h2>ئەمڕۆ چی دەخوێنیت؟ <span class="muted" style="font-size:14px;font-weight:700">(پرسیارە وەزارییەکانی)</span></h2>'+(pgOf(SECK[0])?'<div class="seg"><button data-pmode="sec" aria-pressed="'+(P.mode==='sec')+'">بەند و بەش</button><button data-pmode="page" aria-pressed="'+(P.mode==='page')+'">لاپەڕەکانی کتێب</button></div>':'')+'<div class="card stack" style="margin-top:10px">';
   if(P.mode==='sec'){
-    h+='<div class="field"><label for="pch">بەند</label><select id="pch">'+Object.keys(CH).map(c=>'<option value="'+c+'"'+(+P.c===+c?' selected':'')+'>بەندی '+c+' · '+CH[c]+'</option>').join('')+'</select></div>';
-    h+='<div class="field"><label>بەشەکان (هیچ هەڵنەبژێریت = هەموو بەندەکە)</label>'+SECK.filter(k=>+k.split('.')[0]===+P.c).map(k=>{const n=QS.filter(q=>q.s===k).length;return '<label class="chk"><input type="checkbox" data-psec="'+k+'"'+(P.secs.includes(k)?' checked':'')+'><span class="tx">'+k+' · '+SEC[k][0]+'<span>'+(pgOf(k)?'لاپەڕە <span class="num ltr">'+SEC[k][1]+'–'+secEnd(k)+'</span> · ':'')+'<span class="num">'+n+'</span> پرسیاری وەزاری</span></span></label>'}).join('')+'</div>';
+    h+='<div class="field"><label for="pch">بەند</label><select id="pch">'+Object.keys(CH).map(c=>'<option value="'+c+'"'+(+P.c===+c?' selected':'')+'>بەندی '+dch(c)+' · '+CH[c]+'</option>').join('')+'</select></div>';
+    h+='<div class="field"><label>بەشەکان (هیچ هەڵنەبژێریت = هەموو بەندەکە)</label>'+SECK.filter(k=>+k.split('.')[0]===+P.c).map(k=>{const n=QS.filter(q=>q.s===k).length;return '<label class="chk"><input type="checkbox" data-psec="'+k+'"'+(P.secs.includes(k)?' checked':'')+'><span class="tx">'+dsec(k)+' · '+SEC[k][0]+'<span>'+(pgOf(k)?'لاپەڕە <span class="num ltr">'+SEC[k][1]+'–'+secEnd(k)+'</span> · ':'')+'<span class="num">'+n+'</span> پرسیاری وەزاری</span></span></label>'}).join('')+'</div>';
   }else{
     h+='<div class="grid2"><div class="field"><label for="pfrom">لە لاپەڕە</label><input type="text" id="pfrom" inputmode="numeric" autocomplete="off" value="'+esc(P.from)+'"></div><div class="field"><label for="pto">هەتا لاپەڕە</label><input type="text" id="pto" inputmode="numeric" autocomplete="off" value="'+esc(P.to)+'"></div></div>';
-    h+='<p class="muted" style="margin:0;font-size:13px">ئەم لاپەڕانە ئەم بەشانە دەگرنەوە: '+(secs.length?secs.map(k=>k+' '+SEC[k][0]).join('، '):'هیچ')+'</p>';
+    h+='<p class="muted" style="margin:0;font-size:13px">ئەم لاپەڕانە ئەم بەشانە دەگرنەوە: '+(secs.length?secs.map(k=>dsec(k)+' '+SEC[k][0]).join('، '):'هیچ')+'</p>';
   }
   h+='</div>';
   const lockedC=[...new Set(L.map(chOf))].filter(c=>!canCh(c));
@@ -1871,13 +1874,13 @@ function viewToday(){
 function freqData(){const cnt={},sc={},yrs={};QS.forEach(q=>{const c=chOf(q);cnt[c]=(cnt[c]||0)+1;sc[q.s]=(sc[q.s]||0)+1;(yrs[q.s]=yrs[q.s]||new Set()).add(EX[q.ex].year)});
   const ch=Object.keys(cnt).map(c=>({c:+c,n:cnt[c],pct:Math.round(cnt[c]/QS.length*100),per:(cnt[c]/EXAMS.length)})).sort((a,b)=>b.n-a.n);
   const se=Object.keys(sc).map(k=>({k,n:sc[k],y:yrs[k].size})).sort((a,b)=>b.n-a.n);return {ch,se}}
-function freqRow(x,mx,i){return '<button class="frow" data-act="chap" data-c="'+x.c+'"><span class="fr num">'+(i+1)+'</span><span class="fn"><b>بەندی '+x.c+' · '+CH[x.c]+'</b><span class="wb"><i style="width:'+(x.n/mx*100)+'%"></i></span><small>نزیکەی <span class="num">'+x.per.toFixed(1)+'</span> پرسیار لە هەر ئەسیلەیەک · <span class="num">'+x.pct+'%</span>ی هەموو پرسیارەکان</small></span><span class="fv num">'+x.n+'</span></button>'}
+function freqRow(x,mx,i){return '<button class="frow" data-act="chap" data-c="'+x.c+'"><span class="fr num">'+(i+1)+'</span><span class="fn"><b>بەندی '+dch(x.c)+' · '+CH[x.c]+'</b><span class="wb"><i style="width:'+(x.n/mx*100)+'%"></i></span><small>نزیکەی <span class="num">'+x.per.toFixed(1)+'</span> پرسیار لە هەر ئەسیلەیەک · <span class="num">'+x.pct+'%</span>ی هەموو پرسیارەکان</small></span><span class="fv num">'+x.n+'</span></button>'}
 function freqCard(){const F=freqData(),mx=F.ch[0]?F.ch[0].n:1;
   return '<h2>کام بەند زیاتر هاتووە لە وەزاری؟</h2><div class="card stack"><p class="muted" style="margin:0;font-size:14px">لە <span class="num">'+EXAMS.length+'</span> ئەسیلەی وەزاری (<span class="num">'+QS.length+'</span> پرسیار). ئەوەی زۆرترە یەکەم بیخوێنە.</p><div class="freq">'+F.ch.slice(0,4).map((x,i)=>freqRow(x,mx,i)).join('')+'</div><button class="btn alt" data-act="openfreq">هەموو بەند و بەشەکان بە ڕیز</button></div>'}
 function viewFreq(){const F=freqData(),mx=F.ch[0]?F.ch[0].n:1,smx=F.se[0]?F.se[0].n:1;
   return header('زۆرترین هاتوو لە وەزاری','بەند و بەشەکان بەپێی ژمارەی پرسیار',true)+'<div class="wrap">'+
    '<h2>بەندەکان</h2><div class="freq">'+F.ch.map((x,i)=>freqRow(x,mx,i)).join('')+'</div>'+
-   '<h2>بەشەکان (١٥ ی یەکەم)</h2><div class="freq">'+F.se.slice(0,15).map((x,i)=>'<button class="frow" data-act="runsec" data-s="'+x.k+'"><span class="fr num">'+(i+1)+'</span><span class="fn"><b>'+x.k+' · '+SEC[x.k][0]+'</b><span class="wb"><i style="width:'+(x.n/smx*100)+'%"></i></span><small>لە <span class="num">'+x.y+'</span> ساڵی جیاواز هاتووە'+pgTxt(x.k)+'</small></span><span class="fv num">'+x.n+'</span></button>').join('')+'</div>'+
+   '<h2>بەشەکان (١٥ ی یەکەم)</h2><div class="freq">'+F.se.slice(0,15).map((x,i)=>'<button class="frow" data-act="runsec" data-s="'+x.k+'"><span class="fr num">'+(i+1)+'</span><span class="fn"><b>'+dsec(x.k)+' · '+SEC[x.k][0]+'</b><span class="wb"><i style="width:'+(x.n/smx*100)+'%"></i></span><small>لە <span class="num">'+x.y+'</span> ساڵی جیاواز هاتووە'+pgTxt(x.k)+'</small></span><span class="fv num">'+x.n+'</span></button>').join('')+'</div>'+
    '<p class="muted" style="font-size:13px">کرتە لە بەندێک یان بەشێک بکە بۆ ڕاهێنان لەسەر پرسیارەکانی.</p></div>'}
 
 // ----- parent report -----
@@ -1918,8 +1921,8 @@ function installCard(){if(IN_APP||standalone()||load('bio_noinst',0))return '';c
 
 // ----- daily study log (سەعی ڕۆژانە) -----
 async function loadLog(){if(!ST.user||!sb)return;const r=await sb.from('study_log').select('id,day,body,minutes,done').eq('user_id',ST.user.id).order('day',{ascending:false}).order('id',{ascending:true}).range(0,299);if(!r.error){ST.log=r.data||[];ST.logOk=1}else ST.logOk=0}
-function pickText(){const P=ST.pick,{secs}=pickedQs();if(P.mode==='page')return 'کتێب لاپەڕە '+Math.min(P.from,P.to)+'–'+Math.max(P.from,P.to)+(secs.length?' ('+secs.join('، ')+')':'');
-  return 'بەندی '+P.c+': '+secs.map(k=>k+' '+SEC[k][0]).join('، ')}
+function pickText(){const P=ST.pick,{secs}=pickedQs();if(P.mode==='page')return 'کتێب لاپەڕە '+Math.min(P.from,P.to)+'–'+Math.max(P.from,P.to)+(secs.length?' ('+secs.map(k=>dsec(k)).join('، ')+')':'');
+  return 'بەندی '+dch(P.c)+': '+secs.map(k=>dsec(k)+' '+SEC[k][0]).join('، ')}
 function logCard(){
   let h='<h2>سەعی ڕۆژانەم</h2>';
   if(!ST.user)return h+'<div class="card stack"><span>ڕۆژانە بنووسە چی دەخوێنیت و چەند کاتژمێر، هەموو ڕۆژەکانت لێرە پاشەکەوت دەبن.</span><button class="btn" data-act="joinlb">هەژمار دروست بکە</button></div>';
@@ -1942,7 +1945,7 @@ function viewSummary(){const R=RUN,done=Object.keys(R.done),ok=done.filter(id=>S
   let h=header('کۆتایی ڕاهێنان',R.title,true)+'<div class="wrap"><div class="card score" style="margin-top:16px"><div class="big num '+pctCls(pct)+'">'+ok.length+'/'+done.length+'</div><div class="of">ڕاست · <span class="num">'+pct+'%</span></div></div>';
   if(!done.length)h+='<div class="card" style="margin-top:12px">هیچ پرسیارێکت وەڵام نەدایەوە.</div>';
   else if(!bad.length)h+='<div class="card" style="margin-top:12px">ئافەرین! هەمووت ڕاست کرد. ئەم بەشە باش دەزانیت.</div>';
-  else{h+='<h2>لە کوێ هەڵەت کرد؟</h2><div class="stack">'+secs.map(k=>'<div class="card stack fb"><b>'+k+' · '+SEC[k][0]+'</b><span><span class="num">'+by[k].length+'</span> هەڵەت لەم بەشەدا کرد. پێشنیار: '+(pgOf(k)?'کتێب لاپەڕە <b class="num ltr">'+SEC[k][1]+'–'+secEnd(k)+'</b>':'ئەم بەشەی کتێب')+' بخوێنەوە، پاشان ئەم بەشە دووبارە تاقی بکەرەوە.</span>'+
+  else{h+='<h2>لە کوێ هەڵەت کرد؟</h2><div class="stack">'+secs.map(k=>'<div class="card stack fb"><b>'+dsec(k)+' · '+SEC[k][0]+'</b><span><span class="num">'+by[k].length+'</span> هەڵەت لەم بەشەدا کرد. پێشنیار: '+(pgOf(k)?'کتێب لاپەڕە <b class="num ltr">'+SEC[k][1]+'–'+secEnd(k)+'</b>':'ئەم بەشەی کتێب')+' بخوێنەوە، پاشان ئەم بەشە دووبارە تاقی بکەرەوە.</span>'+
      '<span class="muted" style="font-size:13px">'+by[k].map(id=>esc(srcLabel(BYID[id]))).join(' · ')+'</span></div>').join('')+'</div>'+
      '<p class="muted" style="font-size:13px">ئەم '+bad.length+' پرسیارە بەیانی لە «پێداچوونەوە» دەگەڕێنەوە.</p>'}
   h+='<div class="stack" style="margin-top:14px">'+(bad.length?'<button class="btn" data-act="redobad">هەڵەکان ئێستا دووبارە بکەرەوە ('+bad.length+')</button>':'')+'<button class="btn alt" data-act="home">گەڕانەوە</button></div></div>';
@@ -1963,7 +1966,7 @@ function optsHTML(q,st){ // st: {pick, reveal, a}
 }
 function aiBtn(q){return '<button class="aibtn" data-act="ai" data-q="'+q.id+'">✦ پرسیار لە یاریدەدەری AI بکە</button>'}
 function qBody(q){
-  let h='<div class="qhead"><span class="tag g">بەندی '+chOf(q)+' · '+q.s+'</span><span class="tag">'+esc(EX[q.ex].round)+' · '+EX[q.ex].year+'</span>';
+  let h='<div class="qhead"><span class="tag g">بەندی '+dch(chOf(q),q.sub)+' · '+dsec(q.s,q.sub)+'</span><span class="tag">'+esc(EX[q.ex].round)+' · '+EX[q.ex].year+'</span>';
   const G=grpOf(q);if(G)h+='<span class="tag rep">پرسیاری هاوشێوە '+G.length+' جار هاتووە</span>';
   const p=ST.prog[q.id];if(p&&p.box>=1)h+='<span class="tag" style="background:var(--badsoft);color:var(--bad)">پێداچوونەوە · قۆناغی '+p.box+'</span>';
   h+='</div>';
@@ -2016,7 +2019,7 @@ function viewResult(){
   const ws=Object.keys(bys).map(k=>({k,ok:bys[k][0],seen:bys[k][1],pct:Math.round(bys[k][0]/bys[k][1]*100)})).filter(x=>x.ok<x.seen).sort((a,b)=>a.pct-b.pct||(b.seen-b.ok)-(a.seen-a.ok));
   h+='<h2>ڕاپۆرتی خاڵە لاوازەکان</h2>';
   h+=ws.length?'<p class="muted" style="font-size:14px;margin-top:-4px">ئەم بەشانە نمرەیان لێ بردوویت. یەکەم ئەمانە بخوێنەوە (کرتە بکە بۆ ڕاهێنانی هەمان بەش):</p><div class="weak">'+ws.slice(0,6).map(x=>wkRow(x,'<span class="num">'+(x.seen-x.ok)+'</span> هەڵە لە <span class="num">'+x.seen+'</span> · '+'<span class="num">'+((x.seen-x.ok)*2)+'</span> نمرە لەدەستچوو'+(pgOf(x.k)?' · کتێب لاپەڕە <span class="num">'+SEC[x.k][1]+'</span>':''))).join('')+'</div>':'<div class="card">هیچ هەڵەیەکت نەکرد. ئافەرین!</div>';
-  h+='<h2>بەپێی بەند</h2><div class="card weights">'+Object.keys(byc).sort((a,b)=>a-b).map(c=>{const [a,t]=byc[c];return '<div class="wrow"><span>بەندی '+c+'</span><div class="wb"><i style="width:'+(a/t*100)+'%;background:'+pctCol(a/t*100)+'"></i></div><span class="wn num">'+a+'/'+t+'</span></div>'}).join('')+'</div>';
+  h+='<h2>بەپێی بەند</h2><div class="card weights">'+Object.keys(byc).sort((a,b)=>a-b).map(c=>{const [a,t]=byc[c];return '<div class="wrow"><span>بەندی '+dch(c)+'</span><div class="wb"><i style="width:'+(a/t*100)+'%;background:'+pctCol(a/t*100)+'"></i></div><span class="wn num">'+a+'/'+t+'</span></div>'}).join('')+'</div>';
   h+='<h2>پێداچوونەوە</h2><p class="muted" style="font-size:14px;margin-top:-4px">کرتە لە ژمارەیەک بکە بۆ بینینی پرسیارەکە و ڕوونکردنەوەکەی. هەڵەکانت خۆکارانە چوونە ناو «پێداچوونەوە».</p><div class="dots">'+R.ids.map((id,i)=>'<button class="num '+(isOk(id)?'ok':'no')+'" data-review="'+i+'">'+(i+1)+'</button>').join('')+'</div>';
   if(R.rev!=null){const q=BYID[R.ids[R.rev]],A=ST.ans[q.id]||{};h+='<div class="card" style="margin-top:16px">'+qBody(q)+optsHTML(q,{pick:R.ans[q.id],reveal:true,a:A.a})+aiBtn(q)+explHTML(q,R.ans[q.id]==null?-1:R.ans[q.id])+'</div>'}
   return h+'<div style="margin-top:16px"><button class="btn" data-act="home">گەڕانەوە</button></div></div>';
@@ -2181,7 +2184,7 @@ app.addEventListener('click',e=>{
   if(a==='back'&&!RUN&&V.stack.length&&V.stack[V.stack.length-1].v==='mixpick'){V.stack.pop();if(V.mixFrom==='main'){V.mixFrom=0;goMain()}else{render();scrollTo(0,0)}return}
   if(a==='back'){let y=0;if(RUN){if(RUN.mode==='exam'&&!RUN.submitted&&Object.keys(RUN.ans).length&&!b.dataset.sure){b.dataset.sure=1;b.textContent='؟';toast('دووبارە کرتە بکە بۆ دەرچوون. وەڵامەکانت نانێردرێن.');return}y=RUN.y0||0;RUN=null}else{const p=V.stack.pop();if(p&&p.from==='me')V.me=1;y=p&&p.y0||0}render();scrollTo(0,y);requestAnimationFrame(()=>scrollTo(0,y));return}
   if(a==='home'){const y=RUN&&RUN.y0||0;RUN=null;render();scrollTo(0,y);requestAnimationFrame(()=>scrollTo(0,y));return}
-  if(a==='runpick'||a==='runpicknew'){let {L}=pickedQs();if(a==='runpicknew')L=L.filter(q=>!done_(q.id));L=L.slice().sort((x,y)=>EXAMS.indexOf(EX[y.ex])-EXAMS.indexOf(EX[x.ex])||x.s.localeCompare(y.s));start('ئەمڕۆ · '+(ST.pick.mode==='sec'?'بەندی '+ST.pick.c:'لاپەڕە '+Math.min(ST.pick.from,ST.pick.to)+'–'+Math.max(ST.pick.from,ST.pick.to)),L.map(q=>q.id),'practice');return}
+  if(a==='runpick'||a==='runpicknew'){let {L}=pickedQs();if(a==='runpicknew')L=L.filter(q=>!done_(q.id));L=L.slice().sort((x,y)=>EXAMS.indexOf(EX[y.ex])-EXAMS.indexOf(EX[x.ex])||x.s.localeCompare(y.s));start('ئەمڕۆ · '+(ST.pick.mode==='sec'?'بەندی '+dch(ST.pick.c):'لاپەڕە '+Math.min(ST.pick.from,ST.pick.to)+'–'+Math.max(ST.pick.from,ST.pick.to)),L.map(q=>q.id),'practice');return}
   if(a==='runrep'){const ids=[];GROUPS.forEach(g=>g.forEach(x=>{if(inCur(x)&&canQ(BYID[x]))ids.push(x)}));start('پرسیارە دووبارەبووەکان',ids,'practice');return}
   if(a==='quick'){const pool=QS.filter(q=>q.full&&canQ(q));start('١٠ پرسیاری هەڕەمەکی',shuffle(pool).slice(0,10).map(q=>q.id),'practice');return}
   if(a==='runreview'){const ids=dueIds().sort((x,y)=>ST.prog[x].due.localeCompare(ST.prog[y].due));start('پێداچوونەوەی ئەمڕۆ',ids,'practice');return}
@@ -2219,8 +2222,8 @@ app.addEventListener('click',e=>{
   if(a==='logdone'){const x=ST.log.find(z=>z.id==b.dataset.id);if(!x)return;x.done=!x.done;render();sb.from('study_log').update({done:x.done}).eq('id',x.id).then(r=>{if(r.error)toast(ERR.net)});return}
   if(a==='logdel'){if(!b.dataset.sure){b.dataset.sure=1;b.textContent='سڕینەوە؟';return}const id=+b.dataset.id;ST.log=ST.log.filter(z=>z.id!==id);render();sb.from('study_log').delete().eq('id',id).then(r=>{if(r.error)toast(ERR.net)});return}
   if(a==='chap'){const c=+b.dataset.c;if(needLock(c))return;V.stack.push({v:'chap',c});render();scrollTo(0,0);return}
-  if(a==='runch'){const c=+b.dataset.c;start('بەندی '+c,QS.filter(q=>chOf(q)===c).map(q=>q.id),'practice');return}
-  if(a==='runsec'){const s=b.dataset.s;if(needLock(+s.split('.')[0]))return;start(s+' · '+SEC[s][0],QS.filter(q=>q.s===s).map(q=>q.id),'practice');return}
+  if(a==='runch'){const c=+b.dataset.c;start('بەندی '+dch(c),QS.filter(q=>chOf(q)===c).map(q=>q.id),'practice');return}
+  if(a==='runsec'){const s=b.dataset.s;if(needLock(+s.split('.')[0]))return;start(dsec(s)+' · '+SEC[s][0],QS.filter(q=>q.s===s).map(q=>q.id),'practice');return}
   if(a==='exprac'||a==='exstart'){if(needLock(null))return;if(a==='exstart'&&needLogin())return;const ex=EX[b.dataset.e];start(ex.round+' '+ex.year,QS.filter(q=>q.ex===ex.id).sort((x,y)=>x.n-y.n).map(q=>q.id),a==='exstart'?'exam':'practice',ex.id);return}
   if(a==='runmist'||a==='runmistch'){let ids=reviewIds();if(a==='runmistch')ids=ids.filter(id=>chOf(BYID[id])===+b.dataset.c);start('هەڵەکانم',shuffle(ids),'practice');return}
   if(a==='prev'){if(RUN.i>0){RUN.i--;render();scrollTo(0,0)}return}
@@ -2610,8 +2613,8 @@ function viewCards(){
      '<details class="fchow"><summary>چۆن کار دەکات؟</summary><ol><li>کارتێک دەبینیت کە پرسیارێکی لەسەرە. لە مێشکی خۆتدا وەڵام بدەرەوە.</li><li>کرتە بکە بۆ بینینی وەڵامی ڕاست.</li><li>ئەگەر وەڵامەکەت ڕاست بوو «زانیم» دابگرە، ئەگەر نا «نەمزانی».</li><li>«نەمزانی» ⇐ کارتەکە هەر ئێستا و سبەینێ دەگەڕێتەوە.<br>«زانیم» ⇐ دوای <span class="num">1</span> ، <span class="num">3</span> ، <span class="num">7</span> ، <span class="num">14</span> ، <span class="num">30</span> ڕۆژ دەگەڕێتەوە.</li><li>کە <span class="num">4</span> جار لە سەر یەک زانیت ⇐ «جێگیر بوو».</li></ol></details></div>';
   const DK=fcDecks(sub),CHN=(fcMeta(sub).CH||{});let lastc=null;
   h+='<h2>بەندەکان</h2><div class="stack">'+DK.map(d=>{const open=d.cards.some(fcOpen),s=fcStats(d.cards);let gh='';
-    if(d.ch!==lastc){lastc=d.ch;const CC=DK.filter(x=>x.ch===d.ch),cs=fcStats([].concat(...CC.map(x=>x.cards)));gh='<div class="fchh"><b><span class="num">'+d.ch+'</span> · '+esc(CHN[d.ch]||('بەندی '+d.ch))+'</b>'+(CC.length>1&&open?'<button class="linkbtn" data-act="fcchap" data-c="'+d.ch+'">هەموو بەندەکە (<span class="num">'+cs.n+'</span>)</button>':'')+'</div>'}
-    return gh+'<button class="row deckrow" data-act="fcdeck" data-c="'+d.ch+'" data-d="'+esc(d.deck)+'"><div class="ix num">'+(DK.filter(x=>x.ch===d.ch).length>1?d.ch+'.'+(DK.filter(x=>x.ch===d.ch).indexOf(d)+1):d.ch)+'</div><div class="tx"><b>'+esc(d.deck)+'</b><span><span class="num">'+s.n+'</span> کارت'+(s.seen?' · زانیوتە <span class="num">'+s.known+'</span>':'')+(s.due?' · <b style="color:var(--gold)"><span class="num">'+s.due+'</span> ئەمڕۆ</b>':'')+'</span>'+(s.seen?'<div class="bar"><i style="width:'+Math.max(3,s.known/s.n*100)+'%"></i></div>':'')+'</div>'+(open?'':'<span class="lock">'+ic('lock')+'</span>')+'</button>'}).join('')+'</div>';
+    if(d.ch!==lastc){lastc=d.ch;const CC=DK.filter(x=>x.ch===d.ch),cs=fcStats([].concat(...CC.map(x=>x.cards)));gh='<div class="fchh"><b><span class="num">'+dch(d.ch,sub)+'</span> · '+esc(CHN[d.ch]||('بەندی '+dch(d.ch,sub)))+'</b>'+(CC.length>1&&open?'<button class="linkbtn" data-act="fcchap" data-c="'+d.ch+'">هەموو بەندەکە (<span class="num">'+cs.n+'</span>)</button>':'')+'</div>'}
+    return gh+'<button class="row deckrow" data-act="fcdeck" data-c="'+d.ch+'" data-d="'+esc(d.deck)+'"><div class="ix num">'+(DK.filter(x=>x.ch===d.ch).length>1?dch(d.ch,sub)+'.'+(DK.filter(x=>x.ch===d.ch).indexOf(d)+1):dch(d.ch,sub))+'</div><div class="tx"><b>'+esc(d.deck)+'</b><span><span class="num">'+s.n+'</span> کارت'+(s.seen?' · زانیوتە <span class="num">'+s.known+'</span>':'')+(s.due?' · <b style="color:var(--gold)"><span class="num">'+s.due+'</span> ئەمڕۆ</b>':'')+'</span>'+(s.seen?'<div class="bar"><i style="width:'+Math.max(3,s.known/s.n*100)+'%"></i></div>':'')+'</div>'+(open?'':'<span class="lock">'+ic('lock')+'</span>')+'</button>'}).join('')+'</div>';
   return h+'</div>'}
 function fcStart(ids,title){ids=ids.filter(id=>FC.idx.find(c=>c.id===id&&fcOpen(c)));if(!ids.length){toast('هیچ کارتێک نییە');return}const ss=fcSess();if(ss&&ids.length>ss)ids=ids.slice(0,ss);
   V.fcrun={title,ids:ids.slice(),i:0,flip:0,ok:0,bad:0,again:{},n0:ids.length};render();scrollTo(0,0)}
@@ -2651,7 +2654,7 @@ function cardsClick(a,b){
   if(a==='fcsub'){FC.sub=b.dataset.s;fcText(FC.sub).then(render);render();return true}
   if(a==='fcnew'){save('klil_fc_new',+b.dataset.n);render();return true}
   if(a==='fcss'){save('klil_fc_sess',+b.dataset.n);render();return true}
-  if(a==='fcchap'){const ch=+b.dataset.c;const L=fcCards(fcCur()).filter(c=>c.ch===ch&&fcOpen(c));if(!L.length){V.lock=1;render();return true}const nw=L.filter(c=>fcNew(c.id)||fcDue(c.id)).map(c=>c.id);fcStart(nw.length?nw:shuffle(L.map(c=>c.id)),'بەندی '+ch);return true}
+  if(a==='fcchap'){const ch=+b.dataset.c;const L=fcCards(fcCur()).filter(c=>c.ch===ch&&fcOpen(c));if(!L.length){V.lock=1;render();return true}const nw=L.filter(c=>fcNew(c.id)||fcDue(c.id)).map(c=>c.id);fcStart(nw.length?nw:shuffle(L.map(c=>c.id)),'بەندی '+dch(ch,fcCur()));return true}
   if(a==='fctoday'){fcStart(fcTodayIds(fcCur()),'کارتەکانی ئەمڕۆ · '+subName(FC.sub));return true}
   if(a==='fcdeck'){const ch=+b.dataset.c;const L=fcCards(fcCur()).filter(c=>c.ch===ch&&c.deck===b.dataset.d&&fcOpen(c));if(!L.length){V.lock=1;render();return true}
     const nw=L.filter(c=>fcNew(c.id)||fcDue(c.id)).map(c=>c.id);fcStart(nw.length?nw:shuffle(L.map(c=>c.id)),b.dataset.d);return true}
@@ -3208,7 +3211,7 @@ function viewNb(){if(NBX.uid!==foUid()){NBX.uid=foUid();NBX.sync=0}if(NBX.sync!=
   L.sort(V.nbo==='ch'?(a,b)=>String(BYID[a].s).localeCompare(String(BYID[b].s),undefined,{numeric:true})||BYID[a].n-BYID[b].n:(a,b)=>(o[b].t||0)-(o[a].t||0));
   h+='<div class="card stack nbtools" style="margin-top:12px"><input type="search" id="nbq" dir="auto" placeholder="وشەیەک بنووسە بۆ گەڕان…" value="'+esc(V.nbq||'')+'" autocomplete="off">'+
    '<div class="fochips">'+[['all','هەمووی'],['wrong','دوایین جار هەڵە بوو'],['note','تێبینیم لەسەر نووسیوە']].map(x=>'<button data-fx="nbf" data-f="'+x[0]+'" aria-pressed="'+(ff===x[0])+'">'+x[1]+'</button>').join('')+'</div>'+
-   (chs.length>1?'<div class="fochips nbch"><button data-fx="nbc" data-c="0" aria-pressed="'+(!fc)+'">هەموو بەندەکان</button>'+chs.map(c=>'<button data-fx="nbc" data-c="'+c+'" aria-pressed="'+(fc===c)+'">بەندی <span class="num">'+c+'</span></button>').join('')+'</div>':'')+
+   (chs.length>1?'<div class="fochips nbch"><button data-fx="nbc" data-c="0" aria-pressed="'+(!fc)+'">هەموو بەندەکان</button>'+chs.map(c=>'<button data-fx="nbc" data-c="'+c+'" aria-pressed="'+(fc===c)+'">بەندی <span class="num">'+dch(c)+'</span></button>').join('')+'</div>':'')+
    '<div class="nbsort"><span class="muted">ڕیزکردن:</span><button data-fx="nbo" data-o="new" aria-pressed="'+(V.nbo!=='ch')+'">نوێترین</button><button data-fx="nbo" data-o="ch" aria-pressed="'+(V.nbo==='ch')+'">بەپێی کتێب</button></div></div>';
   h+='<button class="btn dark" style="margin-top:12px" data-fx="nbrun"'+(L.length?'':' disabled')+'>ڕاهێنان لەسەر ئەم <span class="num">'+L.length+'</span> پرسیارە</button><div class="stack" style="margin-top:12px">';
   if(!L.length)h+='<div class="card muted" style="font-size:14px">هیچ پرسیارێک لەگەڵ ئەم هەڵبژاردنەدا ناگونجێت.</div>';
@@ -3395,15 +3398,15 @@ function viewCmix(){const sub=V.cms&&SUBJ_META[V.cms]?V.cms:CUR,chs=cmChs(sub),s
   let h=header('تێکەڵکراوی بەندەکان','خۆت بەندەکان هەڵبژێرە و تاقی بکەرەوە',true)+'<div class="wrap">';
   h+='<div class="subbar" role="tablist" style="margin-top:12px">'+SUBS.map(s=>'<button data-fx="cms" data-s="'+s+'" aria-pressed="'+(s===sub)+'">'+esc(subName(s))+'</button>').join('')+'</div>';
   h+='<div class="card stack" style="margin-top:12px"><b>بەندەکان هەڵبژێرە</b><span class="muted" style="font-size:13px">یەک بەند: <span class="num">20</span> پرسیار · دوو بەند: <span class="num">25</span> · سێ بەند و زیاتر: هەر بەندێک <span class="num">10</span> پرسیار. هەر جارێک پرسیاری نوێ دێت.</span><div class="cmgrid">'+
-   chs.map(x=>{const on=sel.includes(x.k),lk=!cmCanCh(sub,x.k);return '<button class="cmch'+(on?' on':'')+(lk?' lk':'')+'" data-fx="cmc" data-k="'+x.k+'"'+(lk?' data-lk="1"':'')+'><span class="cmn num">'+x.k+'</span><span class="cmt">'+esc(cmChName(sub,x.k))+'</span><small><span class="num">'+x.n+'</span> پرسیار'+(lk?' · '+ic('lock','sm'):'')+'</small></button>'}).join('')+'</div>'+
+   chs.map(x=>{const on=sel.includes(x.k),lk=!cmCanCh(sub,x.k);return '<button class="cmch'+(on?' on':'')+(lk?' lk':'')+'" data-fx="cmc" data-k="'+x.k+'"'+(lk?' data-lk="1"':'')+'><span class="cmn num">'+dch(x.k,sub)+'</span><span class="cmt">'+esc(cmChName(sub,x.k))+'</span><small><span class="num">'+x.n+'</span> پرسیار'+(lk?' · '+ic('lock','sm'):'')+'</small></button>'}).join('')+'</div>'+
    '<button class="btn dark fogo" data-fx="cmgo"'+(sel.length?'':' disabled')+'>'+(sel.length?'دەستپێکردن · <span class="num">'+cmCount(sel.length)+'</span> پرسیار':'لانیکەم بەندێک هەڵبژێرە')+'</button></div>';
   return h+'</div>'}
 function cmClick(a,b){
   if(a==='cmopen'){V.stack.push({v:'cmix'});render();scrollTo(0,0);return true}
   if(a==='cms'){V.cms=b.dataset.s;V.cmc=[];render();return true}
   if(a==='cmc'){if(b.dataset.lk){V.lock=1;render();return true}const k=+b.dataset.k,S=new Set(V.cmc||[]);S.has(k)?S.delete(k):S.add(k);V.cmc=[...S].sort((x,y)=>x-y);render();return true}
-  if(a==='cmgo'){const sub=V.cms&&SUBJ_META[V.cms]?V.cms:CUR,sel=V.cmc||[];if(!sel.length)return true;const ids=cmPick(sub,sel);cmRun(sub,ids,'تێکەڵکراوی بەندەکان · '+subName(sub)+' · بەندی '+sel.join(' + '));return true}
-  if(a==='cmpap'){if(b.dataset.lk){V.lock=1;render();return true}const [sub,pr,i]=b.dataset.k.split(':'),pair=pr.split('-').map(Number),pp=cmPapers(sub,pair);cmRun(sub,pp[+i],'ئەسیلەی تێکەڵ · '+subName(sub)+' · بەندی '+pair.join(' + ')+' · ژمارە '+(+i+1),b.dataset.k);return true}
+  if(a==='cmgo'){const sub=V.cms&&SUBJ_META[V.cms]?V.cms:CUR,sel=V.cmc||[];if(!sel.length)return true;const ids=cmPick(sub,sel);cmRun(sub,ids,'تێکەڵکراوی بەندەکان · '+subName(sub)+' · بەندی '+sel.map(k=>dch(k,sub)).join(' + '));return true}
+  if(a==='cmpap'){if(b.dataset.lk){V.lock=1;render();return true}const [sub,pr,i]=b.dataset.k.split(':'),pair=pr.split('-').map(Number),pp=cmPapers(sub,pair);cmRun(sub,pp[+i],'ئەسیلەی تێکەڵ · '+subName(sub)+' · بەندی '+pair.map(k=>dch(k,sub)).join(' + ')+' · ژمارە '+(+i+1),b.dataset.k);return true}
   return false}
 function cmCard(){return '<h2>تێکەڵکراوی بەندەکان</h2><div class="card stack wtc"><span>خۆت دەرس و بەندەکان هەڵبژێرە، یەک بەند یان چەند بەندێک پێکەوە. هەر جارێک پرسیاری نوێ دێت.</span><button class="btn dark" data-fx="cmopen">کردنەوە</button></div>'}
 
@@ -3414,7 +3417,7 @@ function tmCard(){const sub=CUR;tmLoad(sub);const D=TMX[sub];if(!D||D==='…'||D
   const t=V.tmt||'s';
   let h='<h2>زۆرترین هەڵەی قوتابیان</h2><div class="card stack tmc"><span class="muted" style="font-size:13px">ئەو بەش و پرسیارانەی کە قوتابیانی Klil زۆرترین هەڵەیان تێدا کردووە. ئاگاداربە!</span>'+
    '<div class="seg"><button data-fx="tmt" data-t="s" aria-pressed="'+(t==='s')+'">١٠ بەش</button><button data-fx="tmt" data-t="q" aria-pressed="'+(t==='q')+'">١٠ پرسیار</button></div>';
-  if(t==='s')h+=ss.map((x,i)=>'<button class="tmr" data-act="runsec" data-s="'+x.sec+'"><span class="tmi num">'+(i+1)+'</span><span class="tmx"><b>'+x.sec+' · '+esc(SEC[x.sec][0])+'</b><small><span class="num">'+x.pct+'%</span> ی وەڵامەکان هەڵە بوون</small></span><span class="tmb"><i style="width:'+x.pct+'%"></i></span></button>').join('');
+  if(t==='s')h+=ss.map((x,i)=>'<button class="tmr" data-act="runsec" data-s="'+x.sec+'"><span class="tmi num">'+(i+1)+'</span><span class="tmx"><b>'+dsec(x.sec)+' · '+esc(SEC[x.sec][0])+'</b><small><span class="num">'+x.pct+'%</span> ی وەڵامەکان هەڵە بوون</small></span><span class="tmb"><i style="width:'+x.pct+'%"></i></span></button>').join('');
   else{h+=qs.map((x,i)=>{const q=BYID[x.id],tx=String(q.q||'').replace(/<[^>]+>/g,'');return '<button class="tmr" data-fx="tmq" data-q="'+x.id+'"><span class="tmi num">'+(i+1)+'</span><span class="tmx"><b dir="auto">'+esc(tx?(tx.length>70?tx.slice(0,70)+'…':tx):srcLabel(q))+'</b><small>'+esc(srcLabel(q))+' · <span class="num">'+x.pct+'%</span> هەڵە</small></span></button>'}).join('');
     h+='<button class="btn alt" data-fx="tmall">ڕاهێنان لەسەر هەر ١٠ پرسیارەکە</button>'}
   return h+'</div>'}
@@ -3499,8 +3502,8 @@ function viewPick(){const P=V.pick2,sub=P.sub,L=secsOf(sub),sel=new Set(P.sel),n
   h+='<div class="card stack" style="margin-top:12px"><span>ئەو بەشانە هەڵبژێرە کە خوێندووتن. پرسیارەکان تەنها لەوانە دێن. ('+(P.kind==='mt'?'<span class="num">50</span> پرسیار · <span class="num">3</span> کاتژمێر':'<span class="num">20</span> پرسیار · <span class="num">30</span> خولەک')+')</span>'+
    '<div class="pkbar"><button class="linkbtn" data-fx="pkall">هەمووی</button><button class="linkbtn" data-fx="pknone">هیچ</button><button class="linkbtn" data-fx="pkstud">ئەوانەی خوێندوومن</button></div></div>';
   let lastc=0;h+='<div class="stack" style="margin-top:10px">';
-  L.forEach(x=>{if(x.ch!==lastc){lastc=x.ch;h+='<div class="unit">بەندی <span class="num">'+x.ch+'</span> · '+esc((M.CH&&(M.CH[x.ch]||M.CH[String(x.ch)]))||'')+'</div>'}
-    h+='<label class="pkrow'+(sel.has(x.k)?' on':'')+'"><input type="checkbox" data-pk="'+x.k+'"'+(sel.has(x.k)?' checked':'')+'><span class="pkk num">'+x.k+'</span><span class="pkn">'+esc(x.name)+'</span><small class="num">'+x.n+'</small></label>'});
+  L.forEach(x=>{if(x.ch!==lastc){lastc=x.ch;h+='<div class="unit">بەندی <span class="num">'+dch(x.ch,sub)+'</span> · '+esc((M.CH&&(M.CH[x.ch]||M.CH[String(x.ch)]))||'')+'</div>'}
+    h+='<label class="pkrow'+(sel.has(x.k)?' on':'')+'"><input type="checkbox" data-pk="'+x.k+'"'+(sel.has(x.k)?' checked':'')+'><span class="pkk num">'+dsec(x.k,sub)+'</span><span class="pkn">'+esc(x.name)+'</span><small class="num">'+x.n+'</small></label>'});
   h+='</div><div class="pkfoot"><span>'+(have>=need?'<b class="num">'+have+'</b> پرسیار بەردەستە':'پێویستە لانیکەم <b class="num">'+need+'</b> پرسیار هەبێت (ئێستا <span class="num">'+have+'</span>)')+'</span><button class="btn dark" data-fx="pkgo"'+(have>=need?'':' disabled')+'>دەستپێکردن</button></div>';
   return h+'</div>'}
 function openPick(kind){const sub=CUR,st=studiedSecs(sub),L=secsOf(sub);V.pick2={kind,sub,sel:L.filter(x=>st.has(x.k)).map(x=>x.k)};V.stack.push({v:'pick2'});render();scrollTo(0,0)}
@@ -3519,8 +3522,8 @@ function viewMixPick(){const sel=new Set(V.mxs||SUBS),n=V.mxn||50;
   if(sel.size){h+='<b>لە هەر دەرسێک کام بەش؟</b><div class="mxsubs">'+SUBS.filter(s=>sel.has(s)).map(s=>{const ch=mixSecs(s),open=V.mxopen===s,L=secsOf(s);
     let r='<div class="mxsub'+(open?' open':'')+'"><button class="mxsh" data-fx="mxopen" data-s="'+s+'"><b>'+esc(subName(s))+'</b><span>'+(ch?'<span class="num">'+ch.length+'</span> بەش هەڵبژێردراوە':'هەموو بەشەکان')+'</span><i>'+(open?'▴':'▾')+'</i></button>';
     if(open){const M=SUBJ_META[s]||{CH:{}},S=new Set(ch||[]);let lc=0;r+='<div class="mxlist"><div class="pkbar"><button class="linkbtn" data-fx="mxall" data-s="'+s+'">هەمووی</button><button class="linkbtn" data-fx="mxstud" data-s="'+s+'">ئەوانەی خوێندوومن</button></div>';
-      L.forEach(x=>{if(x.ch!==lc){lc=x.ch;r+='<label class="unit mxch"><input type="checkbox" data-mc="'+s+'|'+x.ch+'"'+(L.filter(y=>y.ch===x.ch).every(y=>S.has(y.k))?' checked':'')+'> بەندی <span class="num">'+x.ch+'</span> · '+esc((M.CH&&(M.CH[x.ch]||M.CH[String(x.ch)]))||'')+'</label>'}
-        r+='<label class="pkrow'+(S.has(x.k)?' on':'')+'"><input type="checkbox" data-mk="'+s+'|'+x.k+'"'+(S.has(x.k)?' checked':'')+'><span class="pkk num">'+x.k+'</span><span class="pkn">'+esc(x.name)+'</span><small class="num">'+x.n+'</small></label>'});
+      L.forEach(x=>{if(x.ch!==lc){lc=x.ch;r+='<label class="unit mxch"><input type="checkbox" data-mc="'+s+'|'+x.ch+'"'+(L.filter(y=>y.ch===x.ch).every(y=>S.has(y.k))?' checked':'')+'> بەندی <span class="num">'+dch(x.ch,s)+'</span> · '+esc((M.CH&&(M.CH[x.ch]||M.CH[String(x.ch)]))||'')+'</label>'}
+        r+='<label class="pkrow'+(S.has(x.k)?' on':'')+'"><input type="checkbox" data-mk="'+s+'|'+x.k+'"'+(S.has(x.k)?' checked':'')+'><span class="pkk num">'+dsec(x.k,s)+'</span><span class="pkn">'+esc(x.name)+'</span><small class="num">'+x.n+'</small></label>'});
       r+='</div>'}
     return r+'</div>'}).join('')+'</div>'}
   h+='<b>چەند پرسیار؟</b><div class="fochips">'+[20,30,50,100].map(k=>'<button data-fx="mxn" data-n="'+k+'" aria-pressed="'+(n===k)+'"><span class="num">'+k+'</span></button>').join('')+'</div>'+
