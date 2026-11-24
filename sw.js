@@ -1,6 +1,6 @@
 // Klil service worker: lets the app open without internet.
 // the saved index.html opens at once; a fresh copy is fetched in the background, and a new version reloads the app when its service worker activates.
-const V='klil-v133';
+const V='klil-v134';
 const SHELL=['./','index.html','manifest.webmanifest','rabar.woff'];
 const RQ=u=>new Request(u,{cache:'reload'});
 // fetch the shell with a version tag so a stale CDN copy of index.html is never saved for a new version
@@ -16,6 +16,8 @@ function swr(req){return caches.match(req).then(hit=>{const n=fetch(req).then(r=
 self.addEventListener('fetch',e=>{const r=e.request;if(r.method!=='GET')return;const u=new URL(r.url);
   if(u.pathname.endsWith('admin.html'))return;
   if(u.pathname.includes('/auth/')||u.pathname.includes('/functions/')||u.pathname.includes('/realtime/'))return;
+  // other pages (privacy.html, test pages…) load normally; only the app itself gets the saved copy
+  if(r.mode==='navigate'&&/\.html$/.test(u.pathname)&&!u.pathname.endsWith('/index.html'))return;
   if(r.mode==='navigate'||u.pathname.endsWith('/index.html')){e.respondWith(caches.match(r,{ignoreSearch:true}).then(hit=>hit||caches.match('index.html')).then(hit=>{const n=fetch(r,{cache:'no-cache'}).then(x=>put(r,x));if(hit){e.waitUntil(n.catch(()=>{}));return hit}return n.catch(()=>new Response('',{status:504}))}));return}
   if(u.hostname.endsWith('supabase.co')){if(u.pathname.startsWith('/rest/v1/'))e.respondWith(netFirst(r,3500));return}
   if(u.origin===location.origin){if(/yt\.json$/.test(u.pathname)){e.respondWith(netFirst(r,4000));return}e.respondWith(swr(r));return}
