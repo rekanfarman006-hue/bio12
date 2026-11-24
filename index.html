@@ -2630,7 +2630,13 @@ function viewCards(){
     return gh+'<button class="row deckrow" data-act="fcdeck" data-c="'+d.ch+'" data-d="'+esc(d.deck)+'"><div class="ix num">'+(DK.filter(x=>x.ch===d.ch).length>1?dch(d.ch,sub)+'.'+(DK.filter(x=>x.ch===d.ch).indexOf(d)+1):dch(d.ch,sub))+'</div><div class="tx"><b>'+esc(d.deck)+'</b><span><span class="num">'+s.n+'</span> کارت'+(s.seen?' · زانیوتە <span class="num">'+s.known+'</span>':'')+(s.due?' · <b style="color:var(--gold)"><span class="num">'+s.due+'</span> ئەمڕۆ</b>':'')+'</span>'+(s.seen?'<div class="bar"><i style="width:'+Math.max(3,s.known/s.n*100)+'%"></i></div>':'')+'</div>'+(open?'':'<span class="lock">'+ic('lock')+'</span>')+'</button>'}).join('')+'</div>';
   return h+'</div>'}
 function fcStart(ids,title){ids=ids.filter(id=>FC.idx.find(c=>c.id===id&&fcOpen(c)));if(!ids.length){toast('هیچ کارتێک نییە');return}const ss=fcSess();if(ss&&ids.length>ss)ids=ids.slice(0,ss);
-  V.fcrun={title,ids:ids.slice(),i:0,flip:0,ok:0,bad:0,again:{},n0:ids.length};render();scrollTo(0,0)}
+  V.fcrun={title,ids:ids.slice(),i:0,flip:0,ok:0,bad:0,again:{},n0:ids.length};
+  {const k=fcKey(V.fcrun),r=k&&load('klil_fc_resume',{})[k],x=r?ids.indexOf(r.id):-1;if(x>0&&x<ids.length)V.fcrun.res0=x}
+  render();scrollTo(0,0)}
+function fcKey(R){return R&&R.n0>1?(FC.sub||CUR)+'|'+R.title+'|'+R.n0+'|'+R.ids[0]:null}
+function fcResSave(R){const k=fcKey(R);if(!k)return;const M=load('klil_fc_resume',{});
+  if(R.i>=R.n0)delete M[k];else M[k]={id:R.ids[R.i],t:Date.now()};
+  const ks=Object.keys(M);if(ks.length>80)ks.sort((a,b)=>M[a].t-M[b].t).slice(0,ks.length-80).forEach(x=>delete M[x]);save('klil_fc_resume',M)}
 function fcFront(t){const L=String(t).split('\n');return fx(L[0])+(L[1]?'<span class="fen" dir="ltr">'+fx(L.slice(1).join(' '))+'</span>':'')}
 function fcBack(t){const P=String(t).split('\n\n');return fx(P[0]).replace(/\n/g,'<br>')+(P[1]?'<span class="fpg">'+fx(P[1])+'</span>':'')}
 function fcCardHTML(id,flip){const T=FC.txt[id];if(!T)return '<div class="fcard"><div class="fface front"><div class="fct">چاوەڕێ بکە…</div></div></div>';
@@ -2650,6 +2656,7 @@ function viewCardRun(){const R=V.fcrun;
   return header(R.title,'کارتی '+(done+1)+' لە '+total,true)+'<div class="wrap fcwrap"><div class="bar" style="margin-top:12px"><i style="width:'+(done/total*100)+'%"></i></div>'+
     '<div class="fcnt"><span class="pill" style="background:var(--goodsoft);color:var(--good)">✓ <span class="num">'+R.ok+'</span></span><span class="pill" style="background:var(--badsoft);color:var(--bad)">✗ <span class="num">'+R.bad+'</span></span></div>'+
     '<div class="fcnav"><button class="fcprev" data-act="fcprev"'+(R.hist&&R.hist.length?'':' disabled')+'>‹ کارتی پێشوو</button></div>'+
+    (R.res0!=null&&R.i===0&&!(R.hist&&R.hist.length)?'<div class="resume"><span>پێشتر تا کارتی <b class="num">'+R.res0+'</b> ت کردووە</span><button class="btn" data-act="fcres">بەردەوامبە لە کارتی '+(R.res0+1)+'</button><button class="rsx" data-act="fcresno" aria-label="داخستن">✕</button></div>':'')+
     fcCardHTML(id,R.flip)+
     (R.flip?'<div class="grid2 fcbtns"><button class="btn fno" data-act="fcno">✗ نەمزانی</button><button class="btn fyes" data-act="fcyes">✓ زانیم</button></div>':'<button class="btn dark" data-act="fcflip" style="margin-top:16px">نیشاندانی وەڵام</button>')+
     '</div>'}
@@ -2660,7 +2667,7 @@ function fcAnswer(ok){const R=V.fcrun,id=R.ids[R.i],t=todayStr();const old=FC.pr
   if(ok){if(!R.again[id]){p.box=Math.min(5,p.box+1);R.ok++}p.due=addDays(t,FC_GAP[p.box]||1)}
   else{p.box=1;p.due=addDays(t,1);if(!R.again[id]){R.bad++;R.again[id]=1;R.ids.push(id)}}
   p.k=ok?1:0;p.t=Date.now();FC.prog[id]=p;markAct(1);fcSaveLocal();fcPush(id);
-  R.i++;R.flip=0;render()}
+  R.i++;R.flip=0;R.res0=null;if(R.i<=R.n0)fcResSave(R);render()}
 function fcPrev(){const R=V.fcrun;if(!R||!R.hist||!R.hist.length)return;const h=R.hist.pop();
   R.ids.length=h.len;R.ok=h.ok;R.bad=h.bad;if(h.again)R.again[h.id]=1;else delete R.again[h.id];
   if(h.old)FC.prog[h.id]=h.old;else delete FC.prog[h.id];fcSaveLocal();if(h.old)fcPush(h.id);
@@ -2676,6 +2683,8 @@ function cardsClick(a,b){
   if(a==='fcflip'){if(V.fcrun){V.fcrun.flip=V.fcrun.flip?0:1;const el=document.querySelector('.fcard');if(el&&V.fcrun.flip){el.classList.add('on');setTimeout(render,320)}else render()}return true}
   if(a==='fcyes'){fcAnswer(true);return true}
   if(a==='fcprev'){fcPrev();return true}
+  if(a==='fcres'){const R=V.fcrun;if(R&&R.res0!=null){R.i=R.res0;R.res0=null;R.flip=0;render();scrollTo(0,0)}return true}
+  if(a==='fcresno'){if(V.fcrun)V.fcrun.res0=null;render();return true}
   if(a==='fcno'){fcAnswer(false);return true}
   if(a==='fcback'){V.fcrun=null;fcFlush();render();scrollTo(0,0);return true}
   return false}
