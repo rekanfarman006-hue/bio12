@@ -1,0 +1,22 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light dark"><title>Klil dark test</title>
+<style>body{font:16px/1.5 system-ui,sans-serif;background:#ffffff;color:#000000;margin:0;padding:16px}
+#p{width:60px;height:30px;background:#ffffff;color:#000000;border:1px solid #888}
+pre{white-space:pre-wrap;font-size:15px;background:#f2f2f2;padding:10px;border-radius:8px}
+.sq{display:inline-block;width:60px;height:60px;margin:4px;border-radius:10px;vertical-align:middle}
+@media (prefers-color-scheme:dark){#mq{background:#111;color:#0f0}}</style></head><body>
+<h3>Klil – تاقیکردنەوەی dark mode</h3>
+<div id="mq">Media query: ئەگەر ئەم دێڕە ڕەش و سەوز بێت = dark</div>
+<div id="p">probe</div>
+<p>ڕەنگەکان: <span class="sq" style="background:#ffffff;border:1px solid #999"></span><span class="sq" style="background:#FDE7EF"></span><span class="sq" style="background:#090B1A"></span><canvas id="cv" width="60" height="60" class="sq"></canvas></p>
+<pre id="o">...</pre>
+<script>
+var c=document.getElementById('cv').getContext('2d');c.fillStyle='#ffffff';c.fillRect(0,0,60,60);
+function rd(t){var p=document.getElementById('p'),cs=getComputedStyle(p),bs=getComputedStyle(document.body);
+return t+': mq='+matchMedia('(prefers-color-scheme: dark)').matches+' light='+matchMedia('(prefers-color-scheme: light)').matches+
+' | probeBG='+cs.backgroundColor+' probeColor='+cs.color+' | bodyBG='+bs.backgroundColor+' | rootScheme='+getComputedStyle(document.documentElement).colorScheme+
+' | sheets='+document.styleSheets.length+' | htmlAttr='+[].map.call(document.documentElement.attributes,function(a){return a.name+'='+a.value}).join(',')+
+' | htmlStyle='+document.documentElement.getAttribute('style')+' | bodyStyle='+document.body.getAttribute('style')}
+var L=['UA: '+navigator.userAgent,rd('t0')];document.getElementById('o').textContent=L.join('\n');
+setTimeout(function(){L.push(rd('t1s'));var ss=[];try{[].forEach.call(document.styleSheets,function(s){ss.push((s.href||'inline')+' rules='+(s.cssRules?s.cssRules.length:'?'))})}catch(e){ss.push('err '+e)}L.push('sheets: '+ss.join(' ; '));
+var ex=[].map.call(document.querySelectorAll('style,link,meta'),function(e){return e.outerHTML.slice(0,90)});L.push('tags: '+ex.join(' || '));document.getElementById('o').textContent=L.join('\n')},1200);
+</script></body></html>
