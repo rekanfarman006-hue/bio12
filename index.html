@@ -567,6 +567,25 @@ html[data-theme=dark] .sg .sgi{filter:saturate(.8) brightness(.85)}
 .seg2{display:flex;gap:4px;background:var(--bg);border-radius:12px;padding:3px;overflow-x:auto}
 .seg2 button{border:0;background:none;border-radius:9px;padding:6px 9px;font:inherit;font-size:13px;font-weight:800;color:var(--muted);white-space:nowrap}
 .seg2 button[aria-pressed=true]{background:var(--brand);color:var(--brandfg)}
+.ucbox{display:flex;flex-direction:column;gap:12px;margin-top:8px}
+.ucempty{display:flex;flex-direction:column;gap:4px;font-size:14px;line-height:1.6}.ucempty span{color:var(--muted)}
+.ucst{display:flex;gap:14px;flex-wrap:wrap;font-size:14px;color:var(--muted)}.ucst b{color:var(--fg)}
+.uclist summary{cursor:pointer;font-weight:800;color:var(--brand);font-size:14px;padding:4px 0}
+.ucrow{display:flex;gap:10px;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding:10px 0}
+.uctx{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1;font-size:14px;overflow-wrap:anywhere}.uctx span{color:var(--muted);font-size:13px}
+.ucbt{display:flex;flex-direction:column;gap:6px;flex:0 0 auto}.ucbt button{border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:10px;padding:6px 10px;font:inherit;font-size:13px;font-weight:700}
+.ucbt .ucdel{color:var(--bad)}.ucbt .ucdel.on{background:var(--bad);color:#fff;border-color:var(--bad)}
+.sheet.full.ucsheet .box{display:flex;flex-direction:column;gap:12px;height:100%;height:100dvh;overflow:hidden;padding:calc(14px + env(safe-area-inset-top,0px)) 16px calc(14px + env(safe-area-inset-bottom,0px))}
+.ucsheet .uchd{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.ucsheet .uchd small{color:var(--muted);font-size:13px}
+.ucsheet .ucx{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--fg);font-size:17px;flex:0 0 auto}
+.ucsheet .ucfl{display:flex;flex-direction:column;gap:6px;flex:1 1 0;min-height:0}
+.ucsheet .uclb{font-weight:800;font-size:15px;display:flex;align-items:center;gap:7px}.ucsheet .uclb i{font-style:normal;color:var(--muted);font-weight:500;font-size:12px}
+.ucsheet .ucn{width:22px;height:22px;border-radius:50%;background:var(--gold);color:#fff;font-size:12px;display:inline-flex;align-items:center;justify-content:center}
+.ucsheet textarea.ucta{flex:1 1 auto;width:100%;min-height:70px;max-height:none;resize:none;border:1px solid var(--line)!important;border-radius:14px;padding:12px!important;font:inherit;font-size:16px;line-height:1.6;background:var(--surface)!important;color:var(--fg)!important;-webkit-text-fill-color:var(--fg)}
+.ucsheet textarea.ucta:focus{border-color:var(--gold)!important;box-shadow:0 0 0 3px rgba(212,155,30,.2);outline:0}
+.ucsheet .err:empty{display:none}
+.ucsheet .ucbtns{display:flex;gap:10px}.ucsheet .ucbtns .btn{flex:1;margin:0}
 .fchh{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:10px 2px 0}
 .fchh b{font-size:15px}.fchh .linkbtn{font-size:13px}
 .accwrap{padding:10px 14px 14px;border-top:1px solid var(--line)}
@@ -1432,7 +1451,7 @@ function goPrevSec(){const p=(V.sh||[]).pop();V.sec=p&&p.s&&p.s!==V.sec?p.s:'mai
 function canBack(){return !!(V.forgot||V.lock||V.acc||V.aiq||V.me||RUN||V.stack.length||V.sec!=='main'||document.querySelector('header .back')||document.querySelector('.sheet'))}
 function backAction(){
   if(!ST.user&&!tourShould()){if(V.forgot){V.forgot=0;render();return true}return false}
-  if(V.forgot||V.lock||V.acc||V.aiq||V.me){V.forgot=0;V.lock=0;V.acc=0;V.aiq=null;V.me=0;render();return true}
+  if(V.forgot||V.lock||V.acc||V.aiq||V.me||V.uc){V.uc=null;V.forgot=0;V.lock=0;V.acc=0;V.aiq=null;V.me=0;render();return true}
   if(typeof aBackSheet==='function'&&aBackSheet())return true;
   const bk=document.querySelector('header .back');if(bk){bk.click();return true}
   if(RUN){RUN=null;render();return true}
@@ -2138,7 +2157,7 @@ function render(){
   const fa=document.activeElement,fid=fa&&fa.id&&fa.tagName!=='BUTTON'?fa.id:null,fpos=fid&&fa.selectionStart!=null?fa.selectionStart:null;
   const HS={};document.querySelectorAll('.fsub,.dtabs,.subsbar,[data-hs]').forEach((el,i)=>{HS[(el.className||'')+'|'+i]=el.scrollLeft});
   const HSQ='.subbar,.seg2,.accrow,.nbch,.chrooms,.subtabs',HS2=[...app.querySelectorAll(HSQ)].map(e=>e.scrollLeft);
-  app.innerHTML=h+((RUN&&RUN.mode==='exam'&&!RUN.submitted)||V.me||GATE||(V.lock&&ST.user)||(V.ann&&ST.user)?'':secTabs())+(V.forgot?forgotSheet():V.lock?lockSheet():V.ann&&ST.user?annSheet():V.trial&&ST.user?trialSheet():V.acc?accSheet():V.aiq?aiSheet():'');
+  app.innerHTML=h+((RUN&&RUN.mode==='exam'&&!RUN.submitted)||V.me||GATE||(V.lock&&ST.user)||(V.ann&&ST.user)?'':secTabs())+(V.forgot?forgotSheet():V.lock?lockSheet():V.ann&&ST.user?annSheet():V.trial&&ST.user?trialSheet():V.acc?accSheet():V.aiq?aiSheet():V.uc?ucSheet():'');
   document.body.style.overflow=app.querySelector('.sheet')?'hidden':'';placeSub();[...app.querySelectorAll(HSQ)].forEach((e,k)=>{if(HS2[k])e.scrollLeft=HS2[k];const on=e.querySelector('[aria-pressed=true],[aria-selected=true],.on,[aria-current]');if(on&&e.scrollWidth>e.clientWidth){const r=on.getBoundingClientRect(),R=e.getBoundingClientRect();if(r.left<R.left)e.scrollLeft+=r.left-R.left-12;else if(r.right>R.right)e.scrollLeft+=r.right-R.right+12}});
   if(fid){const el=document.getElementById(fid);if(el){el.focus();try{if(fpos!=null)el.setSelectionRange(fpos,fpos)}catch(e){}}}
   document.querySelectorAll('.fsub,.dtabs,.subsbar,[data-hs]').forEach((el,i)=>{const k=(el.className||'')+'|'+i;if(k in HS)el.scrollLeft=HS[k];else{const c=el.querySelector('[aria-pressed="true"],[aria-current]');if(c)c.scrollIntoView({inline:'center',block:'nearest'})}});
@@ -2326,7 +2345,7 @@ app.addEventListener('click',e=>{
   if(a==='fibcheck'){fibCheck(false);return}
   if(a==='fibclose'){clearInterval(FIBT);V.fib=null;render();return}
   if(a==='fibcopy'){const u=V.fib&&V.fib.readable||'';(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(()=>toast('کۆپی کرا')).catch(()=>toast(u));return}
-  if(a==='closelk'){V.paym=0;const wm=V.me;clearInterval(FIBT);V.fib=null;V.lock=0;V.acc=0;V.aiq=null;V.me=0;V.forgot=0;render();if(wm)scrollTo(0,V.meY||0);return}
+  if(a==='closelk'){V.paym=0;V.uc=null;const wm=V.me;clearInterval(FIBT);V.fib=null;V.lock=0;V.acc=0;V.aiq=null;V.me=0;V.forgot=0;render();if(wm)scrollTo(0,V.meY||0);return}
   if(a==='forgot'){V.acc=0;V.forgot=1;render();return}
   if(a==='savepw'){const p1=document.getElementById('np1').value,p2=document.getElementById('np2').value,er=document.getElementById('npe');
     if(p1.length<6){er.textContent='لانیکەم ٦ پیت یان ژمارە.';return}if(p1!==p2){er.textContent='دوو وشەکە وەک یەک نین.';return}
@@ -2361,7 +2380,7 @@ if(!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNat
   addEventListener('pointerdown',arm,true);addEventListener('keydown',arm,true);
 }catch(e){}}
 app.addEventListener('focusin',e=>{const t=e.target;if(t&&t.matches&&t.matches('.sheet input,.sheet textarea'))setTimeout(()=>{try{t.scrollIntoView({block:'center'})}catch(x){}},300)});
-app.addEventListener('click',e=>{if(e.target.id==='lk'&&(ST.user||!V.acc)){V.lock=0;V.paym=0;V.acc=0;V.aiq=null;V.me=0;V.forgot=0;render()}});
+app.addEventListener('click',e=>{if(e.target.id==='lk'&&(ST.user||!V.acc)){V.uc=null;V.lock=0;V.paym=0;V.acc=0;V.aiq=null;V.me=0;V.forgot=0;render()}});
 app.addEventListener('change',e=>{const t=e.target;
   if(t.id==='pch'){ST.pick.c=+t.value;ST.pick.secs=[]}
   else if(t.dataset&&t.dataset.psec){const k=t.dataset.psec,i=ST.pick.secs.indexOf(k);if(t.checked&&i<0)ST.pick.secs.push(k);if(!t.checked&&i>=0)ST.pick.secs.splice(i,1)}
@@ -2651,11 +2670,12 @@ function fcOpen(c){if(paid())return true;if(c.sec==null||c.sec==='')return canCh
 function fcMeta(sub){return SUBJ_META[sub]||{CH:{}}}
 async function fcInit(){
   if(!FC.idx){const cached=load('klil_cidx',null);if(cached)FC.idx=cached.map(r=>({id:r[0],sub:r[1],ch:r[2],deck:r[3],sec:r[4]}))}
-  fcLoadLocal();
+  fcLoadLocal();ucLoad();
   if(sb){try{const r=await sb.rpc('card_index');FC.err=r.error?(r.error.message||String(r.error)):null;if(!r.error&&Array.isArray(r.data)){save('klil_cidx',r.data);FC.idx=r.data.map(r=>({id:r[0],sub:r[1],ch:r[2],deck:r[3],sec:r[4]}))}}catch(e){}}
   if(!FC.idx)FC.idx=[];
   if(ST.user&&sb){try{const r=await allRows(()=>sb.from('card_progress').select('cid,box,due').eq('user_id',ST.user.id));
     if(!r.error){(r.data||[]).forEach(x=>{const L=FC.prog[x.cid];if(!L||!L.t||(L.box<=x.box))FC.prog[x.cid]=Object.assign({},L||{},{box:x.box,due:x.due,t:L&&L.t||0})});fcSaveLocal()}}catch(e){}}
+  ucLoad();await ucSync();
   const s=fcCur();if(s)await fcText(s);
   if(V.sec==='cards')render()}
 async function fcText(sub){if(FC.loaded[sub]||!sb)return;
@@ -2673,7 +2693,7 @@ function fcStats(L){const n=L.length,seen=L.filter(c=>!fcNew(c.id)).length,maste
 function fcDecks(sub){const by={};fcCards(sub).forEach(c=>{const k=c.ch+'|'+c.deck;(by[k]=by[k]||{ch:c.ch,deck:c.deck,cards:[]}).cards.push(c)});
   return Object.values(by).sort((a,b)=>a.ch-b.ch)}
 function fcTodayIds(sub){const L=fcCards(sub).filter(fcOpen);const due=L.filter(c=>fcDue(c.id)).map(c=>c.id);
-  const nw=L.filter(c=>fcNew(c.id)).slice(0,fcNewLeft()).map(c=>c.id);return due.concat(nw)}
+  const nw=L.filter(c=>fcNew(c.id)).slice(0,fcNewLeft()).map(c=>c.id);const U=ucOf(sub).map(c=>'u-'+c.id);return U.filter(fcDue).concat(due,nw,U.filter(fcNew))}
 
 // ---------- views ----------
 function fcSubBar(){const L=fcSubs();if(L.length<2)return '';
@@ -2694,12 +2714,13 @@ function viewCards(){
      '<div><span>چەند کارت ئێستا؟<i>ژمارەی کارت لەم جارەدا</i></span><div class="seg2">'+[[10,'10'],[20,'20'],[50,'50'],[0,'هەمووی']].map(x=>'<button data-act="fcss" data-n="'+x[0]+'"'+(fcSess()===x[0]?' aria-pressed="true"':'')+'>'+x[1]+'</button>').join('')+'</div></div></div>'+
      (today.length?'<button class="btn" data-act="fctoday">دەستپێبکە ('+(fcSess()?Math.min(fcSess(),today.length):today.length)+' کارت)</button>':'<div class="okmsg">ئەمڕۆ تەواوت کرد ✓ سبەینێ کارتی نوێ و دووبارەکردنەوە چاوەڕێتن.</div>')+
      '<details class="fchow"><summary>چۆن کار دەکات؟</summary><ol><li>کارتێک دەبینیت کە پرسیارێکی لەسەرە. لە مێشکی خۆتدا وەڵام بدەرەوە.</li><li>کرتە بکە بۆ بینینی وەڵامی ڕاست.</li><li>ئەگەر وەڵامەکەت ڕاست بوو «زانیم» دابگرە، ئەگەر نا «نەمزانی».</li><li>«نەمزانی» ⇐ کارتەکە هەر ئێستا و سبەینێ دەگەڕێتەوە.<br>«زانیم» ⇐ دوای <span class="num">1</span> ، <span class="num">3</span> ، <span class="num">7</span> ، <span class="num">14</span> ، <span class="num">30</span> ڕۆژ دەگەڕێتەوە.</li><li>کە <span class="num">4</span> جار لە سەر یەک زانیت ⇐ «جێگیر بوو».</li></ol></details></div>';
+  h+=ucSection(sub);
   const DK=fcDecks(sub),CHN=(fcMeta(sub).CH||{});let lastc=null;
   h+='<h2>بەندەکان</h2><div class="stack">'+DK.map(d=>{const open=d.cards.some(fcOpen),s=fcStats(d.cards);let gh='';
     if(d.ch!==lastc){lastc=d.ch;const CC=DK.filter(x=>x.ch===d.ch),cs=fcStats([].concat(...CC.map(x=>x.cards)));gh='<div class="fchh"><b><span class="num">'+dch(d.ch,sub)+'</span> · '+esc(CHN[d.ch]||('بەندی '+dch(d.ch,sub)))+'</b>'+(CC.length>1&&open?'<button class="linkbtn" data-act="fcchap" data-c="'+d.ch+'">هەموو بەندەکە (<span class="num">'+cs.n+'</span>)</button>':'')+'</div>'}
     return gh+'<button class="row deckrow" data-act="fcdeck" data-c="'+d.ch+'" data-d="'+esc(d.deck)+'"><div class="ix num">'+(DK.filter(x=>x.ch===d.ch).length>1?dch(d.ch,sub)+'.'+(DK.filter(x=>x.ch===d.ch).indexOf(d)+1):dch(d.ch,sub))+'</div><div class="tx"><b>'+esc(d.deck)+'</b><span><span class="num">'+s.n+'</span> کارت'+(s.seen?' · زانیوتە <span class="num">'+s.known+'</span>':'')+(s.due?' · <b style="color:var(--gold)"><span class="num">'+s.due+'</span> ئەمڕۆ</b>':'')+'</span>'+(s.seen?'<div class="bar"><i style="width:'+Math.max(3,s.known/s.n*100)+'%"></i></div>':'')+'</div>'+(open?'':'<span class="lock">'+ic('lock')+'</span>')+'</button>'}).join('')+'</div>';
   return h+'</div>'}
-function fcStart(ids,title,key){ids=ids.filter(id=>FC.idx.find(c=>c.id===id&&fcOpen(c)));if(!ids.length){toast('هیچ کارتێک نییە');return}const ss=fcSess();
+function fcStart(ids,title,key){ids=ids.filter(id=>isU(id)?!!FC.txt[id]:FC.idx.find(c=>c.id===id&&fcOpen(c)));if(!ids.length){toast('هیچ کارتێک نییە');return}const ss=fcSess();
   V.fcrun={title,key:key||null,all:ids.slice(),base:0,ids:(ss&&ids.length>ss?ids.slice(0,ss):ids.slice()),i:0,flip:0,ok:0,bad:0,again:{}};V.fcrun.n0=V.fcrun.ids.length;
   if(key){const r=load('klil_fc_resume',{})[key];if(r&&r.pos>0&&r.pos<ids.length)V.fcrun.res0=r.pos}
   render();scrollTo(0,0)}
@@ -2710,7 +2731,7 @@ function fcResSave(R){if(!R||!R.key)return;const M=load('klil_fc_resume',{}),pos
 function fcFront(t){const L=String(t).split('\n');return fx(L[0])+(L[1]?'<span class="fen" dir="ltr">'+fx(L.slice(1).join(' '))+'</span>':'')}
 function fcBack(t){const P=String(t).split('\n\n');return fx(P[0]).replace(/\n/g,'<br>')+(P[1]?'<span class="fpg">'+fx(P[1])+'</span>':'')}
 function fcCardHTML(id,flip){const T=FC.txt[id];if(!T)return '<div class="fcard"><div class="fface front"><div class="fct">چاوەڕێ بکە…</div></div></div>';
-  const c=FC.idx.find(x=>x.id===id)||{};const dir=t=>/[A-Za-z]/.test(String(t).replace(/<[^>]+>/g,'').slice(0,12))&&!/[؀-ۿ]/.test(String(t).slice(0,20))?'ltr':'rtl';
+  const c=isU(id)?{deck:'کارتەکانی خۆم'}:(FC.idx.find(x=>x.id===id)||{});const dir=t=>/[A-Za-z]/.test(String(t).replace(/<[^>]+>/g,'').slice(0,12))&&!/[؀-ۿ]/.test(String(t).slice(0,20))?'ltr':'rtl';
   return '<div class="fscene"><button class="fcard'+(flip?' on':'')+'" data-act="fcflip" aria-label="هەڵگێڕانەوەی کارت">'+
    '<div class="fface front"><small class="fcs">'+(c.sec?dsec(c.sec,c.sub)+' · ':'')+esc(c.deck||'')+'</small><div class="fct" dir="'+dir(T.f)+'">'+fcFront(T.f)+'</div><span class="fhint">کرتە بکە بۆ وەڵام</span></div>'+
    '<div class="fface back"><small class="fcs">وەڵام</small>'+(T.img?'<img class="fimg" src="'+T.img+'" alt="">':'')+'<div class="fcb" dir="'+dir(T.b)+'">'+fcBack(T.b)+'</div></div></button></div>'}
@@ -2730,9 +2751,10 @@ function viewCardRun(){const R=V.fcrun;
     fcCardHTML(id,R.flip)+
     (R.flip?'<div class="grid2 fcbtns"><button class="btn fno" data-act="fcno">✗ نەمزانی</button><button class="btn fyes" data-act="fcyes">✓ زانیم</button></div>':'<button class="btn dark" data-act="fcflip" style="margin-top:16px">نیشاندانی وەڵام</button>')+
     '</div>'}
-let FCSAVE=[],FCT=null;
-function fcPush(id){const p=FC.prog[id];FCSAVE=FCSAVE.filter(x=>x.c!==id);FCSAVE.push({c:id,box:p.box,due:p.due});clearTimeout(FCT);FCT=setTimeout(fcFlush,1500)}
-async function fcFlush(){if(!ST.user||!sb||!FCSAVE.length)return;const b=FCSAVE;FCSAVE=[];try{const r=await sb.rpc('save_cards',{p:b});if(r.error)FCSAVE=b.concat(FCSAVE)}catch(e){FCSAVE=b.concat(FCSAVE)}}
+let FCSAVE=[],UCSAVE=[],FCT=null;
+function fcPush(id){const p=FC.prog[id];if(isU(id)){UCSAVE=UCSAVE.filter(x=>x.id!==id.slice(2));UCSAVE.push({id:id.slice(2),box:p.box,due:p.due});clearTimeout(FCT);FCT=setTimeout(fcFlush,1500);return}FCSAVE=FCSAVE.filter(x=>x.c!==id);FCSAVE.push({c:id,box:p.box,due:p.due});clearTimeout(FCT);FCT=setTimeout(fcFlush,1500)}
+async function fcFlush(){if(ST.user&&sb&&UCSAVE.length){const u=UCSAVE;UCSAVE=[];try{const r=await sb.rpc('save_ucards',{p:u});if(r.error)UCSAVE=u.concat(UCSAVE)}catch(e){UCSAVE=u.concat(UCSAVE)}}
+  if(!ST.user||!sb||!FCSAVE.length)return;const b=FCSAVE;FCSAVE=[];try{const r=await sb.rpc('save_cards',{p:b});if(r.error)FCSAVE=b.concat(FCSAVE)}catch(e){FCSAVE=b.concat(FCSAVE)}}
 function fcAnswer(ok){const R=V.fcrun,id=R.ids[R.i],t=todayStr();const old=FC.prog[id]?Object.assign({},FC.prog[id]):null,h={id,old,ok:R.ok,bad:R.bad,again:!!R.again[id],len:R.ids.length};(R.hist=R.hist||[]).push(h);let p=FC.prog[id]?Object.assign({},FC.prog[id]):{box:0,due:t,f:t};
   if(ok){if(!R.again[id]){p.box=Math.min(5,p.box+1);R.ok++}p.due=addDays(t,FC_GAP[p.box]||1)}
   else{p.box=1;p.due=addDays(t,1);if(!R.again[id]){R.bad++;R.again[id]=1;R.ids.push(id)}}
@@ -2742,7 +2764,63 @@ function fcPrev(){const R=V.fcrun;if(!R||!R.hist||!R.hist.length)return;const h=
   R.ids.length=h.len;R.ok=h.ok;R.bad=h.bad;if(h.again)R.again[h.id]=1;else delete R.again[h.id];
   if(h.old)FC.prog[h.id]=h.old;else delete FC.prog[h.id];fcSaveLocal();if(h.old)fcPush(h.id);
   R.i=Math.max(0,R.i-1);fcResSave(R);R.flip=1;render();scrollTo(0,0)}
+// ---------- OWN FLASHCARDS (v122): students write their own cards; only they can see them ----------
+const UC={list:null,off:0};
+function isU(id){return String(id).slice(0,2)==='u-'}
+function ucKey(){return 'klil_ucards_'+(ST.user?ST.user.id:'guest')}
+function ucTxt(c){FC.txt['u-'+c.id]={id:'u-'+c.id,f:c.f,b:c.b}}
+function ucLoad(){UC.list=load(ucKey(),[]);if(!Array.isArray(UC.list))UC.list=[];UC.list.forEach(ucTxt)}
+function ucPut(){save(ucKey(),UC.list)}
+function ucOf(sub){if(!UC.list)ucLoad();return UC.list.filter(c=>c.sub===sub)}
+function ucId(){try{if(window.crypto&&crypto.randomUUID)return crypto.randomUUID()}catch(e){}return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,ch=>{const r=Math.random()*16|0;return (ch==='x'?r:(r&3|8)).toString(16)})}
+async function ucPush1(c){if(!ST.user||!sb)return;try{const r=await sb.from('user_cards').upsert({id:c.id,user_id:ST.user.id,sub:c.sub,f:c.f,b:c.b});
+  if(!r.error){delete c.p;ucPut()}else if(/user_cards_limit/.test((r.error.message||'')+JSON.stringify(r.error))){toast('زۆرترین ژمارەی کارتی خۆت 1000 ە')}}catch(e){}}
+async function ucDelSrv(){if(!ST.user||!sb)return;const D=load(ucKey()+'_del',[]);for(const id of D.slice()){try{const r=await sb.from('user_cards').delete().eq('id',id);if(!r.error)D.splice(D.indexOf(id),1)}catch(e){}}save(ucKey()+'_del',D)}
+async function ucSync(){if(!ST.user||!sb)return;if(!UC.list)ucLoad();
+  for(const c of UC.list.filter(c=>c.p))await ucPush1(c);
+  await ucDelSrv();const D=load(ucKey()+'_del',[]);
+  try{const r=await allRows(()=>sb.from('user_cards').select('id,sub,f,b,box,due,created_at').eq('user_id',ST.user.id).order('created_at',{ascending:true}));
+    if(r.error){UC.off=1;return}UC.off=0;
+    const srv=(r.data||[]).filter(x=>!D.includes(x.id)).map(x=>({id:x.id,sub:x.sub,f:x.f,b:x.b,t:Date.parse(x.created_at)||0}));
+    UC.list.filter(c=>c.p).forEach(c=>{const k=srv.findIndex(x=>x.id===c.id);if(k>=0)srv[k]=c;else srv.push(c)});
+    UC.list=srv;ucPut();UC.list.forEach(ucTxt);
+    (r.data||[]).forEach(x=>{const id='u-'+x.id,L=FC.prog[id];if(x.box>0&&(!L||!L.t||L.box<=x.box))FC.prog[id]=Object.assign({},L||{},{box:x.box,due:x.due,t:L&&L.t||0})});fcSaveLocal()}catch(e){}}
+function ucSection(sub){const L=ucOf(sub),S=fcStats(L.map(c=>({id:'u-'+c.id}))),cut=t=>{t=String(t).replace(/\s+/g,' ');return t.length>70?t.slice(0,70)+'…':t};
+  let h='<div class="fchh"><h2 style="margin:0">کارتەکانی خۆم</h2>'+(L.length?'<button class="linkbtn" data-act="ucnew">+ کارتی نوێ</button>':'')+'</div><div class="card ucbox">';
+  if(!L.length)return h+'<div class="ucempty"><b>کارتی خۆت دروست بکە</b><span>ئەو شتانەی کە زەحمەتن بۆت، بیکە بە پرسیار و وەڵام. تەنها خۆت دەیانبینیت و وەک کارتەکانی تر دووبارە دەبنەوە.</span></div><button class="btn" data-act="ucnew">+ یەکەم کارتی خۆت دروست بکە</button>'+(ST.user?'':'<div class="muted" style="font-size:13px">بۆ ئەوەی کارتەکانت لە دەست نەچن، بچۆ ژوورەوە.</div>')+'</div>';
+  h+='<div class="ucst"><span><b class="num">'+L.length+'</b> کارت</span>'+(S.seen?'<span>زانیوتە <b class="num">'+S.known+'</b></span>':'')+(S.due?'<span style="color:var(--gold)"><b class="num">'+S.due+'</b> ئەمڕۆ</span>':'')+'</div>'+
+    '<button class="btn" data-act="ucrun">خوێندنی کارتەکانی خۆم (<span class="num">'+L.length+'</span>)</button>'+
+    '<details class="uclist"'+(V.ucopen?' open':'')+'><summary data-act="uctog">بینین و دەستکاریکردنی کارتەکان</summary>'+
+    L.slice().reverse().map(c=>'<div class="ucrow"><div class="uctx"><b>'+esc(cut(c.f))+'</b><span>'+esc(cut(c.b))+'</span></div><div class="ucbt"><button data-act="ucedit" data-id="'+c.id+'">دەستکاری</button>'+
+      (V.ucdel===c.id?'<button class="ucdel on" data-act="ucdel" data-id="'+c.id+'">دڵنیای؟ بیسڕەوە</button>':'<button class="ucdel" data-act="ucdel" data-id="'+c.id+'">سڕینەوە</button>')+'</div></div>').join('')+
+    '</details>'+(ST.user?'':'<div class="muted" style="font-size:13px">بۆ ئەوەی کارتەکانت لە دەست نەچن، بچۆ ژوورەوە.</div>')+'</div>';
+  return h}
+function ucSheet(){const U=V.uc,ed=U.id&&UC.list.find(c=>c.id===U.id),sub=ed?ed.sub:U.sub;
+  return sheet('<div class="uchd"><div><h2 style="margin:0">'+(ed?'دەستکاریکردنی کارت':'کارتێکی نوێ')+'</h2><small>'+esc(subName(sub))+' · تەنها خۆت دەیبینیت</small></div><button class="ucx" data-act="closelk" aria-label="داخستن">✕</button></div>'+
+   '<div class="ucfl"><label class="uclb" for="ucf"><span class="ucn">1</span>پرسیار <i>پێشەوەی کارت</i></label><textarea id="ucf" class="ucta" maxlength="600" placeholder="بۆ نموونە: ئەرکی ڕایبۆسۆم چییە؟">'+esc(U.f||'')+'</textarea></div>'+
+   '<div class="ucfl"><label class="uclb" for="ucb"><span class="ucn">2</span>وەڵام <i>پشتەوەی کارت</i></label><textarea id="ucb" class="ucta" maxlength="1500" placeholder="وەڵامەکە لێرە بنووسە">'+esc(U.b||'')+'</textarea></div>'+
+   '<div class="err" id="uce"></div><div class="ucbtns">'+(ed?'<button class="btn" data-act="ucsave">پاشەکەوتکردن</button>':'<button class="btn alt" data-act="ucsave" data-more="1">پاشەکەوت + کارتی تر</button><button class="btn" data-act="ucsave">پاشەکەوتکردن</button>')+'</div>','full ucsheet')}
+function ucSaveNow(more){const U=V.uc;if(!U)return;const f=(document.getElementById('ucf').value||'').trim(),b=(document.getElementById('ucb').value||'').trim(),E=document.getElementById('uce');
+  if(!f){E.textContent='پرسیارەکە بنووسە.';return}if(!b){E.textContent='وەڵامەکە بنووسە.';return}
+  if(!UC.list)ucLoad();let c=U.id&&UC.list.find(x=>x.id===U.id);
+  if(c){c.f=f;c.b=b;c.p=1}else{if(UC.list.length>=1000){E.textContent='زۆرترین ژمارەی کارتی خۆت 1000 ە.';return}c={id:ucId(),sub:U.sub,f,b,t:Date.now(),p:1};UC.list.push(c)}
+  ucPut();ucTxt(c);ucPush1(c);
+  if(more){V.uc={sub:U.sub,f:'',b:''};toast('کارتەکە پاشەکەوت کرا');render();setTimeout(()=>{const t=document.getElementById('ucf');if(t)t.focus()},60)}
+  else{V.uc=null;toast(U.id?'گۆڕانکارییەکە پاشەکەوت کرا':'کارتەکە پاشەکەوت کرا');render()}}
+function ucClick(a,b){
+  if(a==='ucnew'){V.ucdel=null;V.uc={sub:fcCur(),f:'',b:''};render();setTimeout(()=>{const t=document.getElementById('ucf');if(t)t.focus()},60);return true}
+  if(a==='ucedit'){const c=(UC.list||[]).find(x=>x.id===b.dataset.id);if(!c)return true;V.ucdel=null;V.uc={id:c.id,sub:c.sub,f:c.f,b:c.b};render();return true}
+  if(a==='ucsave'){ucSaveNow(!!b.dataset.more);return true}
+  if(a==='uctog'){V.ucopen=!V.ucopen;return false}
+  if(a==='ucdel'){const id=b.dataset.id;if(V.ucdel!==id){V.ucdel=id;render();return true}
+    V.ucdel=null;UC.list=UC.list.filter(x=>x.id!==id);ucPut();delete FC.txt['u-'+id];delete FC.prog['u-'+id];fcSaveLocal();
+    const D=load(ucKey()+'_del',[]);D.push(id);save(ucKey()+'_del',D);ucDelSrv();toast('کارتەکە سڕایەوە');render();return true}
+  if(a==='ucrun'){const sub=fcCur(),L=ucOf(sub);fcStart(L.map(c=>'u-'+c.id),'کارتەکانی خۆم · '+subName(sub),'u|'+sub);return true}
+  return false}
+document.addEventListener('input',e=>{const t=e.target;if(V.uc&&t&&(t.id==='ucf'||t.id==='ucb'))V.uc[t.id==='ucf'?'f':'b']=t.value});
+
 function cardsClick(a,b){
+  if(ucClick(a,b))return true;
   if(a==='fcsub'){FC.sub=b.dataset.s;fcText(FC.sub).then(render);render();return true}
   if(a==='fcnew'){save('klil_fc_new',+b.dataset.n);render();return true}
   if(a==='fcss'){save('klil_fc_sess',+b.dataset.n);render();return true}
