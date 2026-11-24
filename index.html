@@ -849,6 +849,14 @@ html{overflow-x:hidden}
 .subtabs.below{position:static!important;border-bottom:0;padding-top:4px;padding-bottom:6px;top:auto!important}
 .sheet.full.sheet.full.accfull .box{gap:9px;padding-top:calc(12px + env(safe-area-inset-top,0px));padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
 .accfull .fullhead{flex-direction:row;justify-content:center;gap:10px;margin:0 0 2px}.accfull .fullhead img{width:46px;height:46px;border-radius:13px;box-shadow:0 4px 12px rgba(0,0,0,.12)}.accfull .fullhead b{font-size:16px}
+.fhtx{display:flex;flex-direction:column;line-height:1.3}.fhtx small{color:var(--gold);font-size:12px;font-weight:700}
+.accperks{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:2px 0}.accperks span{font-size:12px;padding:5px 10px;border-radius:999px;background:var(--surface2);color:var(--fg);border:1px solid var(--line)}.accperks b{color:var(--gold)}
+.acctag{text-align:center;color:var(--muted);font-size:13px;margin:-2px 0 2px}
+.rchip{border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:7px 12px;font:inherit;font-size:14px;cursor:pointer;line-height:1.3}
+.rchip[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:#1a1405;font-weight:700}
+.refchips input{width:100%}
+.accfull .field input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(212,155,30,.22);outline:0}
+.accfull .btn[data-act="doacc"]{padding-top:14px;padding-bottom:14px;font-size:17px}
 .accfull h2{font-size:19px;text-align:center}.accfull .seg{margin:0}.accfull .field{gap:3px}.accfull .field label{font-size:13px}.accfull .field input{padding-top:10px;padding-bottom:10px}
 .accfull p.muted{font-size:12px!important;line-height:1.6}.accfull .err:empty{display:none}
 .supsheet .box{padding:0;gap:0;display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
@@ -1328,7 +1336,9 @@ function trialLeft(){const P=ST.prof;if(!P||!P.trial_until)return '';const h=Mat
 function unlocked(){return paid()}
 // store mode: inside the Google Play / App Store app no buying is shown (store rules), only signing in to an account that is already Pro
 const STORE=(()=>{try{const q=new URLSearchParams(location.search).get('src');if(q==='twa'||q==='ios')localStorage.setItem('klil_store',q);if(document.referrer.startsWith('android-app://'))localStorage.setItem('klil_store','twa');return localStorage.getItem('klil_store')||''}catch(e){return ''}})();
-function refCard(){const P=ST.prof;if(!ST.user||!P||P.ref||P.paid)return '';return '<div class="procard"><div class="prost"><b>کێ Klil ی پێ ناساندیت؟</b></div><small class="muted">ئەگەر کۆدی ناساندنت هەیە (لە مامۆستا، کەناڵ یان هاوڕێیەکەوە) لێرە بینووسە.</small><div class="procode"><input type="text" id="refin" placeholder="AHMAD" autocomplete="off" autocapitalize="characters" dir="ltr" maxlength="20"><button class="btn alt" data-fx="refset">ناردن</button></div></div>'}
+function refCard(){const P=ST.prof;if(!ST.user||!P||P.ref||P.paid)return '';try{if(localStorage.getItem('klil_refnote_'+ST.user.id))return ''}catch(e){}
+  if(REFL===null)setTimeout(()=>refLoadList(),0);
+  return '<div class="procard"><div class="prost"><b>Klil ت لە ڕێگای کێوە ناسی؟</b></div><small class="muted">ناوی ئەو کەسە، مامۆستا یان کەناڵە بنووسە کە Klil ی پێ ناساندیت.</small><div class="procode"><input type="text" id="refin" placeholder="ناوەکەی بنووسە" autocomplete="off" maxlength="60"><button class="btn alt" data-fx="refset">ناردن</button></div></div>'}
 function storeLock(){return sheet('<h2 style="margin:0">ئەم بەشە بۆ هەژماری Pro یە</h2><p class="muted" style="margin:0">کەرتی یەکەمی بەندی یەکەمی هەموو دەرسەکان بەخۆڕاییە. ئەگەر هەژمارەکەت Pro یە، بە هەمان ژمارە و وشەی نهێنی بچۆ ژوورەوە و هەموو شتێک دەکرێتەوە.</p>'+refCard()+(ST.user?'<button class="btn" data-act="recheck">نوێکردنەوە</button>':'<button class="btn" data-act="joinlb">چوونەژوورەوە</button>')+'<button class="btn alt" data-act="closelk">داخستن</button>')}
 function proReal(){const P=ST.prof;return !!(P&&(P.is_admin||(P.paid&&(!P.paid_until||new Date(P.paid_until)>new Date()))))}
 function canCh(c){return paid()||FREE_CH.includes(c)}
@@ -1561,12 +1571,25 @@ function viewBoard(){const B=ST.board,w=V.lbw||'all';
 
 // ----- sheets -----
 function gateView(){return '<div class="gate"><img src="'+LOGO+'" alt="Klil"><b>Klil کلیل · پۆلی ١٢</b><span>بۆ بەکارهێنانی ئەپەکە هەژمارێکی بەخۆڕایی دروست بکە یان بچۆ ژوورەوە. هەر هەژمارێکی نوێ بۆ ماوەی ٢٤ کاتژمێر هەموو تایبەتمەندییەکانی Pro بەخۆڕایی بۆی دەکرێتەوە.</span></div>'}
+let REFL=null;
+function refLoadList(){if(REFL!==null)return Promise.resolve(REFL);return Promise.resolve(sb.rpc('ref_list')).then(r=>{REFL=(!r||r.error||!Array.isArray(r.data))?[]:r.data.filter(x=>x&&x.code&&x.name);return REFL},()=>{REFL=[];return REFL})}
+function refNorm(t){t=String(t||'').toLowerCase().replace(/[‌‍ً-ْـ]/g,'');
+  [['ي','ی'],['ى','ی'],['ك','ک'],['ة','ە'],['ه','ە'],['ھ','ە'],['ڕ','ر'],['ڵ','ل'],['ۆ','و'],['ێ','ی'],['أ','ا'],['إ','ا'],['آ','ا'],['ئ','']].forEach(p=>{t=t.split(p[0]).join(p[1])});
+  return t.replace(/(مامۆستا|ماموستا|mamosta|کەناڵی|کەنالی|گرووپی|گروپی|کاک|د\.|م\.)/g,'').replace(/[^0-9a-zء-ە]/g,'')}
+// what the student typed -> promoter code (only when exactly one promoter fits)
+function refMatch(txt){const q=refNorm(txt);if(q.length<2||!REFL||!REFL.length)return '';
+  const sk=t=>t.replace(/[ەاویێۆ]/g,''),fit=(q,n)=>q===n||(q.length>=3&&n.length>=3&&(n.indexOf(q)>=0||q.indexOf(n)>=0));
+  for(const f of [t=>t,sk]){const Q=f(q);const hit=REFL.filter(x=>fit(Q,f(refNorm(x.name)))||Q===f(refNorm(x.code)));if(hit.length===1)return hit[0].code;if(hit.length>1)return ''}
+  return ''}
+function refNote(txt){txt=String(txt||'').trim().slice(0,60);if(!txt||!ST.user)return Promise.resolve();return Promise.resolve(sb.rpc('set_ref_note',{p_txt:txt})).catch(()=>{})}
 function sheet(inner,cls){return '<div class="sheet'+(cls?' '+cls:'')+'" id="lk"><div class="box stack">'+inner+'</div></div>'}
 function accSheet(){const reg=V.accMode!=='login';
-  return sheet((ST.user?'':'<div class="fullhead"><img src="'+LOGO+'" alt="Klil"><b>Klil کلیل · پۆلی ١٢</b></div>')+'<h2 style="margin:0">'+(reg?'هەژمار دروست بکە (بەخۆڕایی)':'چوونەژوورەوە')+'</h2>'+(V.accWhy?'<div class="note">'+esc(V.accWhy)+'</div>':'')+
+  if(reg&&REFL===null)setTimeout(()=>refLoadList(),0);
+  return sheet((ST.user?'':'<div class="fullhead"><img src="'+LOGO+'" alt="Klil"><div class="fhtx"><b>Klil کلیل · پۆلی 12</b><small>کلیلی سەرکەوتنی پۆلی 12</small></div></div>')+'<h2 style="margin:0">'+(reg?'هەژمارێکی بەخۆڕایی دروست بکە':'بەخێربێیتەوە')+'</h2>'+
+   (reg?'<div class="accperks"><span><b>24</b> کاتژمێر هەموو شتێک بەخۆڕایی</span><span>پرسیارە وزارییەکان + ڕوونکردنەوە</span><span>فلاشکارد و تاقیکردنەوە</span></div>':'<div class="acctag">بە ژمارەی مۆبایل و وشەی نهێنییەکەت بچۆ ژوورەوە</div>')+(V.accWhy?'<div class="note">'+esc(V.accWhy)+'</div>':'')+
    '<div class="seg"><button data-accm="reg" aria-pressed="'+reg+'">هەژماری نوێ</button><button data-accm="login" aria-pressed="'+!reg+'">هەژمارم هەیە</button></div>'+
    (reg?'<div class="field"><label for="acn">ناوی تەواو <span class="muted">(تەنها مامۆستا دەیبینێت)</span></label><input type="text" id="acn" maxlength="60" autocomplete="name"></div>'+
-     '<div class="field"><label for="ack">نازناو <span class="muted">(لە لیستی پێشەنگەکاندا دەردەکەوێت)</span></label><input type="text" id="ack" maxlength="20"></div><div class="field"><label for="acr">کۆدی ناساندن <span class="muted">(ئەگەر هەتە، ئەو کەسەی Klil ی پێ ناساندیت)</span></label><input type="text" id="acr" maxlength="20" dir="ltr" autocomplete="off" autocapitalize="characters" placeholder="ئارەزوومەندانە"></div>':'')+
+     '<div class="field"><label for="ack">نازناو <span class="muted">(لە لیستی پێشەنگەکاندا دەردەکەوێت)</span></label><input type="text" id="ack" maxlength="20"></div><div class="field"><label for="acr">Klil ت لە ڕێگای کێوە ناسی؟ <span class="muted">(ئارەزوومەندانە)</span></label><input type="text" id="acr" maxlength="60" autocomplete="off" placeholder="ناوی کەسەکە یان کەناڵەکە"></div>':'')+
    '<div class="field"><label for="acu">ژمارەی مۆبایل <span class="muted">(یان ناوی بەکارهێنەر)</span></label><input type="text" id="acu" maxlength="20" inputmode="text" placeholder="07501234567" autocomplete="username" autocapitalize="off" spellcheck="false" style="direction:ltr;text-align:left"></div>'+
    '<div class="field"><label for="acp">وشەی نهێنی <span class="muted">(لانیکەم ٦ پیت یان ژمارە)</span></label><input type="password" id="acp" autocomplete="'+(reg?'new-password':'current-password')+'" style="direction:ltr;text-align:left"></div>'+
    (reg?'<p class="muted" style="margin:0;font-size:13px">ژمارە و وشەی نهێنییەکەت لە یاد بێت. ژمارەکە تەنها بۆ چوونەژوورەوەیە (نامەی بۆ نانێردرێت)، و لە هەر ئامێرێک پرسیارەکانت دەمێنن.</p>':'')+
@@ -1658,9 +1681,10 @@ function proClick(a,b){
   if(a==='prredeem'){const v=(document.getElementById('prcode')||{}).value||'';if(v.replace(/[^A-Za-z0-9]/g,'').length<10){toast('کۆدەکە 10 پیت و ژمارەیە');return true}
     b.disabled=true;sb.rpc('redeem_code',{p_code:v}).then(async r=>{b.disabled=false;const d=r.data||{};if(r.error||d.error){toast(d.error==='used'?'ئەم کۆدە پێشتر بەکارهاتووە.':d.error==='bad code'?'کۆدەکە هەڵەیە.':ERR.net);return}
       toast('پیرۆزە! هەژمارەکەت Pro کرا');try{const p=await sb.from('profiles').select('*').eq('id',ST.user.id).single();if(p.data)ST.prof=p.data}catch(e){}V.lock=0;render()},()=>{b.disabled=false;toast(ERR.net)});return true}
-  if(a==='refset'){const v=((document.getElementById('refin')||{}).value||'').replace(/[^A-Za-z0-9]/g,'');if(v.length<3){toast('کۆدەکە بنووسە');return true}
-    b.disabled=true;sb.rpc('set_ref',{p_code:v}).then(r=>{b.disabled=false;const d=r.data||{};if(r.error||d.error){toast(d.error==='bad code'?'ئەم کۆدە نییە، دووبارە سەیری بکە.':d.error==='has'?'پێشتر کۆدێکت نووسیوە.':ERR.net);return}
-      toast('سوپاس! '+(d.name?'('+d.name+') ':'')+'تۆمار کرا');if(ST.prof)ST.prof.ref=v.toUpperCase();render()},()=>{b.disabled=false;toast(ERR.net)});return true}
+  if(a==='refset'){const txt=((document.getElementById('refin')||{}).value||'').trim();if(txt.length<2){toast('ناوەکە بنووسە');return true}
+    b.disabled=true;refLoadList().then(()=>{const code=refMatch(txt);refNote(txt);try{localStorage.setItem('klil_refnote_'+ST.user.id,'1')}catch(e){}
+      if(!code){b.disabled=false;toast('سوپاس! تۆمار کرا');render();return}
+      sb.rpc('set_ref',{p_code:code}).then(r=>{b.disabled=false;const d=r.data||{};if(!r.error&&!d.error&&ST.prof)ST.prof.ref=code;toast('سوپاس! '+(d.name?'('+d.name+') ':'')+'تۆمار کرا');render()},()=>{b.disabled=false;toast('سوپاس! تۆمار کرا');render()})});return true}
   if(a==='paym'){V.paym={m:'fib'};payCfg();render();return true}
   if(a==='paymm'){V.paym.s=(document.getElementById('pms')||{}).value;V.paym.r=(document.getElementById('pmr')||{}).value;V.paym.m=b.dataset.m;render();return true}
   if(a==='pmimg'){const fi=document.getElementById('pmfile');if(fi){fi.onchange=()=>{const f=fi.files&&fi.files[0];if(f){const t=(document.getElementById('supin')||{}).value;V.paym.f=f;render();const x=document.getElementById('supin');if(x&&t)x.value=t}};fi.click()}return true}
@@ -2141,10 +2165,11 @@ async function doAcc(b){
       if(f.error)throw f.error;
       if(!f.data.username){er.textContent='ئەم ناوی بەکارهێنەرە گیراوە، یەکێکی تر هەڵبژێرە.';b.disabled=false;return}
       if(!f.data.nick){er.textContent='ئەم نازناوە گیراوە، یەکێکی تر هەڵبژێرە.';b.disabled=false;return}
-      const r=await sb.auth.signUp({email,password:pass,options:{data:{username:user,nick,full_name:name,ref:g('acr').replace(/[^A-Za-z0-9]/g,'').toUpperCase()}}});
+      const refTxt=g('acr');if(refTxt&&REFL===null)await Promise.race([refLoadList(),new Promise(z=>setTimeout(z,2500))]);
+      const r=await sb.auth.signUp({email,password:pass,options:{data:{username:user,nick,full_name:name,ref:refMatch(refTxt)}}});
       if(r.error){er.textContent=/registered|exists/i.test(r.error.message)?'ئەم ناوی بەکارهێنەرە گیراوە.':/password/i.test(r.error.message)?'وشەی نهێنی بەهێزتر هەڵبژێرە.':/Database/i.test(r.error.message)?'ئەم نازناوە گیراوە، یەکێکی تر هەڵبژێرە.':'هەڵەیەک ڕوویدا: '+r.error.message;b.disabled=false;return}
       if(!r.data.session){er.textContent='هەژمارەکە دروست کرا بەڵام چوونەژوورەوە سەرنەکەوت. (ڕێکخستنی Confirm email دەبێت کوژابێتەوە)';b.disabled=false;return}
-      ST.user=r.data.session.user;devClaim();
+      ST.user=r.data.session.user;devClaim();refNote(refTxt);
     }else{
       const r=await sb.auth.signInWithPassword({email,password:pass});
       if(r.error){er.textContent='ناوی بەکارهێنەر یان وشەی نهێنی هەڵەیە.';b.disabled=false;return}
